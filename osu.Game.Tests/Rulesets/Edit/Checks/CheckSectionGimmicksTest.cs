@@ -80,6 +80,28 @@ namespace osu.Game.Tests.Rulesets.Edit.Checks
             Assert.That(issues, Is.Empty);
         }
 
+        [Test]
+        public void TestIssueForGradualDifficultyWithoutOverrides()
+        {
+            var beatmap = new Beatmap();
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableGradualDifficultyChange = true,
+                    GradualDifficultyChangeEndTimeMs = 900,
+                }
+            });
+
+            var issues = new CheckSectionGimmicks().Run(createContext(beatmap)).ToList();
+
+            Assert.That(issues.Count, Is.EqualTo(1));
+            Assert.That(issues[0].ToString(), Does.Contain("requires difficulty overrides").IgnoreCase);
+        }
+
         private static BeatmapVerifierContext createContext(IBeatmap beatmap)
         {
             var working = new TestWorkingBeatmap(beatmap.BeatmapInfo, beatmap);

@@ -259,5 +259,54 @@ SliderTickRate: 1
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.SectionCircleSize, Is.EqualTo(7f));
         }
+
+        [Test]
+        public void TestDecodeSectionGimmicksGradualDifficultyOverrides()
+        {
+            const string content = """
+osu file format v128
+
+[General]
+AudioFilename: test.mp3
+Mode: 0
+
+[Metadata]
+Title: Test
+Artist: Test
+Creator: Test
+Version: Test
+
+[Difficulty]
+HPDrainRate: 5
+CircleSize: 4
+OverallDifficulty: 8
+ApproachRate: 8
+SliderMultiplier: 1.4
+SliderTickRate: 1
+
+[TimingPoints]
+0,500,4,2,0,100,1,0
+
+[HitObjects]
+256,192,1000,1,0,0:0:0:0:
+
+[BeatmapSectionGimmicks]
+0,0,1500,EnableDifficultyOverrides=True|EnableGradualDifficultyChange=True|GradualDifficultyChangeEndTimeMs=1200|KeepDifficultyOverridesAfterSection=True|SectionApproachRate=10
+""";
+
+            using var ms = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+            using var reader = new LineBufferedReader(ms);
+            var decoder = Decoder.GetDecoder<Beatmap>(reader);
+            var beatmap = decoder.Decode(reader);
+
+            Assert.That(beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            var section = beatmap.SectionGimmicks.Sections[0];
+
+            Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
+            Assert.That(section.Settings.EnableGradualDifficultyChange, Is.True);
+            Assert.That(section.Settings.GradualDifficultyChangeEndTimeMs, Is.EqualTo(1200f));
+            Assert.That(section.Settings.KeepDifficultyOverridesAfterSection, Is.True);
+            Assert.That(section.Settings.SectionApproachRate, Is.EqualTo(10f));
+        }
     }
 }

@@ -52,12 +52,29 @@ namespace osu.Game.Screens.Edit.Compose
                         startTime = latest.EndTime;
                 }
 
+                var newSettings = new SectionGimmickSettings();
+
+                // If previous section has "Keep overrides after section" enabled,
+                // inherit difficulty override values from the previous section
+                if (sections.Count > 0)
+                {
+                    var latest = sections.MaxBy(s => s.StartTime)!;
+                    if (latest.Settings.KeepDifficultyOverridesAfterSection &&
+                        latest.Settings.EnableDifficultyOverrides)
+                    {
+                        newSettings.EnableDifficultyOverrides = true;
+                        newSettings.SectionCircleSize = latest.Settings.SectionCircleSize;
+                        newSettings.SectionApproachRate = latest.Settings.SectionApproachRate;
+                        newSettings.SectionOverallDifficulty = latest.Settings.SectionOverallDifficulty;
+                    }
+                }
+
                 sections.Add(new SectionGimmickSection
                 {
                     Id = newId,
                     StartTime = startTime,
                     EndTime = -1,
-                    Settings = new SectionGimmickSettings(),
+                    Settings = newSettings,
                 });
 
                 return newId;
@@ -231,6 +248,9 @@ namespace osu.Game.Screens.Edit.Compose
                 GreatOffsetThresholdMs = settings.GreatOffsetThresholdMs,
                 GreatOffsetPenaltyHP = settings.GreatOffsetPenaltyHP,
                 EnableDifficultyOverrides = settings.EnableDifficultyOverrides,
+                EnableGradualDifficultyChange = settings.EnableGradualDifficultyChange,
+                GradualDifficultyChangeEndTimeMs = settings.GradualDifficultyChangeEndTimeMs,
+                KeepDifficultyOverridesAfterSection = settings.KeepDifficultyOverridesAfterSection,
                 SectionCircleSize = settings.SectionCircleSize,
                 SectionApproachRate = settings.SectionApproachRate,
                 SectionOverallDifficulty = settings.SectionOverallDifficulty,

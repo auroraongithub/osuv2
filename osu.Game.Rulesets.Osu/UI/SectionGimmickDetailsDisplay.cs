@@ -126,6 +126,11 @@ namespace osu.Game.Rulesets.Osu.UI
 
             if (settings.EnableDifficultyOverrides)
             {
+                if (settings.EnableGradualDifficultyChange && !float.IsNaN(settings.GradualDifficultyChangeEndTimeMs))
+                    details.Add($"GradualTo: {settings.GradualDifficultyChangeEndTimeMs:0.###}ms");
+                if (settings.KeepDifficultyOverridesAfterSection)
+                    details.Add("KeepAfterSection");
+
                 if (!float.IsNaN(settings.SectionCircleSize))
                     details.Add($"CS: {settings.SectionCircleSize:0.###}");
                 if (!float.IsNaN(settings.SectionApproachRate))

@@ -433,6 +433,9 @@ namespace osu.Game.Beatmaps.Formats
             if (!float.IsNaN(settings.GreatOffsetPenaltyHP)) yield return $"GreatOffsetPenaltyHP={settings.GreatOffsetPenaltyHP.ToString(CultureInfo.InvariantCulture)}";
 
             if (settings.EnableDifficultyOverrides) yield return "EnableDifficultyOverrides=True";
+            if (settings.EnableGradualDifficultyChange) yield return "EnableGradualDifficultyChange=True";
+            if (!float.IsNaN(settings.GradualDifficultyChangeEndTimeMs)) yield return $"GradualDifficultyChangeEndTimeMs={settings.GradualDifficultyChangeEndTimeMs.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.KeepDifficultyOverridesAfterSection) yield return "KeepDifficultyOverridesAfterSection=True";
             if (!float.IsNaN(settings.SectionCircleSize)) yield return $"SectionCircleSize={settings.SectionCircleSize.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.SectionApproachRate)) yield return $"SectionApproachRate={settings.SectionApproachRate.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.SectionOverallDifficulty)) yield return $"SectionOverallDifficulty={settings.SectionOverallDifficulty.ToString(CultureInfo.InvariantCulture)}";

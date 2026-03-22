@@ -29,6 +29,9 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public float GreatOffsetPenaltyHP { get; set; } = float.NaN;
 
         public bool EnableDifficultyOverrides { get; set; }
+        public bool EnableGradualDifficultyChange { get; set; }
+        public float GradualDifficultyChangeEndTimeMs { get; set; } = float.NaN;
+        public bool KeepDifficultyOverridesAfterSection { get; set; }
         public float SectionCircleSize { get; set; } = float.NaN;
         public float SectionApproachRate { get; set; } = float.NaN;
         public float SectionOverallDifficulty { get; set; } = float.NaN;

@@ -58,32 +58,102 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
             if (beatmap.SectionGimmicks.Sections.Count == 0)
                 return;
 
+            var orderedSections = beatmap.SectionGimmicks.Sections.OrderBy(s => s.StartTime).ToList();
+            var baseDifficulty = beatmap.Difficulty;
+
+            // Track the current running difficulty values across sections
+            // This allows sections to inherit from previous sections when "keep overrides after section" is enabled
+            var runningDifficulty = baseDifficulty.Clone();
+
             foreach (var hitObject in beatmap.HitObjects.OfType<OsuHitObject>())
             {
                 SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(beatmap.SectionGimmicks, hitObject.StartTime);
-                if (section == null)
-                    continue;
-
-                var settings = section.Settings;
-                if (!settings.EnableDifficultyOverrides)
-                    continue;
-
-                if (float.IsNaN(settings.SectionCircleSize) && float.IsNaN(settings.SectionApproachRate) && float.IsNaN(settings.SectionOverallDifficulty))
-                    continue;
-
                 var difficulty = beatmap.Difficulty.Clone();
 
-                if (!float.IsNaN(settings.SectionCircleSize))
-                    difficulty.CircleSize = settings.SectionCircleSize;
+                if (section?.Settings.EnableDifficultyOverrides == true)
+                {
+                    // Use running difficulty as the starting baseline for gradual shifts
+                    // This allows sections to inherit from previous sections
+                    applyDifficultyOverridesForTime(section, hitObject.StartTime, difficulty, runningDifficulty);
+                }
+                else
+                {
+                    var keepSection = orderedSections
+                        .Where(s => s.Settings.EnableDifficultyOverrides)
+                        .Where(s => s.EndTime >= 0 && s.EndTime < hitObject.StartTime)
+                        .LastOrDefault();
 
-                if (!float.IsNaN(settings.SectionApproachRate))
-                    difficulty.ApproachRate = settings.SectionApproachRate;
+                    if (keepSection?.Settings.KeepDifficultyOverridesAfterSection == true)
+                    {
+                        // Apply the full target values from the keep section
+                        applyDifficultyOverridesForTime(keepSection, keepSection.EndTime, difficulty, baseDifficulty, allowGradual: false);
+                    }
+                    else
+                    {
+                        // When outside all override zones, use the running difficulty to maintain state
+                        // This allows inheritance from previous sections even when not in a section
+                        difficulty.CircleSize = runningDifficulty.CircleSize;
+                        difficulty.ApproachRate = runningDifficulty.ApproachRate;
+                        difficulty.OverallDifficulty = runningDifficulty.OverallDifficulty;
+                    }
+                }
 
-                if (!float.IsNaN(settings.SectionOverallDifficulty))
-                    difficulty.OverallDifficulty = settings.SectionOverallDifficulty;
+                // Update running difficulty for next object
+                runningDifficulty.CircleSize = difficulty.CircleSize;
+                runningDifficulty.ApproachRate = difficulty.ApproachRate;
+                runningDifficulty.OverallDifficulty = difficulty.OverallDifficulty;
 
                 hitObject.ApplyDefaults(beatmap.ControlPointInfo, difficulty);
             }
+        }
+
+        private static void applyDifficultyOverridesForTime(SectionGimmickSection section, double objectTime, BeatmapDifficulty targetDifficulty, IBeatmapDifficultyInfo baseDifficulty, bool allowGradual = true)
+        {
+            var settings = section.Settings;
+
+            double progress = 1;
+            if (allowGradual && settings.EnableGradualDifficultyChange)
+            {
+                // Calculate the gradual change duration based on section length
+                double sectionEnd = section.EndTime >= 0 ? section.EndTime : double.MaxValue;
+                double gradualEnd;
+
+                if (float.IsNaN(settings.GradualDifficultyChangeEndTimeMs))
+                {
+                    // If no explicit gradual end is set, use the section end
+                    // This makes the gradual change duration = full section length
+                    gradualEnd = sectionEnd;
+                }
+                else
+                {
+                    gradualEnd = settings.GradualDifficultyChangeEndTimeMs;
+
+                    // If gradual end is beyond section end, cap it at section end
+                    // This prevents gradual changes that extend past the section
+                    if (gradualEnd > sectionEnd)
+                        gradualEnd = sectionEnd;
+                }
+
+                // Ensure gradual end is after section start
+                if (gradualEnd > section.StartTime)
+                {
+                    double gradualDuration = gradualEnd - section.StartTime;
+                    if (gradualDuration > 0)
+                        progress = Math.Clamp((objectTime - section.StartTime) / gradualDuration, 0, 1);
+                }
+            }
+
+            if (!float.IsNaN(settings.SectionCircleSize))
+                targetDifficulty.CircleSize = interpolate(baseDifficulty.CircleSize, settings.SectionCircleSize, progress);
+
+            if (!float.IsNaN(settings.SectionApproachRate))
+                targetDifficulty.ApproachRate = interpolate(baseDifficulty.ApproachRate, settings.SectionApproachRate, progress);
+
+            if (!float.IsNaN(settings.SectionOverallDifficulty))
+                targetDifficulty.OverallDifficulty = interpolate(baseDifficulty.OverallDifficulty, settings.SectionOverallDifficulty, progress);
+
+            static float interpolate(float start, float end, double progress)
+                => (float)(start + (end - start) * progress);
         }
 
         internal static void ApplyStacking(IBeatmap beatmap)

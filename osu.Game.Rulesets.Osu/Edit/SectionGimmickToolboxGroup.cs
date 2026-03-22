@@ -15,7 +15,6 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Screens.Edit;
-using osu.Game.Screens.Edit.Components.RadioButtons;
 using osu.Game.Screens.Edit.Compose;
 using osuTK;
 using osuTK.Graphics;
@@ -44,7 +43,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormButton pasteSettingsButton = null!;
         private FormButton applyScopeButton = null!;
 
-        private EditorRadioButtonCollection sectionButtons = null!;
+        private SectionSelectionDropdown sectionDropdown = null!;
 
         private FormTextBox sectionNameBox = null!;
         private FormNumberBox startTimeBox = null!;
@@ -52,6 +51,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private FormButton setStartHereButton = null!;
         private FormButton setEndHereButton = null!;
+        private FormButton setGradualFinishTimeButton = null!;
 
         private FillFlowContainer selectedSectionFlow = null!;
 
@@ -81,6 +81,10 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private FormCheckBox enableDifficultyOverrides = null!;
         private FillFlowContainer difficultyOverrideFields = null!;
+        private FormCheckBox enableGradualDifficultyChange = null!;
+        private FormNumberBox gradualDifficultyChangeEndTime = null!;
+        private FormCheckBox keepDifficultyOverridesAfterSection = null!;
+        private FormButton inheritFromPreviousButton = null!;
         private FormNumberBox sectionCircleSize = null!;
         private FormNumberBox sectionApproachRate = null!;
         private FormNumberBox sectionOverallDifficulty = null!;
@@ -121,9 +125,10 @@ namespace osu.Game.Rulesets.Osu.Edit
                         ButtonText = "Remove Selected",
                         Action = () => model.RemoveSelectedSection(),
                     },
-                    sectionButtons = new EditorRadioButtonCollection
+                    sectionDropdown = new SectionSelectionDropdown
                     {
                         RelativeSizeAxes = Axes.X,
+                        Caption = "Sections",
                     },
                     selectedSectionFlow = new FillFlowContainer
                     {
@@ -309,6 +314,31 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 Spacing = new Vector2(5),
                                 Children = new Drawable[]
                                 {
+                                    enableGradualDifficultyChange = new FormCheckBox
+                                    {
+                                        Caption = "Gradual change",
+                                    },
+                                    gradualDifficultyChangeEndTime = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "Gradual finish time (ms)",
+                                        TabbableContentContainer = this,
+                                    },
+                                    setGradualFinishTimeButton = new FormButton
+                                    {
+                                        Caption = "Gradual finish time (ms)",
+                                        ButtonText = "Set Finish Here",
+                                        Action = () => mutateSetting(s => s.GradualDifficultyChangeEndTimeMs = (float)clock.CurrentTime),
+                                    },
+                                    keepDifficultyOverridesAfterSection = new FormCheckBox
+                                    {
+                                        Caption = "Keep overrides after section",
+                                    },
+                                    inheritFromPreviousButton = new FormButton
+                                    {
+                                        Caption = "Difficulty Overrides",
+                                        ButtonText = "Inherit from Previous",
+                                        Action = inheritDifficultyFromPrevious,
+                                    },
                                     sectionCircleSize = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "SectionCircleSize (0-11)",
@@ -341,7 +371,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             bindModelEvents();
             bindControlEvents();
 
-            updateSectionButtons();
+            updateSectionDropdown();
             updateControlsFromSelection();
         }
 
@@ -349,11 +379,19 @@ namespace osu.Game.Rulesets.Osu.Edit
         {
             model.Sections.BindCollectionChanged((_, _) =>
             {
-                updateSectionButtons();
+                updateSectionDropdown();
                 updateControlsFromSelection();
             }, true);
 
             selectedSectionId.BindValueChanged(_ => updateControlsFromSelection(), true);
+
+            sectionDropdown.Current.BindValueChanged(v =>
+            {
+                if (updatingControls)
+                    return;
+
+                selectedSectionId.Value = v.NewValue?.Id ?? -1;
+            });
         }
 
         private void bindControlEvents()
@@ -397,6 +435,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             greatOffsetPenaltyHp.OnCommit += (_, _) => updateFloatSetting(greatOffsetPenaltyHp, (s, v) => s.GreatOffsetPenaltyHP = v);
 
             enableDifficultyOverrides.Current.BindValueChanged(v => mutateSetting(s => s.EnableDifficultyOverrides = v.NewValue));
+            enableGradualDifficultyChange.Current.BindValueChanged(v => mutateSetting(s => s.EnableGradualDifficultyChange = v.NewValue));
+            gradualDifficultyChangeEndTime.OnCommit += (_, _) => updateFloatSetting(gradualDifficultyChangeEndTime, (s, v) => s.GradualDifficultyChangeEndTimeMs = v);
+            keepDifficultyOverridesAfterSection.Current.BindValueChanged(v => mutateSetting(s => s.KeepDifficultyOverridesAfterSection = v.NewValue));
             sectionCircleSize.OnCommit += (_, _) => updateFloatSetting(sectionCircleSize, (s, v) => s.SectionCircleSize = v);
             sectionApproachRate.OnCommit += (_, _) => updateFloatSetting(sectionApproachRate, (s, v) => s.SectionApproachRate = v);
             sectionOverallDifficulty.OnCommit += (_, _) => updateFloatSetting(sectionOverallDifficulty, (s, v) => s.SectionOverallDifficulty = v);
@@ -410,18 +451,17 @@ namespace osu.Game.Rulesets.Osu.Edit
             model.SetSelectedSetting(settingMutation);
         }
 
-        private void updateSectionButtons()
+        private void updateSectionDropdown()
         {
-            sectionButtons.Items = model.Sections.Select(s =>
-            {
-                var button = new RadioButton($"Section {s.Id}", () => selectedSectionId.Value = s.Id)
-                {
-                    TooltipText = buildSectionTooltip(s),
-                };
+            var sections = model.Sections.OrderBy(s => s.StartTime).ToList();
 
-                button.Selected.Value = s.Id == selectedSectionId.Value;
-                return button;
-            }).ToArray();
+            updatingControls = true;
+            sectionDropdown.Items = sections;
+
+            var selected = sections.FirstOrDefault(s => s.Id == selectedSectionId.Value);
+            if (selected != null)
+                sectionDropdown.Current.Value = selected;
+            updatingControls = false;
         }
 
         private LocalisableString buildSectionTooltip(SectionGimmickSection section)
@@ -441,10 +481,25 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             pasteSettingsButton.Enabled.Value = hasSelection && model.HasCopiedSettings;
 
+            // Enable "Inherit from Previous" only if there's a previous section with difficulty overrides
+            bool canInherit = false;
+            if (selected != null)
+            {
+                var orderedSections = model.Sections.OrderBy(s => s.StartTime).ToList();
+                int currentIndex = orderedSections.FindIndex(s => s.Id == selected.Id);
+                if (currentIndex > 0)
+                {
+                    var previous = orderedSections[currentIndex - 1];
+                    canInherit = previous.Settings.EnableDifficultyOverrides;
+                }
+            }
+            inheritFromPreviousButton.Enabled.Value = canInherit;
+
             updatingControls = true;
 
             if (selected != null)
             {
+                sectionDropdown.Current.Value = selected;
                 sectionNameBox.Current.Value = selected.Settings.SectionName;
 
                 startTimeBox.Current.Value = selected.StartTime.ToString(CultureInfo.InvariantCulture);
@@ -474,6 +529,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                 greatOffsetPenaltyHp.Current.Value = formatFloat(settings.GreatOffsetPenaltyHP);
 
                 enableDifficultyOverrides.Current.Value = settings.EnableDifficultyOverrides;
+                enableGradualDifficultyChange.Current.Value = settings.EnableGradualDifficultyChange;
+                gradualDifficultyChangeEndTime.Current.Value = formatFloat(settings.GradualDifficultyChangeEndTimeMs);
+                keepDifficultyOverridesAfterSection.Current.Value = settings.KeepDifficultyOverridesAfterSection;
                 sectionCircleSize.Current.Value = formatFloat(settings.SectionCircleSize);
                 sectionApproachRate.Current.Value = formatFloat(settings.SectionApproachRate);
                 sectionOverallDifficulty.Current.Value = formatFloat(settings.SectionOverallDifficulty);
@@ -498,6 +556,12 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             difficultyOverrideFields.FadeTo(enableDifficultyOverrides.Current.Value ? 1 : 0, 200, Easing.OutQuint);
             difficultyOverrideFields.AlwaysPresent = enableDifficultyOverrides.Current.Value;
+
+            gradualDifficultyChangeEndTime.FadeTo(enableGradualDifficultyChange.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            gradualDifficultyChangeEndTime.AlwaysPresent = enableGradualDifficultyChange.Current.Value;
+
+            setGradualFinishTimeButton.FadeTo(enableGradualDifficultyChange.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            setGradualFinishTimeButton.AlwaysPresent = enableGradualDifficultyChange.Current.Value;
         }
 
         private void updateValidationState()
@@ -544,6 +608,32 @@ namespace osu.Game.Rulesets.Osu.Edit
             editor?.ApplySectionGimmicksToWholeMapset(model.CreateClonedCurrentGimmicks());
         }
 
+        private void inheritDifficultyFromPrevious()
+        {
+            var current = model.Sections.FirstOrDefault(s => s.Id == model.SelectedSectionId.Value);
+            if (current == null)
+                return;
+
+            var orderedSections = model.Sections.OrderBy(s => s.StartTime).ToList();
+            int currentIndex = orderedSections.FindIndex(s => s.Id == current.Id);
+
+            if (currentIndex <= 0)
+                return;
+
+            var previous = orderedSections[currentIndex - 1];
+
+            if (!previous.Settings.EnableDifficultyOverrides)
+                return;
+
+            mutateSetting(s =>
+            {
+                s.EnableDifficultyOverrides = true;
+                s.SectionCircleSize = previous.Settings.SectionCircleSize;
+                s.SectionApproachRate = previous.Settings.SectionApproachRate;
+                s.SectionOverallDifficulty = previous.Settings.SectionOverallDifficulty;
+            });
+        }
+
         private static string formatFloat(float value)
             => float.IsNaN(value) ? string.Empty : value.ToString(CultureInfo.InvariantCulture);
 
@@ -557,6 +647,14 @@ namespace osu.Game.Rulesets.Osu.Edit
         {
             ThisDifficulty,
             WholeMapset,
+        }
+
+        private partial class SectionSelectionDropdown : FormDropdown<SectionGimmickSection>
+        {
+            protected override LocalisableString GenerateItemText(SectionGimmickSection item)
+                => string.IsNullOrEmpty(item.Settings.SectionName)
+                    ? $"Section {item.Id}"
+                    : $"Section {item.Id} - {item.Settings.SectionName}";
         }
     }
 }
