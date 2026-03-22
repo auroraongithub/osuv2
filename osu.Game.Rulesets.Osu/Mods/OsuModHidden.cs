@@ -38,27 +38,27 @@ namespace osu.Game.Rulesets.Osu.Mods
             base.ApplyToBeatmap(beatmap);
 
             foreach (var obj in beatmap.HitObjects.OfType<OsuHitObject>())
-                applyFadeInAdjustment(obj);
-
-            static void applyFadeInAdjustment(OsuHitObject osuObject)
-            {
-                osuObject.TimeFadeIn = osuObject.TimePreempt * FADE_IN_DURATION_MULTIPLIER;
-                foreach (var nested in osuObject.NestedHitObjects.OfType<OsuHitObject>())
-                    applyFadeInAdjustment(nested);
-            }
+                ApplyFadeInAdjustment(obj);
         }
 
         protected override void ApplyIncreasedVisibilityState(DrawableHitObject hitObject, ArmedState state)
         {
-            applyHiddenState(hitObject, true);
+            ApplyHiddenState(hitObject, true, OnlyFadeApproachCircles.Value);
         }
 
         protected override void ApplyNormalVisibilityState(DrawableHitObject hitObject, ArmedState state)
         {
-            applyHiddenState(hitObject, false);
+            ApplyHiddenState(hitObject, false, OnlyFadeApproachCircles.Value);
         }
 
-        private void applyHiddenState(DrawableHitObject drawableObject, bool increaseVisibility)
+        internal static void ApplyFadeInAdjustment(OsuHitObject osuObject)
+        {
+            osuObject.TimeFadeIn = osuObject.TimePreempt * FADE_IN_DURATION_MULTIPLIER;
+            foreach (var nested in osuObject.NestedHitObjects.OfType<OsuHitObject>())
+                ApplyFadeInAdjustment(nested);
+        }
+
+        internal static void ApplyHiddenState(DrawableHitObject drawableObject, bool increaseVisibility, bool onlyFadeApproachCircles = false)
         {
             if (!(drawableObject is DrawableOsuHitObject drawableOsuObject))
                 return;
@@ -82,7 +82,7 @@ namespace osu.Game.Rulesets.Osu.Mods
                 }
             }
 
-            if (OnlyFadeApproachCircles.Value)
+            if (onlyFadeApproachCircles)
                 return;
 
             switch (drawableObject)
@@ -139,7 +139,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             }
         }
 
-        private (double fadeStartTime, double fadeDuration) getFadeOutParameters(DrawableOsuHitObject drawableObject)
+        private static (double fadeStartTime, double fadeDuration) getFadeOutParameters(DrawableOsuHitObject drawableObject)
         {
             switch (drawableObject)
             {

@@ -14,6 +14,7 @@ using osu.Framework.Graphics.Primitives;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Scoring;
@@ -107,30 +108,20 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         
         private void applyHiddenEffect()
         {
-            // Hidden effect: Apply early fade-out before the object is hit
-            // This is similar to OsuModHidden behavior
-            
-            // Calculate fade-out parameters
-            double fadeOutStartTime = HitObject.StartTime - HitObject.TimePreempt + HitObject.TimeFadeIn;
-            double fadeOutDuration = HitObject.TimePreempt * 0.3; // 30% of preempt time
-            
-            // Apply fade-out transform using this.FadeOut()
-            using (BeginAbsoluteSequence(fadeOutStartTime))
-                this.FadeTo(0, fadeOutDuration);
-            
-            // Also hide approach circles for hidden effect
-            if (this is DrawableHitCircle circle)
-            {
-                // Hide approach circle
-                using (BeginAbsoluteSequence(HitObject.StartTime - HitObject.TimePreempt))
-                    circle.ApproachCircle.Hide();
-            }
-            else if (this is DrawableSpinner spinner)
-            {
-                // Hide spinner approach circle
-                using (BeginAbsoluteSequence(HitObject.StartTime - HitObject.TimePreempt))
-                    spinner.Body.Hide();
-            }
+            // Reuse exact hidden visual logic from OsuModHidden for 1:1 behaviour.
+            // Apply on every state update to mirror mod behaviour and ensure approach circles stay hidden.
+            ApplyCustomUpdateState -= applySectionHiddenState;
+            ApplyCustomUpdateState += applySectionHiddenState;
+
+            applySectionHiddenState(this, State.Value);
+        }
+
+        private void applySectionHiddenState(DrawableHitObject drawable, ArmedState state)
+        {
+            if (!HitObject.ForceHidden)
+                return;
+
+            OsuModHidden.ApplyHiddenState(drawable, increaseVisibility: false, onlyFadeApproachCircles: false);
         }
 
         protected override void ClearNestedHitObjects()
