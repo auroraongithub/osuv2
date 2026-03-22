@@ -97,25 +97,21 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
         private static void applyHardRockTransforms(OsuHitObject hitObject, IBeatmapDifficultyInfo baseDifficulty)
         {
             // Hard Rock effects:
-            // 1. Circle Size: CS * 1.3
-            // 2. Approach Rate: AR * 1.4 (capped at 10)
-            // 3. HP: HP * 1.4 (capped at 10) - handled in difficulty
+            // 1. Circle Size: CS * 1.3 (applied via difficulty parameters in applySectionDifficultyOverrides)
+            // 2. Approach Rate: AR * 1.4, capped at 10 (applied via difficulty parameters in applySectionDifficultyOverrides)
+            // 3. HP: HP * 1.4, capped at 10 (handled elsewhere)
             // 4. Y-axis flip: Position.Y = 384 - Position.Y (for standard 512px height playfield)
-
-            // The circle size scaling is handled through the difficulty parameters
-            // which are applied via ApplyDefaults with the modified difficulty
 
             // For Y-axis flip, we need to transform the position
             // The standard osu! playfield height is 384px (visible area)
-            // The full playfield is 512px tall
             const double playfield_height = 384;
 
             // Flip Y coordinate
             hitObject.Y = (float)(playfield_height - hitObject.Y);
 
-                // Note: Slider path transformation would require more complex handling
-                // to properly recalculate the slider body and end position
-                // The Y-flip for the hitobject position is the main visual effect
+            // Note: Slider path transformation would require more complex handling
+            // to properly recalculate the slider body and end position
+            // The Y-flip for the hitobject position is the main visual effect
         }
 
         private static void adjustDifficultyForDoubleTime(OsuHitObject hitObject, ControlPointInfo controlPointInfo)
@@ -182,6 +178,14 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                         difficulty.ApproachRate = runningDifficulty.ApproachRate;
                         difficulty.OverallDifficulty = runningDifficulty.OverallDifficulty;
                     }
+                }
+
+                // Apply Hard Rock multipliers if ForceHardRock is enabled
+                // HR: CS * 1.3, AR * 1.4 (capped at 10)
+                if (section?.Settings.ForceHardRock == true)
+                {
+                    difficulty.CircleSize = Math.Min(difficulty.CircleSize * 1.3f, 11f);
+                    difficulty.ApproachRate = Math.Min(difficulty.ApproachRate * 1.4f, 10f);
                 }
 
                 // Update running difficulty for next object
