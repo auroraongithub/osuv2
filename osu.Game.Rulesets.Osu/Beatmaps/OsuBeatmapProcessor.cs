@@ -287,11 +287,14 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 }
 
                 // Apply Hard Rock multipliers if ForceHardRock is enabled
-                // HR: CS * 1.3, AR * 1.4 (capped at 10)
+                // HR: CS * 1.3 (capped at 11), AR/OD * 1.4 (capped at 10)
+                // These are intentionally applied to the currently computed difficulty values,
+                // which already represent running/section-adjusted difficulty at this object's time.
                 if (section?.Settings.ForceHardRock == true)
                 {
                     difficulty.CircleSize = Math.Min(difficulty.CircleSize * 1.3f, 11f);
                     difficulty.ApproachRate = Math.Min(difficulty.ApproachRate * 1.4f, 10f);
+                    difficulty.OverallDifficulty = Math.Min(difficulty.OverallDifficulty * 1.4f, 10f);
                 }
 
                 // Update running difficulty for next object

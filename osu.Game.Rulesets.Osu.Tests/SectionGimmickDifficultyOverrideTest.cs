@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using NUnit.Framework;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
@@ -373,6 +374,59 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             Assert.That(atStart.Y, Is.EqualTo(334).Within(0.0001));
             Assert.That(atEnd.Y, Is.EqualTo(324).Within(0.0001));
+        }
+
+        [Test]
+        public void TestForceHardRockUsesRunningDifficultyValues()
+        {
+            var hit = new HitCircle { StartTime = 1000, Position = new Vector2(128, 100) };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(hit);
+
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 2000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionApproachRate = 8,
+                    SectionOverallDifficulty = 6,
+                    SectionCircleSize = 4,
+                    ForceHardRock = true,
+                }
+            });
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            processor.PostProcess();
+
+            // Running values from section overrides: AR8/OD6/CS4
+            // HR should apply on top: AR=8*1.4=11.2->10 cap, OD=6*1.4=8.4, CS=4*1.3=5.2
+            Assert.That(hit.TimePreempt, Is.EqualTo(450).Within(0.0001));
+
+            var expectedOd = new OsuHitWindows();
+            expectedOd.SetDifficulty(8.4);
+            Assert.That(hit.HitWindows.WindowFor(HitResult.Great), Is.EqualTo(expectedOd.WindowFor(HitResult.Great)).Within(0.0001));
+
+            var expectedScaleObj = new HitCircle { StartTime = hit.StartTime };
+            expectedScaleObj.ApplyDefaults(beatmap.ControlPointInfo, new BeatmapDifficulty
+            {
+                CircleSize = 5.2f,
+                ApproachRate = beatmap.Difficulty.ApproachRate,
+                OverallDifficulty = beatmap.Difficulty.OverallDifficulty,
+                DrainRate = beatmap.Difficulty.DrainRate,
+                SliderMultiplier = beatmap.Difficulty.SliderMultiplier,
+                SliderTickRate = beatmap.Difficulty.SliderTickRate,
+            });
+
+            Assert.That(hit.Scale, Is.EqualTo(expectedScaleObj.Scale).Within(0.0001));
         }
     }
 }
