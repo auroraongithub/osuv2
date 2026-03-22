@@ -188,6 +188,10 @@ namespace osu.Game.Screens.Edit.Compose
                     Sections = sections.OrderBy(s => s.StartTime).ToList(),
                 };
 
+                // Force immediate reprocess so section gimmick changes are previewed instantly
+                // in editor gameplay without requiring a reload.
+                editorBeatmap.UpdateAllHitObjects();
+
                 syncFromBeatmap(preferredSelection);
             }
             finally
