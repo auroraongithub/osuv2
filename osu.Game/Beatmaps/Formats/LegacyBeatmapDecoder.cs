@@ -670,6 +670,7 @@ namespace osu.Game.Beatmaps.Formats
                         case "GreatOffsetThresholdMs": section.Settings.GreatOffsetThresholdMs = Parsing.ParseFloat(value); break;
                         case "GreatOffsetPenaltyHP": section.Settings.GreatOffsetPenaltyHP = Parsing.ParseFloat(value); break;
                         case "EnableDifficultyOverrides": section.Settings.EnableDifficultyOverrides = parseBool(value); break;
+                        case "SectionCircleSize": section.Settings.SectionCircleSize = Parsing.ParseFloat(value); break;
                         case "SectionApproachRate": section.Settings.SectionApproachRate = Parsing.ParseFloat(value); break;
                         case "SectionOverallDifficulty": section.Settings.SectionOverallDifficulty = Parsing.ParseFloat(value); break;
                         case "SectionName": section.Settings.SectionName = value; break;

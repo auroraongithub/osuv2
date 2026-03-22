@@ -68,10 +68,13 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 if (!settings.EnableDifficultyOverrides)
                     continue;
 
-                if (float.IsNaN(settings.SectionApproachRate) && float.IsNaN(settings.SectionOverallDifficulty))
+                if (float.IsNaN(settings.SectionCircleSize) && float.IsNaN(settings.SectionApproachRate) && float.IsNaN(settings.SectionOverallDifficulty))
                     continue;
 
                 var difficulty = beatmap.Difficulty.Clone();
+
+                if (!float.IsNaN(settings.SectionCircleSize))
+                    difficulty.CircleSize = settings.SectionCircleSize;
 
                 if (!float.IsNaN(settings.SectionApproachRate))
                     difficulty.ApproachRate = settings.SectionApproachRate;

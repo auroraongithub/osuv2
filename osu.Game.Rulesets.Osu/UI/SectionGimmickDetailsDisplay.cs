@@ -126,6 +126,8 @@ namespace osu.Game.Rulesets.Osu.UI
 
             if (settings.EnableDifficultyOverrides)
             {
+                if (!float.IsNaN(settings.SectionCircleSize))
+                    details.Add($"CS: {settings.SectionCircleSize:0.###}");
                 if (!float.IsNaN(settings.SectionApproachRate))
                     details.Add($"AR: {settings.SectionApproachRate:0.###}");
                 if (!float.IsNaN(settings.SectionOverallDifficulty))

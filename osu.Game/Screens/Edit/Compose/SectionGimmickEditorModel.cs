@@ -231,6 +231,7 @@ namespace osu.Game.Screens.Edit.Compose
                 GreatOffsetThresholdMs = settings.GreatOffsetThresholdMs,
                 GreatOffsetPenaltyHP = settings.GreatOffsetPenaltyHP,
                 EnableDifficultyOverrides = settings.EnableDifficultyOverrides,
+                SectionCircleSize = settings.SectionCircleSize,
                 SectionApproachRate = settings.SectionApproachRate,
                 SectionOverallDifficulty = settings.SectionOverallDifficulty,
                 SectionName = settings.SectionName,

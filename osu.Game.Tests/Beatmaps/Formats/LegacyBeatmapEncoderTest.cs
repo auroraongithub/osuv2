@@ -316,6 +316,40 @@ namespace osu.Game.Tests.Beatmaps.Formats
         }
 
         [Test]
+        public void TestEncodeDecodeSectionGimmicksPersistsCircleSizeOverride()
+        {
+            var beatmap = new Beatmap
+            {
+                SectionGimmicks = new BeatmapSectionGimmicks
+                {
+                    Sections =
+                    {
+                        new SectionGimmickSection
+                        {
+                            Id = 0,
+                            StartTime = 0,
+                            EndTime = 1500,
+                            Settings = new SectionGimmickSettings
+                            {
+                                EnableDifficultyOverrides = true,
+                                SectionCircleSize = 7,
+                            }
+                        }
+                    }
+                }
+            };
+
+            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+
+            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+
+            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
+            Assert.That(section.Settings.SectionCircleSize, Is.EqualTo(7f).Within(0.001));
+        }
+
+        [Test]
         public void TestEncodeCustomSampleBanks()
         {
             var beatmap = new Beatmap

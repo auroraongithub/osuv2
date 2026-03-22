@@ -57,6 +57,29 @@ namespace osu.Game.Tests.Rulesets.Edit.Checks
             Assert.That(issues[0].ToString(), Does.Contain("invalid range").IgnoreCase);
         }
 
+        [Test]
+        public void TestNoIssueForExtendedDifficultyOverrideLimits()
+        {
+            var beatmap = new Beatmap();
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionCircleSize = 11,
+                    SectionApproachRate = 11,
+                    SectionOverallDifficulty = 11,
+                }
+            });
+
+            var issues = new CheckSectionGimmicks().Run(createContext(beatmap)).ToList();
+
+            Assert.That(issues, Is.Empty);
+        }
+
         private static BeatmapVerifierContext createContext(IBeatmap beatmap)
         {
             var working = new TestWorkingBeatmap(beatmap.BeatmapInfo, beatmap);

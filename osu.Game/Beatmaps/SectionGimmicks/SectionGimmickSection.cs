@@ -11,6 +11,6 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public SectionGimmickSettings Settings { get; set; } = new SectionGimmickSettings();
 
         public bool Contains(double time)
-            => time >= StartTime && (EndTime < 0 || time < EndTime);
+            => time >= StartTime && (EndTime < 0 || time <= EndTime);
     }
 }

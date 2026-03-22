@@ -81,6 +81,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private FormCheckBox enableDifficultyOverrides = null!;
         private FillFlowContainer difficultyOverrideFields = null!;
+        private FormNumberBox sectionCircleSize = null!;
         private FormNumberBox sectionApproachRate = null!;
         private FormNumberBox sectionOverallDifficulty = null!;
 
@@ -190,7 +191,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                             enableHpGimmick = new FormCheckBox
                             {
-                                Caption = "Group 1: HP Gimmick",
+                                Caption = "HP Adjustments",
                             },
                             hpGroupFields = new FillFlowContainer
                             {
@@ -233,12 +234,12 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                             enableNoMiss = new FormCheckBox
                             {
-                                Caption = "Group 2: No Miss",
+                                Caption = "No Miss",
                             },
 
                             enableCountLimits = new FormCheckBox
                             {
-                                Caption = "Group 3: Count Limits",
+                                Caption = "Count Limits",
                             },
                             countLimitFields = new FillFlowContainer
                             {
@@ -268,12 +269,12 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                             enableNoMissedSliderEnd = new FormCheckBox
                             {
-                                Caption = "Group 4: No Missed Slider End",
+                                Caption = "No Missed Slider End",
                             },
 
                             enableGreatOffsetPenalty = new FormCheckBox
                             {
-                                Caption = "Group 5: Great Offset Penalty",
+                                Caption = "Great Offset Penalty",
                             },
                             greatOffsetFields = new FillFlowContainer
                             {
@@ -298,7 +299,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                             enableDifficultyOverrides = new FormCheckBox
                             {
-                                Caption = "Group 6: Difficulty Overrides (AR/OD)",
+                                Caption = "Difficulty Overrides (CS/AR/OD)",
                             },
                             difficultyOverrideFields = new FillFlowContainer
                             {
@@ -308,14 +309,19 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 Spacing = new Vector2(5),
                                 Children = new Drawable[]
                                 {
+                                    sectionCircleSize = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "SectionCircleSize (0-11)",
+                                        TabbableContentContainer = this,
+                                    },
                                     sectionApproachRate = new FormNumberBox(allowDecimals: true)
                                     {
-                                        Caption = "SectionApproachRate (0-10)",
+                                        Caption = "SectionApproachRate (-10 to 11)",
                                         TabbableContentContainer = this,
                                     },
                                     sectionOverallDifficulty = new FormNumberBox(allowDecimals: true)
                                     {
-                                        Caption = "SectionOverallDifficulty (0-10)",
+                                        Caption = "SectionOverallDifficulty (0-11)",
                                         TabbableContentContainer = this,
                                     },
                                 }
@@ -391,6 +397,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             greatOffsetPenaltyHp.OnCommit += (_, _) => updateFloatSetting(greatOffsetPenaltyHp, (s, v) => s.GreatOffsetPenaltyHP = v);
 
             enableDifficultyOverrides.Current.BindValueChanged(v => mutateSetting(s => s.EnableDifficultyOverrides = v.NewValue));
+            sectionCircleSize.OnCommit += (_, _) => updateFloatSetting(sectionCircleSize, (s, v) => s.SectionCircleSize = v);
             sectionApproachRate.OnCommit += (_, _) => updateFloatSetting(sectionApproachRate, (s, v) => s.SectionApproachRate = v);
             sectionOverallDifficulty.OnCommit += (_, _) => updateFloatSetting(sectionOverallDifficulty, (s, v) => s.SectionOverallDifficulty = v);
         }
@@ -467,6 +474,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                 greatOffsetPenaltyHp.Current.Value = formatFloat(settings.GreatOffsetPenaltyHP);
 
                 enableDifficultyOverrides.Current.Value = settings.EnableDifficultyOverrides;
+                sectionCircleSize.Current.Value = formatFloat(settings.SectionCircleSize);
                 sectionApproachRate.Current.Value = formatFloat(settings.SectionApproachRate);
                 sectionOverallDifficulty.Current.Value = formatFloat(settings.SectionOverallDifficulty);
             }
