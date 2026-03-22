@@ -36,6 +36,11 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public float SectionApproachRate { get; set; } = float.NaN;
         public float SectionOverallDifficulty { get; set; } = float.NaN;
 
+        public bool ForceHidden { get; set; }
+        public bool ForceHardRock { get; set; }
+        public bool ForceFlashlight { get; set; }
+        public bool ForceDoubleTime { get; set; }
+
         public string SectionName { get; set; } = string.Empty;
         public Color4 DisplayColor { get; set; } = Color4.White;
     }

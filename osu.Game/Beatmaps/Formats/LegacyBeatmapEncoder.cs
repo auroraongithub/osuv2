@@ -439,6 +439,10 @@ namespace osu.Game.Beatmaps.Formats
             if (!float.IsNaN(settings.SectionCircleSize)) yield return $"SectionCircleSize={settings.SectionCircleSize.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.SectionApproachRate)) yield return $"SectionApproachRate={settings.SectionApproachRate.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.SectionOverallDifficulty)) yield return $"SectionOverallDifficulty={settings.SectionOverallDifficulty.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.ForceHidden) yield return "ForceHidden=True";
+            if (settings.ForceHardRock) yield return "ForceHardRock=True";
+            if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
+            if (settings.ForceDoubleTime) yield return "ForceDoubleTime=True";
 
             if (!string.IsNullOrEmpty(settings.SectionName)) yield return $"SectionName={settings.SectionName}";
             if (settings.DisplayColor != Color4.White)

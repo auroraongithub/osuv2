@@ -676,6 +676,10 @@ namespace osu.Game.Beatmaps.Formats
                         case "SectionCircleSize": section.Settings.SectionCircleSize = Parsing.ParseFloat(value); break;
                         case "SectionApproachRate": section.Settings.SectionApproachRate = Parsing.ParseFloat(value); break;
                         case "SectionOverallDifficulty": section.Settings.SectionOverallDifficulty = Parsing.ParseFloat(value); break;
+                        case "ForceHidden": section.Settings.ForceHidden = parseBool(value); break;
+                        case "ForceHardRock": section.Settings.ForceHardRock = parseBool(value); break;
+                        case "ForceFlashlight": section.Settings.ForceFlashlight = parseBool(value); break;
+                        case "ForceDoubleTime": section.Settings.ForceDoubleTime = parseBool(value); break;
                         case "SectionName": section.Settings.SectionName = value; break;
                         case "DisplayColor":
                             if (uint.TryParse(value, out uint colorArgb))

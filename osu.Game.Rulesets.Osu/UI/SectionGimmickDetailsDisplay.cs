@@ -137,6 +137,16 @@ namespace osu.Game.Rulesets.Osu.UI
                     details.Add($"AR: {settings.SectionApproachRate:0.###}");
                 if (!float.IsNaN(settings.SectionOverallDifficulty))
                     details.Add($"OD: {settings.SectionOverallDifficulty:0.###}");
+
+                // Display forced mods
+                if (settings.ForceHidden)
+                    details.Add("HD");
+                if (settings.ForceHardRock)
+                    details.Add("HR");
+                if (settings.ForceFlashlight)
+                    details.Add("FL");
+                if (settings.ForceDoubleTime)
+                    details.Add("DT");
             }
 
             if (details.Count == 0)

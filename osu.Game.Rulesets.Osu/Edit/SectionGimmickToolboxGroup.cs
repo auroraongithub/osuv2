@@ -89,6 +89,11 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormNumberBox sectionApproachRate = null!;
         private FormNumberBox sectionOverallDifficulty = null!;
 
+        private FormCheckBox forceHidden = null!;
+        private FormCheckBox forceHardRock = null!;
+        private FormCheckBox forceFlashlight = null!;
+        private FormCheckBox forceDoubleTime = null!;
+
         private FormEnumDropdown<SectionGimmickApplyScope> applyScopeDropdown = null!;
 
         private OsuSpriteText validationStatus = null!;
@@ -357,6 +362,23 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 }
                             },
 
+                            forceHidden = new FormCheckBox
+                            {
+                                Caption = "Force Hidden (HD)",
+                            },
+                            forceHardRock = new FormCheckBox
+                            {
+                                Caption = "Force Hard Rock (HR)",
+                            },
+                            forceFlashlight = new FormCheckBox
+                            {
+                                Caption = "Force Flashlight (FL)",
+                            },
+                            forceDoubleTime = new FormCheckBox
+                            {
+                                Caption = "Force Double Time (DT)",
+                            },
+
                             validationStatus = new OsuSpriteText
                             {
                                 Text = "Validation: OK",
@@ -441,6 +463,11 @@ namespace osu.Game.Rulesets.Osu.Edit
             sectionCircleSize.OnCommit += (_, _) => updateFloatSetting(sectionCircleSize, (s, v) => s.SectionCircleSize = v);
             sectionApproachRate.OnCommit += (_, _) => updateFloatSetting(sectionApproachRate, (s, v) => s.SectionApproachRate = v);
             sectionOverallDifficulty.OnCommit += (_, _) => updateFloatSetting(sectionOverallDifficulty, (s, v) => s.SectionOverallDifficulty = v);
+
+            forceHidden.Current.BindValueChanged(v => mutateSetting(s => s.ForceHidden = v.NewValue));
+            forceHardRock.Current.BindValueChanged(v => mutateSetting(s => s.ForceHardRock = v.NewValue));
+            forceFlashlight.Current.BindValueChanged(v => mutateSetting(s => s.ForceFlashlight = v.NewValue));
+            forceDoubleTime.Current.BindValueChanged(v => mutateSetting(s => s.ForceDoubleTime = v.NewValue));
         }
 
         private void mutateSetting(Action<SectionGimmickSettings> settingMutation)
@@ -535,6 +562,11 @@ namespace osu.Game.Rulesets.Osu.Edit
                 sectionCircleSize.Current.Value = formatFloat(settings.SectionCircleSize);
                 sectionApproachRate.Current.Value = formatFloat(settings.SectionApproachRate);
                 sectionOverallDifficulty.Current.Value = formatFloat(settings.SectionOverallDifficulty);
+
+                forceHidden.Current.Value = settings.ForceHidden;
+                forceHardRock.Current.Value = settings.ForceHardRock;
+                forceFlashlight.Current.Value = settings.ForceFlashlight;
+                forceDoubleTime.Current.Value = settings.ForceDoubleTime;
             }
 
             updatingControls = false;
