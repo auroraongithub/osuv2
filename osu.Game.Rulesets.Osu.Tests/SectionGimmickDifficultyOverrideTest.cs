@@ -514,5 +514,28 @@ namespace osu.Game.Rulesets.Osu.Tests
             // Position should be restored outside section (no HR flip leakage)
             Assert.That(outside.Y, Is.EqualTo(120).Within(0.0001));
         }
+
+        [Test]
+        public void TestForceFlashlightPresenceDetection()
+        {
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(new HitCircle { StartTime = 1000 });
+
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 1500,
+                Settings = new SectionGimmickSettings
+                {
+                    ForceFlashlight = true,
+                }
+            });
+
+            Assert.That(osu.Game.Rulesets.Osu.UI.SectionGimmickFlashlightOverlay.HasAnyForcedFlashlightSection(beatmap), Is.True);
+
+            beatmap.SectionGimmicks.Sections[0].Settings.ForceFlashlight = false;
+            Assert.That(osu.Game.Rulesets.Osu.UI.SectionGimmickFlashlightOverlay.HasAnyForcedFlashlightSection(beatmap), Is.False);
+        }
     }
 }

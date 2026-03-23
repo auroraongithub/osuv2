@@ -29,7 +29,6 @@ namespace osu.Game.Rulesets.Osu.UI
     public partial class DrawableOsuRuleset : DrawableRuleset<OsuHitObject>
     {
         private Bindable<bool>? cursorHideEnabled;
-
         [Resolved(canBeNull: true)]
         private HealthProcessor? healthProcessor { get; set; }
 
@@ -47,6 +46,14 @@ namespace osu.Game.Rulesets.Osu.UI
         [BackgroundDependencyLoader]
         private void load(ReplayPlayer? replayPlayer)
         {
+            if (!Mods.Any(m => m is ModFlashlight) && SectionGimmickFlashlightOverlay.HasAnyForcedFlashlightSection(Beatmap))
+            {
+                Overlays.Add(new SectionGimmickFlashlightOverlay(Beatmap, this)
+                {
+                    Depth = float.MinValue,
+                });
+            }
+
             // Section gimmick displays are now provided through the skin system
             // They will appear in MainHUDComponents container when enabled
             if (replayPlayer != null)

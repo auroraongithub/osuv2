@@ -103,8 +103,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                     applyHiddenEffect(hitObject);
                 }
 
-                // Force Flashlight is visual effect handled by the playfield
-                // Store flags for future implementation
+                // Force Flashlight is visual effect handled by SectionGimmickFlashlightOverlay.
             }
         }
 
