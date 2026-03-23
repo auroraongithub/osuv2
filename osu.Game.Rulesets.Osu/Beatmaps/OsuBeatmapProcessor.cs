@@ -278,11 +278,11 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                     }
                     else
                     {
-                        // When outside all override zones, use the running difficulty to maintain state
-                        // This allows inheritance from previous sections even when not in a section
-                        difficulty.CircleSize = runningDifficulty.CircleSize;
-                        difficulty.ApproachRate = runningDifficulty.ApproachRate;
-                        difficulty.OverallDifficulty = runningDifficulty.OverallDifficulty;
+                        // No active section override and no "keep after" state:
+                        // revert immediately to map base difficulty.
+                        difficulty.CircleSize = baseDifficulty.CircleSize;
+                        difficulty.ApproachRate = baseDifficulty.ApproachRate;
+                        difficulty.OverallDifficulty = baseDifficulty.OverallDifficulty;
                     }
                 }
 

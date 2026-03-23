@@ -209,6 +209,46 @@ namespace osu.Game.Rulesets.Osu.Tests
         }
 
         [Test]
+        public void TestSectionDifficultyOverrideRevertsImmediatelyWhenKeepOff()
+        {
+            var inSection = new HitCircle { StartTime = 500 };
+            var rightAfterSection = new HitCircle { StartTime = 1001 };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(inSection);
+            beatmap.HitObjects.Add(rightAfterSection);
+
+            beatmap.Difficulty.ApproachRate = 5;
+
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    KeepDifficultyOverridesAfterSection = false,
+                    SectionApproachRate = 10,
+                }
+            });
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            processor.PostProcess();
+
+            // AR10 inside section
+            Assert.That(inSection.TimePreempt, Is.EqualTo(450).Within(0.0001));
+
+            // Must immediately revert to base AR5 just outside section when keep is off.
+            Assert.That(rightAfterSection.TimePreempt, Is.EqualTo(1200).Within(0.0001));
+        }
+
+        [Test]
         public void TestSectionInheritsDifficultyFromPreviousSection()
         {
             var section0Object = new HitCircle { StartTime = 500 };
