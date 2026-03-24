@@ -59,16 +59,27 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
         private static void applySectionForcedMods(IBeatmap beatmap)
         {
-            var objectNoApproachLookup = createNoApproachObjectLookup(beatmap.HitObjectGimmicks);
+            var objectSettingsLookup = createObjectSettingsLookup(beatmap.HitObjectGimmicks);
 
             if (beatmap.SectionGimmicks.Sections.Count == 0)
             {
                 foreach (var hitObject in beatmap.HitObjects.OfType<OsuHitObject>())
                 {
-                    setHiddenFlagRecursive(hitObject, false);
-                    bool objectNoApproach = hasObjectNoApproachOverride(hitObject, objectNoApproachLookup);
+                    var objectSettings = getObjectSettings(hitObject, objectSettingsLookup);
+                    bool objectForceHidden = objectSettings?.ForceHidden == true;
+                    bool objectForceHardRock = objectSettings?.ForceHardRock == true;
+                    bool objectNoApproach = objectSettings?.ForceNoApproachCircle == true;
+
+                    setHiddenFlagRecursive(hitObject, objectForceHidden);
                     setNoApproachCircleFlagRecursive(hitObject, objectNoApproach);
-                    restoreFromHardRockTransforms(hitObject);
+
+                    if (objectForceHardRock)
+                        applyHardRockTransforms(hitObject);
+                    else
+                        restoreFromHardRockTransforms(hitObject);
+
+                    if (objectForceHidden)
+                        applyHiddenEffect(hitObject);
                 }
 
                 return;
@@ -81,22 +92,19 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
                 // Always write the flag so drawable layer can reliably detect section-forced HD.
                 // Also propagate to nested objects because Hidden is applied per drawable hitobject.
-                setHiddenFlagRecursive(hitObject, section?.Settings.ForceHidden == true);
+                var objectSettings = getObjectSettings(hitObject, objectSettingsLookup);
 
-                bool objectNoApproach = hasObjectNoApproachOverride(hitObject, objectNoApproachLookup);
+                bool objectForceHidden = objectSettings?.ForceHidden == true;
+                setHiddenFlagRecursive(hitObject, (section?.Settings.ForceHidden == true) || objectForceHidden);
+
+                bool objectNoApproach = objectSettings?.ForceNoApproachCircle == true;
                 bool sectionNoApproach = section?.Settings.ForceNoApproachCircle == true;
                 setNoApproachCircleFlagRecursive(hitObject, sectionNoApproach || objectNoApproach);
 
-                if (section?.Settings == null)
-                {
-                    restoreFromHardRockTransforms(hitObject);
-                    continue;
-                }
-
-                var settings = section.Settings;
+                bool forceHardRock = section?.Settings.ForceHardRock == true || objectSettings?.ForceHardRock == true;
 
                 // Apply Hard Rock transformations
-                if (settings.ForceHardRock)
+                if (forceHardRock)
                 {
                     applyHardRockTransforms(hitObject);
                 }
@@ -107,7 +115,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
                 // Apply Hidden effect by modifying TimeFadeIn
                 // This makes objects fade out before they're hit (like HD mod)
-                if (settings.ForceHidden)
+                if (section?.Settings.ForceHidden == true || objectSettings?.ForceHidden == true)
                 {
                     applyHiddenEffect(hitObject);
                 }
@@ -117,18 +125,18 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
         }
 
-        private static Dictionary<(double StartTime, int ComboIndexWithOffsets), bool> createNoApproachObjectLookup(BeatmapHitObjectGimmicks gimmicks)
+        private static Dictionary<(double StartTime, int ComboIndexWithOffsets), HitObjectGimmickSettings> createObjectSettingsLookup(BeatmapHitObjectGimmicks gimmicks)
         {
-            var lookup = new Dictionary<(double, int), bool>();
+            var lookup = new Dictionary<(double, int), HitObjectGimmickSettings>();
 
             foreach (var entry in gimmicks.Entries)
-                lookup[(entry.StartTime, entry.ComboIndexWithOffsets)] = entry.Settings?.ForceNoApproachCircle == true;
+                lookup[(entry.StartTime, entry.ComboIndexWithOffsets)] = entry.Settings ?? new HitObjectGimmickSettings();
 
             return lookup;
         }
 
-        private static bool hasObjectNoApproachOverride(OsuHitObject hitObject, Dictionary<(double StartTime, int ComboIndexWithOffsets), bool> lookup)
-            => lookup.TryGetValue((hitObject.StartTime, hitObject.ComboIndexWithOffsets), out bool enabled) && enabled;
+        private static HitObjectGimmickSettings? getObjectSettings(OsuHitObject hitObject, Dictionary<(double StartTime, int ComboIndexWithOffsets), HitObjectGimmickSettings> lookup)
+            => lookup.TryGetValue((hitObject.StartTime, hitObject.ComboIndexWithOffsets), out HitObjectGimmickSettings? settings) ? settings : null;
 
         private static void setHiddenFlagRecursive(OsuHitObject osuObject, bool hidden)
         {
@@ -283,9 +291,12 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
             // This allows sections to inherit from previous sections when "keep overrides after section" is enabled
             var runningDifficulty = baseDifficulty.Clone();
 
+            var objectSettingsLookup = createObjectSettingsLookup(beatmap.HitObjectGimmicks);
+
             foreach (var hitObject in beatmap.HitObjects.OfType<OsuHitObject>())
             {
                 SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(beatmap.SectionGimmicks, hitObject.StartTime);
+                HitObjectGimmickSettings? objectSettings = getObjectSettings(hitObject, objectSettingsLookup);
                 var difficulty = beatmap.Difficulty.Clone();
 
                 if (section?.Settings.EnableDifficultyOverrides == true)
@@ -327,12 +338,14 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 // HR: CS * 1.3 (capped at 11), AR/OD * 1.4 (capped at 10)
                 // These are intentionally applied to the currently computed difficulty values,
                 // which already represent running/section-adjusted difficulty at this object's time.
-                if (section?.Settings.ForceHardRock == true)
+                if ((section?.Settings.ForceHardRock == true) || (objectSettings?.ForceHardRock == true))
                 {
                     difficulty.CircleSize = Math.Min(difficulty.CircleSize * 1.3f, 11f);
                     difficulty.ApproachRate = Math.Min(difficulty.ApproachRate * 1.4f, 10f);
                     difficulty.OverallDifficulty = Math.Min(difficulty.OverallDifficulty * 1.4f, 10f);
                 }
+
+                applyObjectDifficultyOverrides(objectSettings, difficulty);
 
                 // Update running difficulty for next object
                 runningDifficulty.CircleSize = runningCircleSize;
@@ -341,6 +354,21 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
                 hitObject.ApplyDefaults(beatmap.ControlPointInfo, difficulty);
             }
+        }
+
+        private static void applyObjectDifficultyOverrides(HitObjectGimmickSettings? settings, BeatmapDifficulty difficulty)
+        {
+            if (settings?.EnableDifficultyOverrides != true)
+                return;
+
+            if (!float.IsNaN(settings.SectionCircleSize))
+                difficulty.CircleSize = settings.SectionCircleSize;
+
+            if (!float.IsNaN(settings.SectionApproachRate))
+                difficulty.ApproachRate = settings.SectionApproachRate;
+
+            if (!float.IsNaN(settings.SectionOverallDifficulty))
+                difficulty.OverallDifficulty = settings.SectionOverallDifficulty;
         }
 
         private static void applyDifficultyOverridesForTime(SectionGimmickSection section, double objectTime, BeatmapDifficulty targetDifficulty, IBeatmapDifficultyInfo baseDifficulty, bool allowGradual = true)

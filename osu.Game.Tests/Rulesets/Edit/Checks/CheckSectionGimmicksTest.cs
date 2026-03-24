@@ -81,6 +81,27 @@ namespace osu.Game.Tests.Rulesets.Edit.Checks
         }
 
         [Test]
+        public void TestNoIssueForNegativeArDifficultyOverride()
+        {
+            var beatmap = new Beatmap();
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionApproachRate = -20,
+                }
+            });
+
+            var issues = new CheckSectionGimmicks().Run(createContext(beatmap)).ToList();
+
+            Assert.That(issues, Is.Empty);
+        }
+
+        [Test]
         public void TestIssueForGradualDifficultyWithoutOverrides()
         {
             var beatmap = new Beatmap();

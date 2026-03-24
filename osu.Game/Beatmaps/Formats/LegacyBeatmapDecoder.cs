@@ -737,8 +737,71 @@ namespace osu.Game.Beatmaps.Formats
 
                     switch (key)
                     {
+                        case "EnableHPGimmick":
+                            entry.Settings.EnableHPGimmick = parseBool(value);
+                            break;
+                        case "EnableNoMiss":
+                            entry.Settings.EnableNoMiss = parseBool(value);
+                            break;
+                        case "EnableCountLimits":
+                            entry.Settings.EnableCountLimits = parseBool(value);
+                            break;
+                        case "EnableGreatOffsetPenalty":
+                            entry.Settings.EnableGreatOffsetPenalty = parseBool(value);
+                            break;
+                        case "Max300s":
+                            entry.Settings.Max300s = Parsing.ParseInt(value);
+                            break;
+                        case "Max100s":
+                            entry.Settings.Max100s = Parsing.ParseInt(value);
+                            break;
+                        case "Max50s":
+                            entry.Settings.Max50s = Parsing.ParseInt(value);
+                            break;
+                        case "MaxMisses":
+                            entry.Settings.MaxMisses = Parsing.ParseInt(value);
+                            break;
+                        case "HP300":
+                            entry.Settings.HP300 = Parsing.ParseFloat(value);
+                            break;
+                        case "HP100":
+                            entry.Settings.HP100 = Parsing.ParseFloat(value);
+                            break;
+                        case "HP50":
+                            entry.Settings.HP50 = Parsing.ParseFloat(value);
+                            break;
+                        case "HPMiss":
+                            entry.Settings.HPMiss = Parsing.ParseFloat(value);
+                            break;
+                        case "GreatOffsetThresholdMs":
+                            entry.Settings.GreatOffsetThresholdMs = Parsing.ParseFloat(value);
+                            break;
+                        case "GreatOffsetPenaltyHP":
+                            entry.Settings.GreatOffsetPenaltyHP = Parsing.ParseFloat(value);
+                            break;
+                        case "EnableDifficultyOverrides":
+                            entry.Settings.EnableDifficultyOverrides = parseBool(value);
+                            break;
+                        case "SectionCircleSize":
+                            entry.Settings.SectionCircleSize = Parsing.ParseFloat(value);
+                            break;
+                        case "SectionApproachRate":
+                            entry.Settings.SectionApproachRate = Parsing.ParseFloat(value);
+                            break;
+                        case "SectionOverallDifficulty":
+                            entry.Settings.SectionOverallDifficulty = Parsing.ParseFloat(value);
+                            break;
+                        case "ForceHidden":
+                            entry.Settings.ForceHidden = parseBool(value);
+                            break;
                         case "ForceNoApproachCircle":
                             entry.Settings.ForceNoApproachCircle = parseBool(value);
+                            break;
+                        case "ForceHardRock":
+                            entry.Settings.ForceHardRock = parseBool(value);
+                            break;
+                        case "ForceFlashlight":
+                            entry.Settings.ForceFlashlight = parseBool(value);
                             break;
                     }
                 }

@@ -479,7 +479,33 @@ namespace osu.Game.Beatmaps.Formats
 
         private static IEnumerable<string> serialiseHitObjectSettings(HitObjectGimmickSettings settings)
         {
+            if (settings.EnableHPGimmick) yield return "EnableHPGimmick=True";
+            if (settings.EnableNoMiss) yield return "EnableNoMiss=True";
+            if (settings.EnableCountLimits) yield return "EnableCountLimits=True";
+            if (settings.EnableGreatOffsetPenalty) yield return "EnableGreatOffsetPenalty=True";
+
+            if (settings.Max300s >= 0) yield return $"Max300s={settings.Max300s}";
+            if (settings.Max100s >= 0) yield return $"Max100s={settings.Max100s}";
+            if (settings.Max50s >= 0) yield return $"Max50s={settings.Max50s}";
+            if (settings.MaxMisses >= 0) yield return $"MaxMisses={settings.MaxMisses}";
+
+            if (!float.IsNaN(settings.HP300)) yield return $"HP300={settings.HP300.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.HP100)) yield return $"HP100={settings.HP100.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.HP50)) yield return $"HP50={settings.HP50.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.HPMiss)) yield return $"HPMiss={settings.HPMiss.ToString(CultureInfo.InvariantCulture)}";
+
+            if (settings.GreatOffsetThresholdMs >= 0) yield return $"GreatOffsetThresholdMs={settings.GreatOffsetThresholdMs.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.GreatOffsetPenaltyHP)) yield return $"GreatOffsetPenaltyHP={settings.GreatOffsetPenaltyHP.ToString(CultureInfo.InvariantCulture)}";
+
+            if (settings.EnableDifficultyOverrides) yield return "EnableDifficultyOverrides=True";
+            if (!float.IsNaN(settings.SectionCircleSize)) yield return $"SectionCircleSize={settings.SectionCircleSize.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.SectionApproachRate)) yield return $"SectionApproachRate={settings.SectionApproachRate.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.SectionOverallDifficulty)) yield return $"SectionOverallDifficulty={settings.SectionOverallDifficulty.ToString(CultureInfo.InvariantCulture)}";
+
+            if (settings.ForceHidden) yield return "ForceHidden=True";
             if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
+            if (settings.ForceHardRock) yield return "ForceHardRock=True";
+            if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
         }
 
         private void handleHitObject(TextWriter writer, HitObject hitObject)

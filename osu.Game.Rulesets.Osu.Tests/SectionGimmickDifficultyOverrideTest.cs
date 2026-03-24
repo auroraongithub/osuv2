@@ -134,6 +134,37 @@ namespace osu.Game.Rulesets.Osu.Tests
         }
 
         [Test]
+        public void TestSectionDifficultyOverrideAllowsNegativeArBelowMinusTen()
+        {
+            var hit = new HitCircle { StartTime = 1000 };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(hit);
+
+            beatmap.SectionGimmicks.Sections.Add(new SectionGimmickSection
+            {
+                Id = 0,
+                StartTime = 0,
+                EndTime = 2000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionApproachRate = -20,
+                }
+            });
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            processor.PostProcess();
+
+            Assert.That(hit.TimePreempt, Is.GreaterThan(1800));
+        }
+
+        [Test]
         public void TestSectionDifficultyOverrideGradualArChange()
         {
             var early = new HitCircle { StartTime = 200 };

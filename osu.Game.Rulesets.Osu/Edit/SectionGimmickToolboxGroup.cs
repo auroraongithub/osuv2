@@ -358,7 +358,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     },
                                     sectionApproachRate = new FormNumberBox(allowDecimals: true)
                                     {
-                                        Caption = "SectionApproachRate (-10 to 11)",
+                                        Caption = "SectionApproachRate (<= 11)",
                                         TabbableContentContainer = this,
                                     },
                                     sectionOverallDifficulty = new FormNumberBox(allowDecimals: true)

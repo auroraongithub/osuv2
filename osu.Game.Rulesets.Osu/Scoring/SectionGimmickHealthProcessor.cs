@@ -2,7 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Linq;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Osu.Objects;
@@ -14,6 +16,7 @@ namespace osu.Game.Rulesets.Osu.Scoring
     {
         private readonly SectionGimmickCountTracker countTracker = new SectionGimmickCountTracker();
         private BeatmapSectionGimmicks gimmicks = new BeatmapSectionGimmicks();
+        private BeatmapHitObjectGimmicks hitObjectGimmicks = new BeatmapHitObjectGimmicks();
         private SectionGimmickSection? activeSection;
 
         public SectionGimmickSection? ActiveSection => activeSection;
@@ -26,6 +29,7 @@ namespace osu.Game.Rulesets.Osu.Scoring
         public override void ApplyBeatmap(IBeatmap beatmap)
         {
             gimmicks = beatmap.SectionGimmicks ?? new BeatmapSectionGimmicks();
+            hitObjectGimmicks = beatmap.HitObjectGimmicks ?? new BeatmapHitObjectGimmicks();
             SectionGimmicksValidator.Validate(gimmicks);
             base.ApplyBeatmap(beatmap);
         }
@@ -51,9 +55,11 @@ namespace osu.Game.Rulesets.Osu.Scoring
         protected override void ApplyResultInternal(JudgementResult result)
         {
             var section = resolveSection(result.HitObject.StartTime);
-            if (section != null)
+            var objectSettings = resolveObjectSettings(result.HitObject);
+
+            if (section != null || objectSettings != null)
             {
-                var settings = section.Settings;
+                var settings = mergeSettings(section?.Settings, objectSettings);
 
                 if (settings.EnableNoMiss && result.Type == HitResult.Miss)
                 {
@@ -78,9 +84,9 @@ namespace osu.Game.Rulesets.Osu.Scoring
             base.ApplyResultInternal(result);
 
             // Apply additional offset penalty after base judgement application.
-            if (section != null)
+            if (section != null || objectSettings != null)
             {
-                var settings = section.Settings;
+                var settings = mergeSettings(section?.Settings, objectSettings);
                 if (settings.EnableGreatOffsetPenalty && shouldApplyOffsetPenalty(settings, result))
                 {
                     if (Math.Abs(result.TimeOffset) > settings.GreatOffsetThresholdMs)
@@ -92,10 +98,11 @@ namespace osu.Game.Rulesets.Osu.Scoring
         protected override double GetHealthIncreaseFor(JudgementResult result)
         {
             var section = resolveSection(result.HitObject.StartTime);
-            if (section == null)
+            var objectSettings = resolveObjectSettings(result.HitObject);
+            if (section == null && objectSettings == null)
                 return base.GetHealthIncreaseFor(result);
 
-            var settings = section.Settings;
+            var settings = mergeSettings(section?.Settings, objectSettings);
             if (!settings.EnableHPGimmick)
                 return base.GetHealthIncreaseFor(result);
 
@@ -166,6 +173,67 @@ namespace osu.Game.Rulesets.Osu.Scoring
             double resultingHealthDelta = settings.ReverseHP ? configured : -configured;
             bool hpGimmickAlreadyPunishes = resultingHealthDelta < 0;
             return !hpGimmickAlreadyPunishes;
+        }
+
+        private HitObjectGimmickSettings? resolveObjectSettings(osu.Game.Rulesets.Objects.HitObject hitObject)
+        {
+            if (hitObject is not OsuHitObject osuHitObject)
+                return null;
+
+            return hitObjectGimmicks.Entries.FirstOrDefault(e =>
+                e.StartTime == osuHitObject.StartTime
+                && e.ComboIndexWithOffsets == osuHitObject.ComboIndexWithOffsets)?.Settings;
+        }
+
+        private static SectionGimmickSettings mergeSettings(SectionGimmickSettings? sectionSettings, HitObjectGimmickSettings? objectSettings)
+        {
+            var result = new SectionGimmickSettings();
+
+            if (sectionSettings != null)
+            {
+                result.EnableHPGimmick = sectionSettings.EnableHPGimmick;
+                result.EnableNoMiss = sectionSettings.EnableNoMiss;
+                result.EnableCountLimits = sectionSettings.EnableCountLimits;
+                result.EnableGreatOffsetPenalty = sectionSettings.EnableGreatOffsetPenalty;
+
+                result.Max300s = sectionSettings.Max300s;
+                result.Max100s = sectionSettings.Max100s;
+                result.Max50s = sectionSettings.Max50s;
+                result.MaxMisses = sectionSettings.MaxMisses;
+
+                result.HP300 = sectionSettings.HP300;
+                result.HP100 = sectionSettings.HP100;
+                result.HP50 = sectionSettings.HP50;
+                result.HPMiss = sectionSettings.HPMiss;
+                result.NoDrain = sectionSettings.NoDrain;
+                result.ReverseHP = sectionSettings.ReverseHP;
+
+                result.GreatOffsetThresholdMs = sectionSettings.GreatOffsetThresholdMs;
+                result.GreatOffsetPenaltyHP = sectionSettings.GreatOffsetPenaltyHP;
+            }
+
+            if (objectSettings != null)
+            {
+                result.EnableHPGimmick = result.EnableHPGimmick || objectSettings.EnableHPGimmick;
+                result.EnableNoMiss = result.EnableNoMiss || objectSettings.EnableNoMiss;
+                result.EnableCountLimits = result.EnableCountLimits || objectSettings.EnableCountLimits;
+                result.EnableGreatOffsetPenalty = result.EnableGreatOffsetPenalty || objectSettings.EnableGreatOffsetPenalty;
+
+                if (objectSettings.Max300s >= 0) result.Max300s = objectSettings.Max300s;
+                if (objectSettings.Max100s >= 0) result.Max100s = objectSettings.Max100s;
+                if (objectSettings.Max50s >= 0) result.Max50s = objectSettings.Max50s;
+                if (objectSettings.MaxMisses >= 0) result.MaxMisses = objectSettings.MaxMisses;
+
+                if (!float.IsNaN(objectSettings.HP300)) result.HP300 = objectSettings.HP300;
+                if (!float.IsNaN(objectSettings.HP100)) result.HP100 = objectSettings.HP100;
+                if (!float.IsNaN(objectSettings.HP50)) result.HP50 = objectSettings.HP50;
+                if (!float.IsNaN(objectSettings.HPMiss)) result.HPMiss = objectSettings.HPMiss;
+
+                if (objectSettings.GreatOffsetThresholdMs >= 0) result.GreatOffsetThresholdMs = objectSettings.GreatOffsetThresholdMs;
+                if (!float.IsNaN(objectSettings.GreatOffsetPenaltyHP)) result.GreatOffsetPenaltyHP = objectSettings.GreatOffsetPenaltyHP;
+            }
+
+            return result;
         }
     }
 }

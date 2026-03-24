@@ -11,6 +11,7 @@ using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects.Drawables;
@@ -29,6 +30,7 @@ namespace osu.Game.Rulesets.Osu.UI
     public partial class SectionGimmickFlashlightOverlay : CompositeDrawable
     {
         private readonly BeatmapSectionGimmicks gimmicks;
+        private readonly BeatmapHitObjectGimmicks hitObjectGimmicks;
         private readonly SectionForcedFlashlightMod forcedFlashlightMod;
 
         private bool wasFlashlightForced;
@@ -39,6 +41,7 @@ namespace osu.Game.Rulesets.Osu.UI
         public SectionGimmickFlashlightOverlay(IBeatmap beatmap, DrawableRuleset<OsuHitObject> drawableRuleset)
         {
             gimmicks = beatmap.SectionGimmicks;
+            hitObjectGimmicks = beatmap.HitObjectGimmicks;
 
             RelativeSizeAxes = Axes.Both;
 
@@ -62,14 +65,21 @@ namespace osu.Game.Rulesets.Osu.UI
         private bool isFlashlightForcedAtCurrentTime()
         {
             if (healthProcessor is SectionGimmickHealthProcessor sectionHealthProcessor)
-                return sectionHealthProcessor.ActiveSection?.Settings.ForceFlashlight == true;
+            {
+                if (sectionHealthProcessor.ActiveSection?.Settings.ForceFlashlight == true)
+                    return true;
+            }
 
             SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(gimmicks, Time.Current);
-            return section?.Settings.ForceFlashlight == true;
+            if (section?.Settings.ForceFlashlight == true)
+                return true;
+
+            return hitObjectGimmicks.Entries.Any(e => e.Settings?.ForceFlashlight == true && Math.Abs(e.StartTime - Time.Current) <= 1);
         }
 
         public static bool HasAnyForcedFlashlightSection(IBeatmap beatmap)
-            => beatmap.SectionGimmicks.Sections.Any(s => s.Settings.ForceFlashlight);
+            => beatmap.SectionGimmicks.Sections.Any(s => s.Settings.ForceFlashlight)
+               || beatmap.HitObjectGimmicks.Entries.Any(e => e.Settings?.ForceFlashlight == true);
 
         private sealed class SectionForcedFlashlightMod : ModFlashlight<OsuHitObject>, IApplicableToDrawableHitObject
         {

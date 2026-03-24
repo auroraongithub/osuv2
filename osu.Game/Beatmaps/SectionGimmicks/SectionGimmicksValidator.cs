@@ -65,8 +65,8 @@ namespace osu.Game.Beatmaps.SectionGimmicks
                     if (!float.IsNaN(settings.SectionCircleSize) && (settings.SectionCircleSize < 0 || settings.SectionCircleSize > 11))
                         throw new InvalidOperationException($"Section {section.Id}: SectionCircleSize must be in [0, 11].");
 
-                    if (!float.IsNaN(settings.SectionApproachRate) && (settings.SectionApproachRate < -10 || settings.SectionApproachRate > 11))
-                        throw new InvalidOperationException($"Section {section.Id}: SectionApproachRate must be in [-10, 11].");
+                    if (!float.IsNaN(settings.SectionApproachRate) && settings.SectionApproachRate > 11)
+                        throw new InvalidOperationException($"Section {section.Id}: SectionApproachRate must be <= 11.");
 
                     if (!float.IsNaN(settings.SectionOverallDifficulty) && (settings.SectionOverallDifficulty < 0 || settings.SectionOverallDifficulty > 11))
                         throw new InvalidOperationException($"Section {section.Id}: SectionOverallDifficulty must be in [0, 11].");

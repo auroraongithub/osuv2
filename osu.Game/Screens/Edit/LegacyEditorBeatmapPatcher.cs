@@ -320,7 +320,28 @@ namespace osu.Game.Screens.Edit
                         ComboIndexWithOffsets = e.ComboIndexWithOffsets,
                         Settings = new HitObjectGimmickSettings
                         {
+                            EnableHPGimmick = settings.EnableHPGimmick,
+                            EnableNoMiss = settings.EnableNoMiss,
+                            EnableCountLimits = settings.EnableCountLimits,
+                            EnableGreatOffsetPenalty = settings.EnableGreatOffsetPenalty,
+                            Max300s = settings.Max300s,
+                            Max100s = settings.Max100s,
+                            Max50s = settings.Max50s,
+                            MaxMisses = settings.MaxMisses,
+                            HP300 = settings.HP300,
+                            HP100 = settings.HP100,
+                            HP50 = settings.HP50,
+                            HPMiss = settings.HPMiss,
+                            GreatOffsetThresholdMs = settings.GreatOffsetThresholdMs,
+                            GreatOffsetPenaltyHP = settings.GreatOffsetPenaltyHP,
+                            EnableDifficultyOverrides = settings.EnableDifficultyOverrides,
+                            SectionCircleSize = settings.SectionCircleSize,
+                            SectionApproachRate = settings.SectionApproachRate,
+                            SectionOverallDifficulty = settings.SectionOverallDifficulty,
+                            ForceHidden = settings.ForceHidden,
                             ForceNoApproachCircle = settings.ForceNoApproachCircle,
+                            ForceHardRock = settings.ForceHardRock,
+                            ForceFlashlight = settings.ForceFlashlight,
                         }
                     };
                 }).ToList(),
