@@ -168,6 +168,10 @@ namespace osu.Game.Rulesets.Osu.UI
                     details.Add("FL");
                 if (settings.ForceDoubleTime)
                     details.Add("DT");
+                if (settings.ForceSingleTap)
+                    details.Add("SG");
+                if (settings.ForceAlternate)
+                    details.Add("AL");
             }
 
             if (details.Count == 0)

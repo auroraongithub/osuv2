@@ -38,12 +38,30 @@ namespace osu.Game.Rulesets.Osu.Tests
                     ForceHardRock = true,
                     ForceFlashlight = true,
                     ForceDoubleTime = true,
+                    ForceSingleTap = true,
                 },
             };
 
             string label = invokeBuildLabel(section);
 
-            Assert.That(label, Is.EqualTo("Kiai (HD, NoAC, HR, FL, DT)"));
+            Assert.That(label, Is.EqualTo("Kiai (HD, NoAC, HR, FL, DT, SG)"));
+        }
+
+        [Test]
+        public void TestBuildLabelIncludesAlternateTag()
+        {
+            var section = new SectionGimmickSection
+            {
+                Id = 5,
+                Settings = new SectionGimmickSettings
+                {
+                    ForceAlternate = true,
+                },
+            };
+
+            string label = invokeBuildLabel(section);
+
+            Assert.That(label, Is.EqualTo("Section 5 (AL)"));
         }
 
         private static string invokeBuildLabel(SectionGimmickSection section)

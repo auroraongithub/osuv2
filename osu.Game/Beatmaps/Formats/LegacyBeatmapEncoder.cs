@@ -465,6 +465,8 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceHardRock) yield return "ForceHardRock=True";
             if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
             if (settings.ForceDoubleTime) yield return "ForceDoubleTime=True";
+            if (settings.ForceSingleTap) yield return "ForceSingleTap=True";
+            if (settings.ForceAlternate) yield return "ForceAlternate=True";
 
             if (!string.IsNullOrEmpty(settings.SectionName)) yield return $"SectionName={settings.SectionName}";
             if (settings.DisplayColor != Color4.White)

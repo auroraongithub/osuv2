@@ -386,7 +386,7 @@ SliderTickRate: 1
 256,192,1000,1,0,0:0:0:0:
 
 [BeatmapSectionGimmicks]
-0,0,1500,EnableDifficultyOverrides=True|SectionApproachRate=9|ForceNoApproachCircle=True
+0,0,1500,EnableDifficultyOverrides=True|SectionApproachRate=9|ForceNoApproachCircle=True|ForceSingleTap=True
 """;
 
             using var ms = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
@@ -399,6 +399,7 @@ SliderTickRate: 1
 
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.ForceNoApproachCircle, Is.True);
+            Assert.That(section.Settings.ForceSingleTap, Is.True);
         }
 
         [Test]

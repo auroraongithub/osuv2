@@ -687,6 +687,8 @@ namespace osu.Game.Beatmaps.Formats
                         case "ForceHardRock": section.Settings.ForceHardRock = parseBool(value); break;
                         case "ForceFlashlight": section.Settings.ForceFlashlight = parseBool(value); break;
                         case "ForceDoubleTime": section.Settings.ForceDoubleTime = parseBool(value); break;
+                        case "ForceSingleTap": section.Settings.ForceSingleTap = parseBool(value); break;
+                        case "ForceAlternate": section.Settings.ForceAlternate = parseBool(value); break;
                         case "SectionName": section.Settings.SectionName = value; break;
                         case "DisplayColor":
                             if (uint.TryParse(value, out uint colorArgb))

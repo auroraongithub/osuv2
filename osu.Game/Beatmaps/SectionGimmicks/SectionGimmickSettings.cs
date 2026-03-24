@@ -42,6 +42,8 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public bool ForceHardRock { get; set; }
         public bool ForceFlashlight { get; set; }
         public bool ForceDoubleTime { get; set; }
+        public bool ForceSingleTap { get; set; }
+        public bool ForceAlternate { get; set; }
 
         public string SectionName { get; set; } = string.Empty;
         public Color4 DisplayColor { get; set; } = Color4.White;

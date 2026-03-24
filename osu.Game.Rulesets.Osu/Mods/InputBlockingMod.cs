@@ -31,6 +31,8 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         protected OsuAction? LastAcceptedAction { get; private set; }
 
+        protected void ResetInputState() => LastAcceptedAction = null;
+
         /// <summary>
         /// A tracker for periods where alternate should not be forced (i.e. non-gameplay periods).
         /// </summary>
@@ -66,10 +68,10 @@ namespace osu.Game.Rulesets.Osu.Mods
         public void Update(Playfield playfield)
         {
             if (LastAcceptedAction != null && nonGameplayPeriods.IsInAny(gameplayClock.CurrentTime))
-                LastAcceptedAction = null;
+                ResetInputState();
 
             if (LastAcceptedAction != null && gameplayClock.IsRewinding)
-                LastAcceptedAction = null;
+                ResetInputState();
         }
 
         protected abstract bool CheckValidNewAction(OsuAction action);

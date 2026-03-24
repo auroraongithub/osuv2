@@ -300,6 +300,8 @@ namespace osu.Game.Screens.Edit
                                 ForceHardRock = settings.ForceHardRock,
                                 ForceFlashlight = settings.ForceFlashlight,
                                 ForceDoubleTime = settings.ForceDoubleTime,
+                                ForceSingleTap = settings.ForceSingleTap,
+                                ForceAlternate = settings.ForceAlternate,
                                 SectionName = settings.SectionName,
                                 DisplayColor = settings.DisplayColor,
                             }

@@ -93,6 +93,10 @@ namespace osu.Game.Rulesets.Osu.UI
                 tags.Add("FL");
             if (settings.ForceDoubleTime)
                 tags.Add("DT");
+            if (settings.ForceSingleTap)
+                tags.Add("SG");
+            if (settings.ForceAlternate)
+                tags.Add("AL");
 
             if (tags.Count > 0)
                 return $"{sectionName} ({string.Join(", ", tags)})";

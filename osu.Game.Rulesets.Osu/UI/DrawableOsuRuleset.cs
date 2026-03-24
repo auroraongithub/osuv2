@@ -54,6 +54,14 @@ namespace osu.Game.Rulesets.Osu.UI
                 });
             }
 
+            if (!Mods.Any(m => m is InputBlockingMod) && SectionGimmickInputBlockingOverlay.HasAnyForcedInputBlockingSection(Beatmap))
+            {
+                Overlays.Add(new SectionGimmickInputBlockingOverlay(Beatmap, this)
+                {
+                    Depth = float.MinValue,
+                });
+            }
+
             // Section gimmick displays are now provided through the skin system
             // They will appear in MainHUDComponents container when enabled
             if (replayPlayer != null)

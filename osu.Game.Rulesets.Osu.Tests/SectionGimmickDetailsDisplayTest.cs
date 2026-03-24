@@ -114,6 +114,42 @@ namespace osu.Game.Rulesets.Osu.Tests
             Assert.That(label, Does.Contain("NoApproachCircle"));
         }
 
+        [Test]
+        public void TestBuildDetailsLabelShowsSingleTapAndAlternateMarkers()
+        {
+            var sectionSingleTap = new SectionGimmickSection
+            {
+                Id = 3,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionApproachRate = 8,
+                    ForceSingleTap = true,
+                }
+            };
+
+            string singleTapLabel = invokeBuildLabel(sectionSingleTap, false);
+            Assert.That(singleTapLabel, Does.Contain("SG"));
+
+            var sectionAlternate = new SectionGimmickSection
+            {
+                Id = 4,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionApproachRate = 8,
+                    ForceAlternate = true,
+                }
+            };
+
+            string alternateLabel = invokeBuildLabel(sectionAlternate, false);
+            Assert.That(alternateLabel, Does.Contain("AL"));
+        }
+
         private static string invokeBuildLabel(SectionGimmickSection section, bool multiline, IBeatmapDifficultyInfo? difficulty = null)
         {
             var method = typeof(SectionGimmickDetailsDisplay).GetMethod("BuildDetailsLabelForTest", BindingFlags.NonPublic | BindingFlags.Static);

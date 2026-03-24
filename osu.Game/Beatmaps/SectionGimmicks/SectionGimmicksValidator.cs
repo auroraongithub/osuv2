@@ -90,6 +90,9 @@ namespace osu.Game.Beatmaps.SectionGimmicks
                 if (settings.KeepDifficultyOverridesAfterSection && !settings.EnableDifficultyOverrides)
                     throw new InvalidOperationException($"Section {section.Id}: keep difficulty overrides requires difficulty overrides.");
 
+                if (settings.ForceSingleTap && settings.ForceAlternate)
+                    throw new InvalidOperationException($"Section {section.Id}: ForceSingleTap and ForceAlternate cannot both be enabled.");
+
                 if (i > 0)
                 {
                     var prev = ordered[i - 1];

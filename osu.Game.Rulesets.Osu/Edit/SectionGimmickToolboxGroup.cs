@@ -97,6 +97,8 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceHardRock = null!;
         private FormCheckBox forceFlashlight = null!;
         private FormCheckBox forceDoubleTime = null!;
+        private FormCheckBox forceSingleTap = null!;
+        private FormCheckBox forceAlternate = null!;
 
         private FormEnumDropdown<SectionGimmickApplyScope> applyScopeDropdown = null!;
 
@@ -392,6 +394,14 @@ namespace osu.Game.Rulesets.Osu.Edit
                             {
                                 Caption = "Force Double Time (DT)",
                             },
+                            forceSingleTap = new FormCheckBox
+                            {
+                                Caption = "Force Single Tap (SG)",
+                            },
+                            forceAlternate = new FormCheckBox
+                            {
+                                Caption = "Force Alternate (AL)",
+                            },
 
                             validationStatus = new OsuSpriteText
                             {
@@ -484,6 +494,18 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceHardRock.Current.BindValueChanged(v => mutateSetting(s => s.ForceHardRock = v.NewValue));
             forceFlashlight.Current.BindValueChanged(v => mutateSetting(s => s.ForceFlashlight = v.NewValue));
             forceDoubleTime.Current.BindValueChanged(v => mutateSetting(s => s.ForceDoubleTime = v.NewValue));
+            forceSingleTap.Current.BindValueChanged(v => mutateSetting(s =>
+            {
+                s.ForceSingleTap = v.NewValue;
+                if (v.NewValue)
+                    s.ForceAlternate = false;
+            }));
+            forceAlternate.Current.BindValueChanged(v => mutateSetting(s =>
+            {
+                s.ForceAlternate = v.NewValue;
+                if (v.NewValue)
+                    s.ForceSingleTap = false;
+            }));
         }
 
         private void mutateSetting(Action<SectionGimmickSettings> settingMutation)
@@ -585,6 +607,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceHardRock.Current.Value = settings.ForceHardRock;
                 forceFlashlight.Current.Value = settings.ForceFlashlight;
                 forceDoubleTime.Current.Value = settings.ForceDoubleTime;
+                forceSingleTap.Current.Value = settings.ForceSingleTap;
+                forceAlternate.Current.Value = settings.ForceAlternate;
             }
 
             updatingControls = false;
