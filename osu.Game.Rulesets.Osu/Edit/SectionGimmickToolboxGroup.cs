@@ -121,28 +121,28 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         // Fun mod adjustable value controls (shown when corresponding mod is enabled)
         private FillFlowContainer wiggleSettings = null!;
-        private FormSliderBar<float> wiggleStrength = null!;
+        private FormNumberBox wiggleStrength = null!;
         private FillFlowContainer growSettings = null!;
-        private FormSliderBar<float> growStartScale = null!;
+        private FormNumberBox growStartScale = null!;
         private FillFlowContainer deflateSettings = null!;
-        private FormSliderBar<float> deflateStartScale = null!;
+        private FormNumberBox deflateStartScale = null!;
         private FillFlowContainer approachDifferentSettings = null!;
-        private FormSliderBar<float> approachDifferentScale = null!;
+        private FormNumberBox approachDifferentScale = null!;
         private FillFlowContainer noScopeSettings = null!;
-        private FormSliderBar<int> noScopeHiddenComboCount = null!;
+        private FormNumberBox noScopeHiddenComboCount = null!;
         private FillFlowContainer magnetisedSettings = null!;
-        private FormSliderBar<float> magnetisedAttractionStrength = null!;
+        private FormNumberBox magnetisedAttractionStrength = null!;
         private FillFlowContainer repelSettings = null!;
-        private FormSliderBar<float> repelRepulsionStrength = null!;
+        private FormNumberBox repelRepulsionStrength = null!;
         private FillFlowContainer depthSettings = null!;
-        private FormSliderBar<float> depthMaxDepth = null!;
+        private FormNumberBox depthMaxDepth = null!;
         private FillFlowContainer bloomSettings = null!;
-        private FormSliderBar<int> bloomMaxSizeComboCount = null!;
-        private FormSliderBar<float> bloomMaxCursorSize = null!;
+        private FormNumberBox bloomMaxSizeComboCount = null!;
+        private FormNumberBox bloomMaxCursorSize = null!;
         private FillFlowContainer barrelRollSettings = null!;
-        private FormSliderBar<double> barrelRollSpinSpeed = null!;
+        private FormNumberBox barrelRollSpinSpeed = null!;
         private FillFlowContainer mutedSettings = null!;
-        private FormSliderBar<int> mutedMuteComboCount = null!;
+        private FormNumberBox mutedMuteComboCount = null!;
 
         private FormEnumDropdown<SectionGimmickApplyScope> applyScopeDropdown = null!;
 
@@ -536,10 +536,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            wiggleStrength = new FormSliderBar<float>
+                                            wiggleStrength = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Strength",
-                                                Current = new BindableFloat(1) { MinValue = 0.1f, MaxValue = 2f, Precision = 0.1f },
+                                                PlaceholderText = "Strength (min: 0.1, max: 2)",
                                             },
                                         }
                                     },
@@ -554,10 +553,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            growStartScale = new FormSliderBar<float>
+                                            growStartScale = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Start Scale",
-                                                Current = new BindableFloat(0.5f) { MinValue = 0f, MaxValue = 0.99f, Precision = 0.01f },
+                                                PlaceholderText = "Start Scale (min: 0, max: 0.99)",
                                             },
                                         }
                                     },
@@ -572,10 +570,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            deflateStartScale = new FormSliderBar<float>
+                                            deflateStartScale = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Start Scale",
-                                                Current = new BindableFloat(2) { MinValue = 1f, MaxValue = 25f, Precision = 0.1f },
+                                                PlaceholderText = "Start Scale (min: 1, max: 25)",
                                             },
                                         }
                                     },
@@ -590,10 +587,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            approachDifferentScale = new FormSliderBar<float>
+                                            approachDifferentScale = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Initial Size",
-                                                Current = new BindableFloat(4) { MinValue = 1.5f, MaxValue = 10f, Precision = 0.1f },
+                                                PlaceholderText = "Initial Size (min: 1.5, max: 10)",
                                             },
                                         }
                                     },
@@ -608,10 +604,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            noScopeHiddenComboCount = new FormSliderBar<int>
+                                            noScopeHiddenComboCount = new FormNumberBox
                                             {
-                                                Caption = "Hidden Combo Count",
-                                                Current = new BindableInt(10) { MinValue = 0, MaxValue = 50 },
+                                                PlaceholderText = "Hidden Combo Count (min: 0, max: 50)",
                                             },
                                         }
                                     },
@@ -626,10 +621,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            magnetisedAttractionStrength = new FormSliderBar<float>
+                                            magnetisedAttractionStrength = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Attraction Strength",
-                                                Current = new BindableFloat(0.5f) { MinValue = 0.05f, MaxValue = 1f, Precision = 0.05f },
+                                                PlaceholderText = "Attraction Strength (min: 0.05, max: 1)",
                                             },
                                         }
                                     },
@@ -644,10 +638,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            repelRepulsionStrength = new FormSliderBar<float>
+                                            repelRepulsionStrength = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Repulsion Strength",
-                                                Current = new BindableFloat(0.5f) { MinValue = 0.05f, MaxValue = 1f, Precision = 0.05f },
+                                                PlaceholderText = "Repulsion Strength (min: 0.05, max: 1)",
                                             },
                                         }
                                     },
@@ -662,10 +655,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            depthMaxDepth = new FormSliderBar<float>
+                                            depthMaxDepth = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Max Depth",
-                                                Current = new BindableFloat(100) { MinValue = 50f, MaxValue = 200f, Precision = 10f },
+                                                PlaceholderText = "Max Depth (min: 50, max: 200)",
                                             },
                                         }
                                     },
@@ -680,15 +672,13 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            bloomMaxSizeComboCount = new FormSliderBar<int>
+                                            bloomMaxSizeComboCount = new FormNumberBox
                                             {
-                                                Caption = "Max Size Combo",
-                                                Current = new BindableInt(50) { MinValue = 5, MaxValue = 100 },
+                                                PlaceholderText = "Max Size Combo (min: 5, max: 100)",
                                             },
-                                            bloomMaxCursorSize = new FormSliderBar<float>
+                                            bloomMaxCursorSize = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Max Cursor Size",
-                                                Current = new BindableFloat(10f) { MinValue = 5f, MaxValue = 15f, Precision = 0.5f },
+                                                PlaceholderText = "Max Cursor Size (min: 5, max: 15)",
                                             },
                                         }
                                     },
@@ -703,10 +693,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            barrelRollSpinSpeed = new FormSliderBar<double>
+                                            barrelRollSpinSpeed = new FormNumberBox(allowDecimals: true)
                                             {
-                                                Caption = "Spin Speed (RPM)",
-                                                Current = new BindableDouble(0.5) { MinValue = 0.02, MaxValue = 12, Precision = 0.01 },
+                                                PlaceholderText = "Spin Speed RPM (min: 0.02, max: 12)",
                                             },
                                         }
                                     },
@@ -721,10 +710,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Margin = new MarginPadding { Left = 20 },
                                         Children = new Drawable[]
                                         {
-                                            mutedMuteComboCount = new FormSliderBar<int>
+                                            mutedMuteComboCount = new FormNumberBox
                                             {
-                                                Caption = "Mute Combo Count",
-                                                Current = new BindableInt(100) { MinValue = 0, MaxValue = 500 },
+                                                PlaceholderText = "Mute Combo Count (min: 0, max: 500)",
                                             },
                                         }
                                     },
@@ -863,38 +851,86 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             // Fun mod settings bindings - also toggle visibility when corresponding checkbox changes
             forceWiggle.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            wiggleStrength.Current.BindValueChanged(v => mutateSetting(s => s.WiggleStrength = v.NewValue));
+            wiggleStrength.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(wiggleStrength.Current.Value, out float value))
+                    mutateSetting(s => s.WiggleStrength = Math.Clamp(value, 0.1f, 2f));
+            };
 
             forceGrow.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            growStartScale.Current.BindValueChanged(v => mutateSetting(s => s.GrowStartScale = v.NewValue));
+            growStartScale.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(growStartScale.Current.Value, out float value))
+                    mutateSetting(s => s.GrowStartScale = Math.Clamp(value, 0f, 0.99f));
+            };
 
             forceDeflate.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            deflateStartScale.Current.BindValueChanged(v => mutateSetting(s => s.DeflateStartScale = v.NewValue));
+            deflateStartScale.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(deflateStartScale.Current.Value, out float value))
+                    mutateSetting(s => s.DeflateStartScale = Math.Clamp(value, 1f, 25f));
+            };
 
             forceApproachDifferent.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            approachDifferentScale.Current.BindValueChanged(v => mutateSetting(s => s.ApproachDifferentScale = v.NewValue));
+            approachDifferentScale.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(approachDifferentScale.Current.Value, out float value))
+                    mutateSetting(s => s.ApproachDifferentScale = Math.Clamp(value, 1.5f, 10f));
+            };
 
             forceNoScope.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            noScopeHiddenComboCount.Current.BindValueChanged(v => mutateSetting(s => s.NoScopeHiddenComboCount = v.NewValue));
+            noScopeHiddenComboCount.OnCommit += (_, _) =>
+            {
+                if (int.TryParse(noScopeHiddenComboCount.Current.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+                    mutateSetting(s => s.NoScopeHiddenComboCount = Math.Clamp(value, 0, 50));
+            };
 
             forceMagnetised.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            magnetisedAttractionStrength.Current.BindValueChanged(v => mutateSetting(s => s.MagnetisedAttractionStrength = v.NewValue));
+            magnetisedAttractionStrength.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(magnetisedAttractionStrength.Current.Value, out float value))
+                    mutateSetting(s => s.MagnetisedAttractionStrength = Math.Clamp(value, 0.05f, 1f));
+            };
 
             forceRepel.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            repelRepulsionStrength.Current.BindValueChanged(v => mutateSetting(s => s.RepelRepulsionStrength = v.NewValue));
+            repelRepulsionStrength.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(repelRepulsionStrength.Current.Value, out float value))
+                    mutateSetting(s => s.RepelRepulsionStrength = Math.Clamp(value, 0.05f, 1f));
+            };
 
             forceDepth.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            depthMaxDepth.Current.BindValueChanged(v => mutateSetting(s => s.DepthMaxDepth = v.NewValue));
+            depthMaxDepth.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(depthMaxDepth.Current.Value, out float value))
+                    mutateSetting(s => s.DepthMaxDepth = Math.Clamp(value, 50f, 200f));
+            };
 
             forceBloom.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            bloomMaxSizeComboCount.Current.BindValueChanged(v => mutateSetting(s => s.BloomMaxSizeComboCount = v.NewValue));
-            bloomMaxCursorSize.Current.BindValueChanged(v => mutateSetting(s => s.BloomMaxCursorSize = v.NewValue));
+            bloomMaxSizeComboCount.OnCommit += (_, _) =>
+            {
+                if (int.TryParse(bloomMaxSizeComboCount.Current.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+                    mutateSetting(s => s.BloomMaxSizeComboCount = Math.Clamp(value, 5, 100));
+            };
+            bloomMaxCursorSize.OnCommit += (_, _) =>
+            {
+                if (tryParseFloat(bloomMaxCursorSize.Current.Value, out float value))
+                    mutateSetting(s => s.BloomMaxCursorSize = Math.Clamp(value, 5f, 15f));
+            };
 
             forceBarrelRoll.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            barrelRollSpinSpeed.Current.BindValueChanged(v => mutateSetting(s => s.BarrelRollSpinSpeed = v.NewValue));
+            barrelRollSpinSpeed.OnCommit += (_, _) =>
+            {
+                if (tryParseDouble(barrelRollSpinSpeed.Current.Value, out double value))
+                    mutateSetting(s => s.BarrelRollSpinSpeed = Math.Clamp(value, 0.02, 12));
+            };
 
             forceMuted.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            mutedMuteComboCount.Current.BindValueChanged(v => mutateSetting(s => s.MutedMuteComboCount = v.NewValue));
+            mutedMuteComboCount.OnCommit += (_, _) =>
+            {
+                if (int.TryParse(mutedMuteComboCount.Current.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+                    mutateSetting(s => s.MutedMuteComboCount = Math.Clamp(value, 0, 500));
+            };
         }
 
         private void mutateSetting(Action<SectionGimmickSettings> settingMutation)
@@ -1026,18 +1062,18 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceBloom.Current.Value = settings.ForceBloom;
 
                 // Fun mod adjustable values
-                wiggleStrength.Current.Value = settings.WiggleStrength;
-                growStartScale.Current.Value = settings.GrowStartScale;
-                deflateStartScale.Current.Value = settings.DeflateStartScale;
-                approachDifferentScale.Current.Value = settings.ApproachDifferentScale;
-                noScopeHiddenComboCount.Current.Value = settings.NoScopeHiddenComboCount;
-                magnetisedAttractionStrength.Current.Value = settings.MagnetisedAttractionStrength;
-                repelRepulsionStrength.Current.Value = settings.RepelRepulsionStrength;
-                depthMaxDepth.Current.Value = settings.DepthMaxDepth;
-                bloomMaxSizeComboCount.Current.Value = settings.BloomMaxSizeComboCount;
-                bloomMaxCursorSize.Current.Value = settings.BloomMaxCursorSize;
-                barrelRollSpinSpeed.Current.Value = settings.BarrelRollSpinSpeed;
-                mutedMuteComboCount.Current.Value = settings.MutedMuteComboCount;
+                wiggleStrength.Current.Value = formatFloat(settings.WiggleStrength);
+                growStartScale.Current.Value = formatFloat(settings.GrowStartScale);
+                deflateStartScale.Current.Value = formatFloat(settings.DeflateStartScale);
+                approachDifferentScale.Current.Value = formatFloat(settings.ApproachDifferentScale);
+                noScopeHiddenComboCount.Current.Value = settings.NoScopeHiddenComboCount.ToString(CultureInfo.InvariantCulture);
+                magnetisedAttractionStrength.Current.Value = formatFloat(settings.MagnetisedAttractionStrength);
+                repelRepulsionStrength.Current.Value = formatFloat(settings.RepelRepulsionStrength);
+                depthMaxDepth.Current.Value = formatFloat(settings.DepthMaxDepth);
+                bloomMaxSizeComboCount.Current.Value = settings.BloomMaxSizeComboCount.ToString(CultureInfo.InvariantCulture);
+                bloomMaxCursorSize.Current.Value = formatFloat(settings.BloomMaxCursorSize);
+                barrelRollSpinSpeed.Current.Value = settings.BarrelRollSpinSpeed.ToString(CultureInfo.InvariantCulture);
+                mutedMuteComboCount.Current.Value = settings.MutedMuteComboCount.ToString(CultureInfo.InvariantCulture);
             }
 
             updatingControls = false;
