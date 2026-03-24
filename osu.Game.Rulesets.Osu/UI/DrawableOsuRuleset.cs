@@ -62,9 +62,7 @@ namespace osu.Game.Rulesets.Osu.UI
                 });
             }
 
-            // Fun mods overlay requires player context (score processor, player state) - only add in gameplay mode
-            // The editor uses DrawableOsuEditorRuleset which doesn't have replayPlayer
-            if (replayPlayer != null && SectionGimmickFunModsOverlay.HasAnyForcedFunMods(Beatmap))
+            if (SectionGimmickFunModsOverlay.HasAnyForcedFunMods(Beatmap))
             {
                 Overlays.Add(new SectionGimmickFunModsOverlay(Beatmap, this, Mods)
                 {
