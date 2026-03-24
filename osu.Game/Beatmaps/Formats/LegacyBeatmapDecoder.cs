@@ -10,6 +10,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Logging;
 using osu.Game.Audio;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Beatmaps.Timing;
@@ -242,6 +243,10 @@ namespace osu.Game.Beatmaps.Formats
 
                 case Section.BeatmapSectionGimmicks:
                     handleSectionGimmick(line);
+                    return;
+
+                case Section.BeatmapHitObjectGimmicks:
+                    handleHitObjectGimmick(line);
                     return;
             }
 
@@ -698,6 +703,48 @@ namespace osu.Game.Beatmaps.Formats
             }
 
             beatmap.SectionGimmicks.Sections.Add(section);
+
+            static bool parseBool(string boolValue)
+                => boolValue == "1" || boolValue.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void handleHitObjectGimmick(string line)
+        {
+            string[] split = line.Split(',', 3);
+            if (split.Length < 2)
+                return;
+
+            if (!double.TryParse(split[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double startTime))
+                return;
+
+            if (!int.TryParse(split[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int comboIndexWithOffsets))
+                return;
+
+            var entry = new HitObjectGimmickEntry
+            {
+                StartTime = startTime,
+                ComboIndexWithOffsets = comboIndexWithOffsets,
+                Settings = new HitObjectGimmickSettings(),
+            };
+
+            if (split.Length == 3 && !string.IsNullOrEmpty(split[2]))
+            {
+                foreach (string kv in split[2].Split('|'))
+                {
+                    var pair = SplitKeyVal(kv, '=');
+                    string key = pair.Key;
+                    string value = pair.Value;
+
+                    switch (key)
+                    {
+                        case "ForceNoApproachCircle":
+                            entry.Settings.ForceNoApproachCircle = parseBool(value);
+                            break;
+                    }
+                }
+            }
+
+            beatmap.HitObjectGimmicks.Entries.Add(entry);
 
             static bool parseBool(string boolValue)
                 => boolValue == "1" || boolValue.Equals("true", StringComparison.OrdinalIgnoreCase);

@@ -7,6 +7,7 @@ using System.Linq;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
@@ -58,12 +59,15 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
         private static void applySectionForcedMods(IBeatmap beatmap)
         {
+            var objectNoApproachLookup = createNoApproachObjectLookup(beatmap.HitObjectGimmicks);
+
             if (beatmap.SectionGimmicks.Sections.Count == 0)
             {
                 foreach (var hitObject in beatmap.HitObjects.OfType<OsuHitObject>())
                 {
                     setHiddenFlagRecursive(hitObject, false);
-                    setNoApproachCircleFlagRecursive(hitObject, false);
+                    bool objectNoApproach = hasObjectNoApproachOverride(hitObject, objectNoApproachLookup);
+                    setNoApproachCircleFlagRecursive(hitObject, objectNoApproach);
                     restoreFromHardRockTransforms(hitObject);
                 }
 
@@ -78,7 +82,10 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 // Always write the flag so drawable layer can reliably detect section-forced HD.
                 // Also propagate to nested objects because Hidden is applied per drawable hitobject.
                 setHiddenFlagRecursive(hitObject, section?.Settings.ForceHidden == true);
-                setNoApproachCircleFlagRecursive(hitObject, section?.Settings.ForceNoApproachCircle == true);
+
+                bool objectNoApproach = hasObjectNoApproachOverride(hitObject, objectNoApproachLookup);
+                bool sectionNoApproach = section?.Settings.ForceNoApproachCircle == true;
+                setNoApproachCircleFlagRecursive(hitObject, sectionNoApproach || objectNoApproach);
 
                 if (section?.Settings == null)
                 {
@@ -107,7 +114,21 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
                 // Force Flashlight is visual effect handled by SectionGimmickFlashlightOverlay.
             }
+
         }
+
+        private static Dictionary<(double StartTime, int ComboIndexWithOffsets), bool> createNoApproachObjectLookup(BeatmapHitObjectGimmicks gimmicks)
+        {
+            var lookup = new Dictionary<(double, int), bool>();
+
+            foreach (var entry in gimmicks.Entries)
+                lookup[(entry.StartTime, entry.ComboIndexWithOffsets)] = entry.Settings?.ForceNoApproachCircle == true;
+
+            return lookup;
+        }
+
+        private static bool hasObjectNoApproachOverride(OsuHitObject hitObject, Dictionary<(double StartTime, int ComboIndexWithOffsets), bool> lookup)
+            => lookup.TryGetValue((hitObject.StartTime, hitObject.ComboIndexWithOffsets), out bool enabled) && enabled;
 
         private static void setHiddenFlagRecursive(OsuHitObject osuObject, bool hidden)
         {

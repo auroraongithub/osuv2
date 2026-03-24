@@ -86,6 +86,14 @@ namespace osu.Game.Screens.Edit.Components.Timelines.Summary
                     Height = 0.7f,
                     Depth = -5,
                 },
+                new HitObjectGimmickPart
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    RelativeSizeAxes = Axes.Both,
+                    Height = 0.6f,
+                    Depth = -6,
+                },
                 new PreviewTimePart
                 {
                     Anchor = Anchor.Centre,

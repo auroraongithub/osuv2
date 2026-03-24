@@ -180,6 +180,7 @@ namespace osu.Game.Beatmaps.Formats
             CatchTheBeat,
             Mania,
             BeatmapSectionGimmicks,
+            BeatmapHitObjectGimmicks,
         }
 
         internal class LegacySampleControlPoint : SampleControlPoint, IEquatable<LegacySampleControlPoint>

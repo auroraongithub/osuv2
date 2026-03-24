@@ -400,5 +400,52 @@ SliderTickRate: 1
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.ForceNoApproachCircle, Is.True);
         }
+
+        [Test]
+        public void TestDecodeHitObjectGimmicksForceNoApproachCircle()
+        {
+            const string content = """
+osu file format v128
+
+[General]
+AudioFilename: test.mp3
+Mode: 0
+
+[Metadata]
+Title: Test
+Artist: Test
+Creator: Test
+Version: Test
+
+[Difficulty]
+HPDrainRate: 5
+CircleSize: 4
+OverallDifficulty: 8
+ApproachRate: 8
+SliderMultiplier: 1.4
+SliderTickRate: 1
+
+[TimingPoints]
+0,500,4,2,0,100,1,0
+
+[HitObjects]
+256,192,1000,1,0,0:0:0:0:
+
+[BeatmapHitObjectGimmicks]
+1000,0,ForceNoApproachCircle=True
+""";
+
+            using var ms = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+            using var reader = new LineBufferedReader(ms);
+            var decoder = Decoder.GetDecoder<Beatmap>(reader);
+            var beatmap = decoder.Decode(reader);
+
+            Assert.That(beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
+            var entry = beatmap.HitObjectGimmicks.Entries[0];
+
+            Assert.That(entry.StartTime, Is.EqualTo(1000));
+            Assert.That(entry.ComboIndexWithOffsets, Is.EqualTo(0));
+            Assert.That(entry.Settings.ForceNoApproachCircle, Is.True);
+        }
     }
 }

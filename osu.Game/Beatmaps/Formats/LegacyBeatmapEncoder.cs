@@ -10,6 +10,7 @@ using System.Text;
 using osu.Framework.Graphics.Colour;
 using osu.Game.Audio;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Objects;
@@ -78,6 +79,9 @@ namespace osu.Game.Beatmaps.Formats
 
             writer.WriteLine();
             handleSectionGimmicks(writer);
+
+            writer.WriteLine();
+            handleHitObjectGimmicks(writer);
         }
 
         private void handleGeneral(TextWriter writer)
@@ -409,6 +413,22 @@ namespace osu.Game.Beatmaps.Formats
             }
         }
 
+        private void handleHitObjectGimmicks(TextWriter writer)
+        {
+            var hitObjectGimmicks = beatmap.HitObjectGimmicks;
+
+            if (hitObjectGimmicks == null || hitObjectGimmicks.Entries.Count == 0)
+                return;
+
+            writer.WriteLine("[BeatmapHitObjectGimmicks]");
+
+            foreach (var entry in hitObjectGimmicks.Entries.OrderBy(e => e.StartTime).ThenBy(e => e.ComboIndexWithOffsets))
+            {
+                var pairs = serialiseHitObjectSettings(entry.Settings);
+                writer.WriteLine($"{entry.StartTime},{entry.ComboIndexWithOffsets},{string.Join('|', pairs)}");
+            }
+        }
+
         private static IEnumerable<string> serialiseSettings(SectionGimmickSettings settings)
         {
             if (settings.EnableHPGimmick) yield return "EnableHPGimmick=True";
@@ -455,6 +475,11 @@ namespace osu.Game.Beatmaps.Formats
                 colorArgb |= (uint)(settings.DisplayColor.B * 255) << 24;
                 yield return $"DisplayColor={colorArgb}";
             }
+        }
+
+        private static IEnumerable<string> serialiseHitObjectSettings(HitObjectGimmickSettings settings)
+        {
+            if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
         }
 
         private void handleHitObject(TextWriter writer, HitObject hitObject)

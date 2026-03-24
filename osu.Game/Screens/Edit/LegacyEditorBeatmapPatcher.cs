@@ -14,6 +14,7 @@ using DiffPlex.Model;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.Formats;
@@ -49,6 +50,7 @@ namespace osu.Game.Screens.Edit
             processBreaks(() => newBeatmap ??= readBeatmap(newState));
             processBookmarks(() => newBeatmap ??= readBeatmap(newState));
             processSectionGimmicks(() => newBeatmap ??= readBeatmap(newState));
+            processHitObjectGimmicks(() => newBeatmap ??= readBeatmap(newState));
             processHitObjectLocalData(() => newBeatmap ??= readBeatmap(newState));
             editorBeatmap.EndChange();
         }
@@ -56,6 +58,11 @@ namespace osu.Game.Screens.Edit
         private void processSectionGimmicks(Func<IBeatmap> getNewBeatmap)
         {
             editorBeatmap.SectionGimmicks = cloneGimmicks(getNewBeatmap().SectionGimmicks ?? new BeatmapSectionGimmicks());
+        }
+
+        private void processHitObjectGimmicks(Func<IBeatmap> getNewBeatmap)
+        {
+            editorBeatmap.HitObjectGimmicks = cloneHitObjectGimmicks(getNewBeatmap().HitObjectGimmicks ?? new BeatmapHitObjectGimmicks());
         }
 
         private void processTimingPoints(Func<IBeatmap> getNewBeatmap)
@@ -296,6 +303,25 @@ namespace osu.Game.Screens.Edit
                                 SectionName = settings.SectionName,
                                 DisplayColor = settings.DisplayColor,
                             }
+                    };
+                }).ToList(),
+            };
+
+        private static BeatmapHitObjectGimmicks cloneHitObjectGimmicks(BeatmapHitObjectGimmicks source)
+            => new BeatmapHitObjectGimmicks
+            {
+                Entries = source.Entries.Select(e =>
+                {
+                    var settings = e.Settings ?? new HitObjectGimmickSettings();
+
+                    return new HitObjectGimmickEntry
+                    {
+                        StartTime = e.StartTime,
+                        ComboIndexWithOffsets = e.ComboIndexWithOffsets,
+                        Settings = new HitObjectGimmickSettings
+                        {
+                            ForceNoApproachCircle = settings.ForceNoApproachCircle,
+                        }
                     };
                 }).ToList(),
             };

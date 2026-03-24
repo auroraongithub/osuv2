@@ -84,6 +84,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         [Cached]
         protected readonly SectionGimmickToolboxGroup SectionGimmickToolboxGroup = new SectionGimmickToolboxGroup();
 
+        [Cached]
+        protected readonly HitObjectGimmickToolboxGroup HitObjectGimmickToolboxGroup = new HitObjectGimmickToolboxGroup();
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -123,6 +126,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                     },
                     new GenerateToolboxGroup(),
                     FreehandSliderToolboxGroup,
+                    HitObjectGimmickToolboxGroup,
                     SectionGimmickToolboxGroup,
                 }
             );

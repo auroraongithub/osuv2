@@ -14,6 +14,7 @@ using osu.Framework.Lists;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.Formats;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Beatmaps.Timing;
@@ -291,6 +292,12 @@ namespace osu.Game.Screens.Edit
         {
             get => PlayableBeatmap.SectionGimmicks;
             set => PlayableBeatmap.SectionGimmicks = value;
+        }
+
+        public BeatmapHitObjectGimmicks HitObjectGimmicks
+        {
+            get => PlayableBeatmap.HitObjectGimmicks;
+            set => PlayableBeatmap.HitObjectGimmicks = value;
         }
 
         public int BeatmapVersion { get; set; }

@@ -3,6 +3,7 @@
 
 using NUnit.Framework;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
@@ -569,6 +570,41 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             Assert.That(inside.ForceNoApproachCircle, Is.True);
             Assert.That(outside.ForceNoApproachCircle, Is.False);
+        }
+
+        [Test]
+        public void TestForceNoApproachCircleFlagsAppliedBySelectedObjectGimmick()
+        {
+            var target = new HitCircle { StartTime = 500 };
+            var other = new HitCircle { StartTime = 500, ComboOffset = 1, NewCombo = true };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(target);
+            beatmap.HitObjects.Add(other);
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            target.UpdateComboInformation(null);
+            other.UpdateComboInformation(target);
+
+            beatmap.HitObjectGimmicks.Entries.Add(new HitObjectGimmickEntry
+            {
+                StartTime = target.StartTime,
+                ComboIndexWithOffsets = target.ComboIndexWithOffsets,
+                Settings = new HitObjectGimmickSettings
+                {
+                    ForceNoApproachCircle = true,
+                },
+            });
+
+            processor.PostProcess();
+
+            Assert.That(target.ForceNoApproachCircle, Is.True);
+            Assert.That(other.ForceNoApproachCircle, Is.False);
         }
     }
 }

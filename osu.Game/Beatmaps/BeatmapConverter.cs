@@ -87,6 +87,7 @@ namespace osu.Game.Beatmaps
             beatmap.CountdownOffset = original.CountdownOffset;
             beatmap.Bookmarks = original.Bookmarks;
             beatmap.SectionGimmicks = original.SectionGimmicks;
+            beatmap.HitObjectGimmicks = original.HitObjectGimmicks;
             beatmap.BeatmapVersion = original.BeatmapVersion;
 
             return beatmap;

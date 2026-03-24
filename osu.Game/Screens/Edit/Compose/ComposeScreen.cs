@@ -99,6 +99,15 @@ namespace osu.Game.Screens.Edit.Compose
                 Depth = -200,
             };
 
+            TimelineHitObjectGimmickLineDisplay objectGimmickDisplay = new TimelineHitObjectGimmickLineDisplay
+            {
+                RelativeSizeAxes = Axes.Both,
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                Alpha = 1f,
+                Depth = -210,
+            };
+
             return wrapSkinnableContent(new Container
             {
                 RelativeSizeAxes = Axes.Both,
@@ -107,10 +116,12 @@ namespace osu.Game.Screens.Edit.Compose
                     // We want to display this below hitobjects to better expose placement objects visually.
                     // It needs to be above the blueprint container to handle drags on breaks though.
                     breakDisplay.CreateProxy(),
+                    objectGimmickDisplay.CreateProxy(),
                     sectionBoundaryDisplay.CreateProxy(),
                     sectionGimmickDisplay.CreateProxy(),
                     new TimelineBlueprintContainer(composer),
                     breakDisplay,
+                    objectGimmickDisplay,
                     sectionBoundaryDisplay,
                     sectionGimmickDisplay,
                 }

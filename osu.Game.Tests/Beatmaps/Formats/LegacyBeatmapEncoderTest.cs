@@ -425,6 +425,39 @@ namespace osu.Game.Tests.Beatmaps.Formats
         }
 
         [Test]
+        public void TestEncodeDecodeHitObjectGimmicksPersistsForceNoApproachCircle()
+        {
+            var beatmap = new Beatmap
+            {
+                HitObjectGimmicks = new osu.Game.Beatmaps.HitObjectGimmicks.BeatmapHitObjectGimmicks
+                {
+                    Entries =
+                    {
+                        new osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickEntry
+                        {
+                            StartTime = 1000,
+                            ComboIndexWithOffsets = 2,
+                            Settings = new osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickSettings
+                            {
+                                ForceNoApproachCircle = true,
+                            }
+                        }
+                    }
+                }
+            };
+
+            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+
+            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
+
+            var entry = decodedAfterEncode.beatmap.HitObjectGimmicks.Entries[0];
+            Assert.That(entry.StartTime, Is.EqualTo(1000).Within(0.001));
+            Assert.That(entry.ComboIndexWithOffsets, Is.EqualTo(2));
+            Assert.That(entry.Settings.ForceNoApproachCircle, Is.True);
+        }
+
+        [Test]
         public void TestEncodeCustomSampleBanks()
         {
             var beatmap = new Beatmap
