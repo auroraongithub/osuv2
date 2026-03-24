@@ -119,6 +119,31 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceDepth = null!;
         private FormCheckBox forceBloom = null!;
 
+        // Fun mod adjustable value controls (shown when corresponding mod is enabled)
+        private FillFlowContainer wiggleSettings = null!;
+        private FormSliderBar<float> wiggleStrength = null!;
+        private FillFlowContainer growSettings = null!;
+        private FormSliderBar<float> growStartScale = null!;
+        private FillFlowContainer deflateSettings = null!;
+        private FormSliderBar<float> deflateStartScale = null!;
+        private FillFlowContainer approachDifferentSettings = null!;
+        private FormSliderBar<float> approachDifferentScale = null!;
+        private FillFlowContainer noScopeSettings = null!;
+        private FormSliderBar<int> noScopeHiddenComboCount = null!;
+        private FillFlowContainer magnetisedSettings = null!;
+        private FormSliderBar<float> magnetisedAttractionStrength = null!;
+        private FillFlowContainer repelSettings = null!;
+        private FormSliderBar<float> repelRepulsionStrength = null!;
+        private FillFlowContainer depthSettings = null!;
+        private FormSliderBar<float> depthMaxDepth = null!;
+        private FillFlowContainer bloomSettings = null!;
+        private FormSliderBar<int> bloomMaxSizeComboCount = null!;
+        private FormSliderBar<float> bloomMaxCursorSize = null!;
+        private FillFlowContainer barrelRollSettings = null!;
+        private FormSliderBar<double> barrelRollSpinSpeed = null!;
+        private FillFlowContainer mutedSettings = null!;
+        private FormSliderBar<int> mutedMuteComboCount = null!;
+
         private FormEnumDropdown<SectionGimmickApplyScope> applyScopeDropdown = null!;
 
         private OsuSpriteText validationStatus = null!;
@@ -500,6 +525,209 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         Caption = "Force Bloom (BM)",
                                     },
+
+                                    // Wiggle settings (shown when ForceWiggle is enabled)
+                                    wiggleSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            wiggleStrength = new FormSliderBar<float>
+                                            {
+                                                Caption = "Strength",
+                                                Current = new BindableFloat(1) { MinValue = 0.1f, MaxValue = 2f, Precision = 0.1f },
+                                            },
+                                        }
+                                    },
+
+                                    // Grow settings
+                                    growSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            growStartScale = new FormSliderBar<float>
+                                            {
+                                                Caption = "Start Scale",
+                                                Current = new BindableFloat(0.5f) { MinValue = 0f, MaxValue = 0.99f, Precision = 0.01f },
+                                            },
+                                        }
+                                    },
+
+                                    // Deflate settings
+                                    deflateSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            deflateStartScale = new FormSliderBar<float>
+                                            {
+                                                Caption = "Start Scale",
+                                                Current = new BindableFloat(2) { MinValue = 1f, MaxValue = 25f, Precision = 0.1f },
+                                            },
+                                        }
+                                    },
+
+                                    // ApproachDifferent settings
+                                    approachDifferentSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            approachDifferentScale = new FormSliderBar<float>
+                                            {
+                                                Caption = "Initial Size",
+                                                Current = new BindableFloat(4) { MinValue = 1.5f, MaxValue = 10f, Precision = 0.1f },
+                                            },
+                                        }
+                                    },
+
+                                    // NoScope settings
+                                    noScopeSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            noScopeHiddenComboCount = new FormSliderBar<int>
+                                            {
+                                                Caption = "Hidden Combo Count",
+                                                Current = new BindableInt(10) { MinValue = 0, MaxValue = 50 },
+                                            },
+                                        }
+                                    },
+
+                                    // Magnetised settings
+                                    magnetisedSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            magnetisedAttractionStrength = new FormSliderBar<float>
+                                            {
+                                                Caption = "Attraction Strength",
+                                                Current = new BindableFloat(0.5f) { MinValue = 0.05f, MaxValue = 1f, Precision = 0.05f },
+                                            },
+                                        }
+                                    },
+
+                                    // Repel settings
+                                    repelSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            repelRepulsionStrength = new FormSliderBar<float>
+                                            {
+                                                Caption = "Repulsion Strength",
+                                                Current = new BindableFloat(0.5f) { MinValue = 0.05f, MaxValue = 1f, Precision = 0.05f },
+                                            },
+                                        }
+                                    },
+
+                                    // Depth settings
+                                    depthSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            depthMaxDepth = new FormSliderBar<float>
+                                            {
+                                                Caption = "Max Depth",
+                                                Current = new BindableFloat(100) { MinValue = 50f, MaxValue = 200f, Precision = 10f },
+                                            },
+                                        }
+                                    },
+
+                                    // Bloom settings
+                                    bloomSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            bloomMaxSizeComboCount = new FormSliderBar<int>
+                                            {
+                                                Caption = "Max Size Combo",
+                                                Current = new BindableInt(50) { MinValue = 5, MaxValue = 100 },
+                                            },
+                                            bloomMaxCursorSize = new FormSliderBar<float>
+                                            {
+                                                Caption = "Max Cursor Size",
+                                                Current = new BindableFloat(10f) { MinValue = 5f, MaxValue = 15f, Precision = 0.5f },
+                                            },
+                                        }
+                                    },
+
+                                    // BarrelRoll settings
+                                    barrelRollSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            barrelRollSpinSpeed = new FormSliderBar<double>
+                                            {
+                                                Caption = "Spin Speed (RPM)",
+                                                Current = new BindableDouble(0.5) { MinValue = 0.02, MaxValue = 12, Precision = 0.01 },
+                                            },
+                                        }
+                                    },
+
+                                    // Muted settings
+                                    mutedSettings = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Margin = new MarginPadding { Left = 20 },
+                                        Children = new Drawable[]
+                                        {
+                                            mutedMuteComboCount = new FormSliderBar<int>
+                                            {
+                                                Caption = "Mute Combo Count",
+                                                Current = new BindableInt(100) { MinValue = 0, MaxValue = 500 },
+                                            },
+                                        }
+                                    },
                                 }
                             },
 
@@ -627,7 +855,46 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceBubbles.Current.BindValueChanged(v => mutateSetting(s => s.ForceBubbles = v.NewValue));
             forceSynesthesia.Current.BindValueChanged(v => mutateSetting(s => s.ForceSynesthesia = v.NewValue));
             forceDepth.Current.BindValueChanged(v => mutateSetting(s => s.ForceDepth = v.NewValue));
-            forceBloom.Current.BindValueChanged(v => mutateSetting(s => s.ForceBloom = v.NewValue));
+            forceBloom.Current.BindValueChanged(v =>
+            {
+                mutateSetting(s => s.ForceBloom = v.NewValue);
+                updateFunModSettingsVisibility();
+            });
+
+            // Fun mod settings bindings - also toggle visibility when corresponding checkbox changes
+            forceWiggle.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            wiggleStrength.Current.BindValueChanged(v => mutateSetting(s => s.WiggleStrength = v.NewValue));
+
+            forceGrow.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            growStartScale.Current.BindValueChanged(v => mutateSetting(s => s.GrowStartScale = v.NewValue));
+
+            forceDeflate.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            deflateStartScale.Current.BindValueChanged(v => mutateSetting(s => s.DeflateStartScale = v.NewValue));
+
+            forceApproachDifferent.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            approachDifferentScale.Current.BindValueChanged(v => mutateSetting(s => s.ApproachDifferentScale = v.NewValue));
+
+            forceNoScope.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            noScopeHiddenComboCount.Current.BindValueChanged(v => mutateSetting(s => s.NoScopeHiddenComboCount = v.NewValue));
+
+            forceMagnetised.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            magnetisedAttractionStrength.Current.BindValueChanged(v => mutateSetting(s => s.MagnetisedAttractionStrength = v.NewValue));
+
+            forceRepel.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            repelRepulsionStrength.Current.BindValueChanged(v => mutateSetting(s => s.RepelRepulsionStrength = v.NewValue));
+
+            forceDepth.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            depthMaxDepth.Current.BindValueChanged(v => mutateSetting(s => s.DepthMaxDepth = v.NewValue));
+
+            forceBloom.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            bloomMaxSizeComboCount.Current.BindValueChanged(v => mutateSetting(s => s.BloomMaxSizeComboCount = v.NewValue));
+            bloomMaxCursorSize.Current.BindValueChanged(v => mutateSetting(s => s.BloomMaxCursorSize = v.NewValue));
+
+            forceBarrelRoll.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            barrelRollSpinSpeed.Current.BindValueChanged(v => mutateSetting(s => s.BarrelRollSpinSpeed = v.NewValue));
+
+            forceMuted.Current.BindValueChanged(v => updateFunModSettingsVisibility());
+            mutedMuteComboCount.Current.BindValueChanged(v => mutateSetting(s => s.MutedMuteComboCount = v.NewValue));
         }
 
         private void mutateSetting(Action<SectionGimmickSettings> settingMutation)
@@ -757,12 +1024,27 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceSynesthesia.Current.Value = settings.ForceSynesthesia;
                 forceDepth.Current.Value = settings.ForceDepth;
                 forceBloom.Current.Value = settings.ForceBloom;
+
+                // Fun mod adjustable values
+                wiggleStrength.Current.Value = settings.WiggleStrength;
+                growStartScale.Current.Value = settings.GrowStartScale;
+                deflateStartScale.Current.Value = settings.DeflateStartScale;
+                approachDifferentScale.Current.Value = settings.ApproachDifferentScale;
+                noScopeHiddenComboCount.Current.Value = settings.NoScopeHiddenComboCount;
+                magnetisedAttractionStrength.Current.Value = settings.MagnetisedAttractionStrength;
+                repelRepulsionStrength.Current.Value = settings.RepelRepulsionStrength;
+                depthMaxDepth.Current.Value = settings.DepthMaxDepth;
+                bloomMaxSizeComboCount.Current.Value = settings.BloomMaxSizeComboCount;
+                bloomMaxCursorSize.Current.Value = settings.BloomMaxCursorSize;
+                barrelRollSpinSpeed.Current.Value = settings.BarrelRollSpinSpeed;
+                mutedMuteComboCount.Current.Value = settings.MutedMuteComboCount;
             }
 
             updatingControls = false;
 
             updateGroupVisibility();
             updateValidationState();
+            updateFunModSettingsVisibility();
         }
 
         private void updateGroupVisibility()
@@ -784,6 +1066,44 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             setGradualFinishTimeButton.FadeTo(enableGradualDifficultyChange.Current.Value ? 1 : 0, 200, Easing.OutQuint);
             setGradualFinishTimeButton.AlwaysPresent = enableGradualDifficultyChange.Current.Value;
+        }
+
+        private void updateFunModSettingsVisibility()
+        {
+            if (updatingControls) return;
+
+            wiggleSettings.FadeTo(forceWiggle.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            wiggleSettings.AlwaysPresent = forceWiggle.Current.Value;
+
+            growSettings.FadeTo(forceGrow.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            growSettings.AlwaysPresent = forceGrow.Current.Value;
+
+            deflateSettings.FadeTo(forceDeflate.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            deflateSettings.AlwaysPresent = forceDeflate.Current.Value;
+
+            approachDifferentSettings.FadeTo(forceApproachDifferent.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            approachDifferentSettings.AlwaysPresent = forceApproachDifferent.Current.Value;
+
+            noScopeSettings.FadeTo(forceNoScope.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            noScopeSettings.AlwaysPresent = forceNoScope.Current.Value;
+
+            magnetisedSettings.FadeTo(forceMagnetised.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            magnetisedSettings.AlwaysPresent = forceMagnetised.Current.Value;
+
+            repelSettings.FadeTo(forceRepel.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            repelSettings.AlwaysPresent = forceRepel.Current.Value;
+
+            depthSettings.FadeTo(forceDepth.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            depthSettings.AlwaysPresent = forceDepth.Current.Value;
+
+            bloomSettings.FadeTo(forceBloom.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            bloomSettings.AlwaysPresent = forceBloom.Current.Value;
+
+            barrelRollSettings.FadeTo(forceBarrelRoll.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            barrelRollSettings.AlwaysPresent = forceBarrelRoll.Current.Value;
+
+            mutedSettings.FadeTo(forceMuted.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            mutedSettings.AlwaysPresent = forceMuted.Current.Value;
         }
 
         private void updateValidationState()

@@ -483,6 +483,18 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceSynesthesia) yield return "ForceSynesthesia=True";
             if (settings.ForceDepth) yield return "ForceDepth=True";
             if (settings.ForceBloom) yield return "ForceBloom=True";
+            if (settings.WiggleStrength != 1.0f) yield return $"WiggleStrength={settings.WiggleStrength}";
+            if (settings.GrowStartScale != 0.5f) yield return $"GrowStartScale={settings.GrowStartScale}";
+            if (settings.DeflateStartScale != 2.0f) yield return $"DeflateStartScale={settings.DeflateStartScale}";
+            if (settings.ApproachDifferentScale != 4.0f) yield return $"ApproachDifferentScale={settings.ApproachDifferentScale}";
+            if (settings.NoScopeHiddenComboCount != 10) yield return $"NoScopeHiddenComboCount={settings.NoScopeHiddenComboCount}";
+            if (settings.MagnetisedAttractionStrength != 0.5f) yield return $"MagnetisedAttractionStrength={settings.MagnetisedAttractionStrength}";
+            if (settings.RepelRepulsionStrength != 0.5f) yield return $"RepelRepulsionStrength={settings.RepelRepulsionStrength}";
+            if (settings.DepthMaxDepth != 100.0f) yield return $"DepthMaxDepth={settings.DepthMaxDepth}";
+            if (settings.BloomMaxSizeComboCount != 50) yield return $"BloomMaxSizeComboCount={settings.BloomMaxSizeComboCount}";
+            if (settings.BloomMaxCursorSize != 10.0f) yield return $"BloomMaxCursorSize={settings.BloomMaxCursorSize}";
+            if (settings.BarrelRollSpinSpeed != 0.5) yield return $"BarrelRollSpinSpeed={settings.BarrelRollSpinSpeed}";
+            if (settings.MutedMuteComboCount != 100) yield return $"MutedMuteComboCount={settings.MutedMuteComboCount}";
 
             if (!string.IsNullOrEmpty(settings.SectionName)) yield return $"SectionName={settings.SectionName}";
             if (settings.DisplayColor != Color4.White)

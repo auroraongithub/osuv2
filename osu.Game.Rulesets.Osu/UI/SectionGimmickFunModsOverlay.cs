@@ -138,25 +138,89 @@ namespace osu.Game.Rulesets.Osu.UI
 
         private void initialiseForcedMods()
         {
+            // Get the first section that has each fun mod enabled to get default settings
+            SectionGimmickSettings? getFirstSectionWithMod(Func<SectionGimmickSettings, bool> predicate)
+                => gimmicks.Sections.FirstOrDefault(s => predicate(s.Settings))?.Settings;
+
             addIfForced(new OsuModTransform(), s => s.ForceTransform);
-            addIfForced(new OsuModWiggle(), s => s.ForceWiggle);
+
+            var wiggleMod = new OsuModWiggle();
+            var wiggleSettings = getFirstSectionWithMod(s => s.ForceWiggle);
+            if (wiggleSettings != null)
+                wiggleMod.Strength.Value = wiggleSettings.WiggleStrength;
+            addIfForced(wiggleMod, s => s.ForceWiggle);
+
             addIfForced(new OsuModSpinIn(), s => s.ForceSpinIn);
-            addIfForced(new OsuModGrow(), s => s.ForceGrow);
-            addIfForced(new OsuModDeflate(), s => s.ForceDeflate);
-            addIfForced(new OsuModApproachDifferent(), s => s.ForceApproachDifferent);
+
+            var growMod = new OsuModGrow();
+            var growSettings = getFirstSectionWithMod(s => s.ForceGrow);
+            if (growSettings != null)
+                growMod.StartScale.Value = growSettings.GrowStartScale;
+            addIfForced(growMod, s => s.ForceGrow);
+
+            var deflateMod = new OsuModDeflate();
+            var deflateSettings = getFirstSectionWithMod(s => s.ForceDeflate);
+            if (deflateSettings != null)
+                deflateMod.StartScale.Value = deflateSettings.DeflateStartScale;
+            addIfForced(deflateMod, s => s.ForceDeflate);
+
+            var approachMod = new OsuModApproachDifferent();
+            var approachSettings = getFirstSectionWithMod(s => s.ForceApproachDifferent);
+            if (approachSettings != null)
+                approachMod.Scale.Value = approachSettings.ApproachDifferentScale;
+            addIfForced(approachMod, s => s.ForceApproachDifferent);
+
             addIfForced(new OsuModSynesthesia(), s => s.ForceSynesthesia);
             addIfForced(new OsuModBubbles(), s => s.ForceBubbles);
 
             // These mods rely on playfield-wide update loops and/or global beatmap adjustments,
             // so run them as global forced effects when present anywhere.
-            addIfForced(new OsuModBarrelRoll(), s => s.ForceBarrelRoll, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
-            addIfForced(new OsuModMuted(), s => s.ForceMuted, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
-            addIfForced(new OsuModNoScope(), s => s.ForceNoScope, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
-            addIfForced(new OsuModMagnetised(), s => s.ForceMagnetised, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
-            addIfForced(new OsuModRepel(), s => s.ForceRepel, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+            var barrelRollMod = new OsuModBarrelRoll();
+            var brSettings = getFirstSectionWithMod(s => s.ForceBarrelRoll);
+            if (brSettings != null)
+                barrelRollMod.SpinSpeed.Value = brSettings.BarrelRollSpinSpeed;
+            addIfForced(barrelRollMod, s => s.ForceBarrelRoll, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
+            var mutedMod = new OsuModMuted();
+            var mutedSettings = getFirstSectionWithMod(s => s.ForceMuted);
+            if (mutedSettings != null)
+                mutedMod.MuteComboCount.Value = mutedSettings.MutedMuteComboCount;
+            addIfForced(mutedMod, s => s.ForceMuted, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
+            var noScopeMod = new OsuModNoScope();
+            var nsSettings = getFirstSectionWithMod(s => s.ForceNoScope);
+            if (nsSettings != null)
+                noScopeMod.HiddenComboCount.Value = nsSettings.NoScopeHiddenComboCount;
+            addIfForced(noScopeMod, s => s.ForceNoScope, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
+            var magnetisedMod = new OsuModMagnetised();
+            var magSettings = getFirstSectionWithMod(s => s.ForceMagnetised);
+            if (magSettings != null)
+                magnetisedMod.AttractionStrength.Value = magSettings.MagnetisedAttractionStrength;
+            addIfForced(magnetisedMod, s => s.ForceMagnetised, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
+            var repelMod = new OsuModRepel();
+            var repelSettings = getFirstSectionWithMod(s => s.ForceRepel);
+            if (repelSettings != null)
+                repelMod.RepulsionStrength.Value = repelSettings.RepelRepulsionStrength;
+            addIfForced(repelMod, s => s.ForceRepel, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
             addIfForced(new OsuModFreezeFrame(), s => s.ForceFreezeFrame, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
-            addIfForced(new OsuModDepth(), s => s.ForceDepth, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
-            addIfForced(new OsuModBloom(), s => s.ForceBloom, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
+            var depthMod = new OsuModDepth();
+            var depthSettings = getFirstSectionWithMod(s => s.ForceDepth);
+            if (depthSettings != null)
+                depthMod.MaxDepth.Value = depthSettings.DepthMaxDepth;
+            addIfForced(depthMod, s => s.ForceDepth, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
+
+            var bloomMod = new OsuModBloom();
+            var bloomSettings = getFirstSectionWithMod(s => s.ForceBloom);
+            if (bloomSettings != null)
+            {
+                bloomMod.MaxSizeComboCount.Value = bloomSettings.BloomMaxSizeComboCount;
+                bloomMod.MaxCursorSize.Value = bloomSettings.BloomMaxCursorSize;
+            }
+            addIfForced(bloomMod, s => s.ForceBloom, applyToAllDrawables: true, alwaysUpdateWhenPresent: true);
         }
 
         private void addIfForced(Mod mod, Func<SectionGimmickSettings, bool> enabledPredicate, bool applyToAllDrawables = false, bool alwaysUpdateWhenPresent = false)

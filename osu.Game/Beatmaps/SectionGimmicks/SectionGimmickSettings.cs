@@ -63,6 +63,20 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public bool ForceDepth { get; set; }
         public bool ForceBloom { get; set; }
 
+        // Fun mod adjustable values
+        public float WiggleStrength { get; set; } = 1.0f;
+        public float GrowStartScale { get; set; } = 0.5f;
+        public float DeflateStartScale { get; set; } = 2.0f;
+        public float ApproachDifferentScale { get; set; } = 4.0f;
+        public int NoScopeHiddenComboCount { get; set; } = 10;
+        public float MagnetisedAttractionStrength { get; set; } = 0.5f;
+        public float RepelRepulsionStrength { get; set; } = 0.5f;
+        public float DepthMaxDepth { get; set; } = 100.0f;
+        public int BloomMaxSizeComboCount { get; set; } = 50;
+        public float BloomMaxCursorSize { get; set; } = 10.0f;
+        public double BarrelRollSpinSpeed { get; set; } = 0.5;
+        public int MutedMuteComboCount { get; set; } = 100;
+
         public string SectionName { get; set; } = string.Empty;
         public Color4 DisplayColor { get; set; } = Color4.White;
     }

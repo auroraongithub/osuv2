@@ -705,6 +705,18 @@ namespace osu.Game.Beatmaps.Formats
                         case "ForceSynesthesia": section.Settings.ForceSynesthesia = parseBool(value); break;
                         case "ForceDepth": section.Settings.ForceDepth = parseBool(value); break;
                         case "ForceBloom": section.Settings.ForceBloom = parseBool(value); break;
+                        case "WiggleStrength": section.Settings.WiggleStrength = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "GrowStartScale": section.Settings.GrowStartScale = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "DeflateStartScale": section.Settings.DeflateStartScale = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "ApproachDifferentScale": section.Settings.ApproachDifferentScale = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "NoScopeHiddenComboCount": section.Settings.NoScopeHiddenComboCount = int.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "MagnetisedAttractionStrength": section.Settings.MagnetisedAttractionStrength = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "RepelRepulsionStrength": section.Settings.RepelRepulsionStrength = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "DepthMaxDepth": section.Settings.DepthMaxDepth = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "BloomMaxSizeComboCount": section.Settings.BloomMaxSizeComboCount = int.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "BloomMaxCursorSize": section.Settings.BloomMaxCursorSize = float.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "BarrelRollSpinSpeed": section.Settings.BarrelRollSpinSpeed = double.Parse(value, CultureInfo.InvariantCulture); break;
+                        case "MutedMuteComboCount": section.Settings.MutedMuteComboCount = int.Parse(value, CultureInfo.InvariantCulture); break;
                         case "SectionName": section.Settings.SectionName = value; break;
                         case "DisplayColor":
                             if (uint.TryParse(value, out uint colorArgb))
