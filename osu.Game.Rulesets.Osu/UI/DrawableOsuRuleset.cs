@@ -62,6 +62,14 @@ namespace osu.Game.Rulesets.Osu.UI
                 });
             }
 
+            if (SectionGimmickFunModsOverlay.HasAnyForcedFunMods(Beatmap))
+            {
+                Overlays.Add(new SectionGimmickFunModsOverlay(Beatmap, this, Mods)
+                {
+                    Depth = float.MinValue,
+                });
+            }
+
             // Section gimmick displays are now provided through the skin system
             // They will appear in MainHUDComponents container when enabled
             if (replayPlayer != null)
