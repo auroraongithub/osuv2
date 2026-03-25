@@ -13,6 +13,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
@@ -40,12 +41,12 @@ namespace osu.Game.Rulesets.Osu.Edit
         [Resolved(canBeNull: true)]
         private Editor? editor { get; set; }
 
-        private FormButton addSectionButton = null!;
-        private FormButton removeSectionButton = null!;
+        private RoundedButton addSectionButton = null!;
+        private RoundedButton removeSectionButton = null!;
         private CompositeDrawable sectionActionButtons = null!;
-        private FormButton copySettingsButton = null!;
-        private FormButton pasteSettingsButton = null!;
-        private FormButton applyScopeButton = null!;
+        private RoundedButton copySettingsButton = null!;
+        private RoundedButton pasteSettingsButton = null!;
+        private RoundedButton applyScopeButton = null!;
         private CompositeDrawable settingsActionButtons = null!;
 
         private SectionSelectionDropdown sectionDropdown = null!;
@@ -54,9 +55,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormNumberBox startTimeBox = null!;
         private FormNumberBox endTimeBox = null!;
 
-        private FormButton setStartHereButton = null!;
-        private FormButton setEndHereButton = null!;
-        private FormButton setGradualFinishTimeButton = null!;
+        private RoundedButton setStartHereButton = null!;
+        private RoundedButton setEndHereButton = null!;
+        private RoundedButton setGradualFinishTimeButton = null!;
 
         private FillFlowContainer selectedSectionFlow = null!;
 
@@ -152,18 +153,18 @@ namespace osu.Game.Rulesets.Osu.Edit
                         {
                             new Drawable[]
                             {
-                                addSectionButton = new FormButton
-                                {
-                                    Caption = string.Empty,
-                                    ButtonText = "Add",
-                                    Action = () => model.AddSection(clock.CurrentTime),
-                                },
-                                removeSectionButton = new FormButton
-                                {
-                                    Caption = string.Empty,
-                                    ButtonText = "Remove",
-                                    Action = () => model.RemoveSelectedSection(),
-                                },
+                            addSectionButton = new RoundedButton
+                            {
+                                Text = "Add",
+                                RelativeSizeAxes = Axes.X,
+                                Action = () => model.AddSection(clock.CurrentTime),
+                            },
+                            removeSectionButton = new RoundedButton
+                            {
+                                Text = "Remove",
+                                RelativeSizeAxes = Axes.X,
+                                Action = () => model.RemoveSelectedSection(),
+                            },
                             }
                         }
                     },
@@ -186,29 +187,55 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 PlaceholderText = "e.g., Kiai time",
                                 TabbableContentContainer = this,
                             },
-                            startTimeBox = new FormNumberBox(allowDecimals: true)
+                            new GridContainer
                             {
-                                Caption = "Start (ms)",
-                                Current = { Value = "0" },
-                                TabbableContentContainer = this,
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        startTimeBox = new FormNumberBox(allowDecimals: true)
+                                        {
+                                            Caption = "Start (ms)",
+                                            Current = { Value = "0" },
+                                            TabbableContentContainer = this,
+                                        },
+                                        setStartHereButton = new RoundedButton
+                                        {
+                                            Text = "Use current time",
+                                            RelativeSizeAxes = Axes.X,
+                                            Action = () => model.SetSelectedStartTime(clock.CurrentTime),
+                                        },
+                                    }
+                                }
                             },
-                            setStartHereButton = new FormButton
+                            new GridContainer
                             {
-                                Caption = string.Empty,
-                                ButtonText = "Use current",
-                                Action = () => model.SetSelectedStartTime(clock.CurrentTime),
-                            },
-                            endTimeBox = new FormNumberBox(allowDecimals: true)
-                            {
-                                Caption = "End (ms, -1 map end)",
-                                Current = { Value = "-1" },
-                                TabbableContentContainer = this,
-                            },
-                            setEndHereButton = new FormButton
-                            {
-                                Caption = string.Empty,
-                                ButtonText = "Use current",
-                                Action = () => model.SetSelectedEndTime(clock.CurrentTime),
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        endTimeBox = new FormNumberBox(allowDecimals: true)
+                                        {
+                                            Caption = "End (ms, -1 map end)",
+                                            Current = { Value = "-1" },
+                                            TabbableContentContainer = this,
+                                        },
+                                        setEndHereButton = new RoundedButton
+                                        {
+                                            Text = "Use current time",
+                                            RelativeSizeAxes = Axes.X,
+                                            Action = () => model.SetSelectedEndTime(clock.CurrentTime),
+                                        },
+                                    }
+                                }
                             },
 
                             settingsActionButtons = new GridContainer
@@ -221,16 +248,16 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 {
                                     new Drawable[]
                                     {
-                                        copySettingsButton = new FormButton
+                                        copySettingsButton = new RoundedButton
                                         {
-                                            Caption = string.Empty,
-                                            ButtonText = "Copy",
+                                            Text = "Copy",
+                                            RelativeSizeAxes = Axes.X,
                                             Action = () => model.CopySelectedSettings(),
                                         },
-                                        pasteSettingsButton = new FormButton
+                                        pasteSettingsButton = new RoundedButton
                                         {
-                                            Caption = string.Empty,
-                                            ButtonText = "Paste",
+                                            Text = "Paste",
+                                            RelativeSizeAxes = Axes.X,
                                             Action = () => model.PasteSettingsTo(Array.Empty<int>()),
                                         },
                                     }
@@ -242,10 +269,10 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 Caption = "Apply scope",
                                 Current = { Value = SectionGimmickApplyScope.ThisDifficulty },
                             },
-                            applyScopeButton = new FormButton
+                            applyScopeButton = new RoundedButton
                             {
-                                Caption = string.Empty,
-                                ButtonText = "Apply",
+                                Text = "Apply",
+                                RelativeSizeAxes = Axes.X,
                                 Action = applyCurrentSettingsByScope,
                             },
 
@@ -463,16 +490,29 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         Caption = "Gradual change",
                                     },
-                                    gradualDifficultyChangeEndTime = new FormNumberBox(allowDecimals: true)
+                                    new GridContainer
                                     {
-                                        Caption = "Gradual finish time (ms)",
-                                        TabbableContentContainer = this,
-                                    },
-                                    setGradualFinishTimeButton = new FormButton
-                                    {
-                                        Caption = string.Empty,
-                                        ButtonText = "Use current",
-                                        Action = () => mutateSetting(s => s.GradualDifficultyChangeEndTimeMs = (float)clock.CurrentTime),
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                        ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                        Content = new[]
+                                        {
+                                            new Drawable[]
+                                            {
+                                                gradualDifficultyChangeEndTime = new FormNumberBox(allowDecimals: true)
+                                                {
+                                                    Caption = "Gradual finish time (ms)",
+                                                    TabbableContentContainer = this,
+                                                },
+                                                setGradualFinishTimeButton = new RoundedButton
+                                                {
+                                                    Text = "Use current time",
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Action = () => mutateSetting(s => s.GradualDifficultyChangeEndTimeMs = (float)clock.CurrentTime),
+                                                },
+                                            }
+                                        }
                                     },
                                     keepDifficultyOverridesAfterSection = new FormCheckBox
                                     {
