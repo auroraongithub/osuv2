@@ -90,8 +90,29 @@ namespace osu.Game.Screens.Edit.Compose
 
             mutate(sections =>
             {
+                var orderedBefore = sections.OrderBy(s => s.StartTime).ToList();
+                int removedIndex = orderedBefore.FindIndex(s => s.Id == selectedId);
+
+                if (removedIndex < 0)
+                    return sections.FirstOrDefault()?.Id ?? -1;
+
                 sections.RemoveAll(s => s.Id == selectedId);
-                return sections.FirstOrDefault()?.Id ?? -1;
+
+                var orderedAfter = sections.OrderBy(s => s.StartTime).ToList();
+
+                // Re-number section IDs to keep them contiguous after deletion.
+                for (int i = 0; i < orderedAfter.Count; i++)
+                    orderedAfter[i].Id = i;
+
+                sections.Clear();
+                sections.AddRange(orderedAfter);
+
+                if (orderedAfter.Count == 0)
+                    return -1;
+
+                // Select the previous section (or first remaining if deleted section was first).
+                int newSelectedIndex = Math.Clamp(removedIndex - 1, 0, orderedAfter.Count - 1);
+                return orderedAfter[newSelectedIndex].Id;
             });
         }
 

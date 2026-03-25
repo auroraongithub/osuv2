@@ -9,11 +9,14 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets.Edit;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Compose;
 using osuTK;
@@ -101,6 +104,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         private OsuSpriteText validationStatus = null!;
 
         private bool updatingControls;
+        private readonly BindableList<HitObject> selectedHitObjects = new BindableList<HitObject>();
 
         public SectionGimmickToolboxGroup()
             : base("Section gimmicks")
@@ -410,6 +414,9 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private void bindModelEvents()
         {
+            selectedHitObjects.BindTo(editorBeatmap.SelectedHitObjects);
+            selectedHitObjects.BindCollectionChanged((_, _) => trySelectSectionFromCurrentObjectSelection(), true);
+
             model.Sections.BindCollectionChanged((_, _) =>
             {
                 updateSectionDropdown();
@@ -632,6 +639,29 @@ namespace osu.Game.Rulesets.Osu.Edit
                 validationStatus.Text = $"Validation: {e.Message}";
                 validationStatus.Colour = Color4.IndianRed;
             }
+        }
+
+        private void trySelectSectionFromCurrentObjectSelection()
+        {
+            if (updatingControls)
+                return;
+
+            if (!selectedHitObjects.Any())
+                return;
+
+            var latestSelected = selectedHitObjects.LastOrDefault();
+            if (latestSelected == null)
+                return;
+
+            var section = SectionGimmickSectionResolver.Resolve(editorBeatmap.SectionGimmicks, latestSelected.StartTime);
+            if (section == null)
+                return;
+
+            if (selectedSectionId.Value == section.Id)
+                return;
+
+            selectedSectionId.Value = section.Id;
+            clock.SeekSmoothlyTo(section.StartTime);
         }
 
         private void updateFloatSetting(FormNumberBox box, Action<SectionGimmickSettings, float> mutation)

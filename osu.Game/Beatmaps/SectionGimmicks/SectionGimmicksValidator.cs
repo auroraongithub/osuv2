@@ -73,14 +73,14 @@ namespace osu.Game.Beatmaps.SectionGimmicks
 
                     if (settings.EnableGradualDifficultyChange)
                     {
-                        if (float.IsNaN(settings.GradualDifficultyChangeEndTimeMs))
-                            throw new InvalidOperationException($"Section {section.Id}: GradualDifficultyChangeEndTimeMs is required when gradual change is enabled.");
+                        if (!float.IsNaN(settings.GradualDifficultyChangeEndTimeMs))
+                        {
+                            if (settings.GradualDifficultyChangeEndTimeMs < section.StartTime)
+                                throw new InvalidOperationException($"Section {section.Id}: GradualDifficultyChangeEndTimeMs must be >= section start.");
 
-                        if (settings.GradualDifficultyChangeEndTimeMs < section.StartTime)
-                            throw new InvalidOperationException($"Section {section.Id}: GradualDifficultyChangeEndTimeMs must be >= section start.");
-
-                        if (section.EndTime >= 0 && settings.GradualDifficultyChangeEndTimeMs > section.EndTime)
-                            throw new InvalidOperationException($"Section {section.Id}: GradualDifficultyChangeEndTimeMs must be within section range.");
+                            if (section.EndTime >= 0 && settings.GradualDifficultyChangeEndTimeMs > section.EndTime)
+                                throw new InvalidOperationException($"Section {section.Id}: GradualDifficultyChangeEndTimeMs must be within section range.");
+                        }
                     }
                 }
 
