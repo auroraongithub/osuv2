@@ -375,6 +375,21 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 Spacing = new Vector2(5),
                                 Children = new Drawable[]
                                 {
+                                    sectionCircleSize = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "SectionCircleSize (0-11)",
+                                        TabbableContentContainer = this,
+                                    },
+                                    sectionApproachRate = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "SectionApproachRate (<= 11)",
+                                        TabbableContentContainer = this,
+                                    },
+                                    sectionOverallDifficulty = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "SectionOverallDifficulty (0-11)",
+                                        TabbableContentContainer = this,
+                                    },
                                     enableGradualDifficultyChange = new FormCheckBox
                                     {
                                         Caption = "Gradual change",
@@ -399,21 +414,6 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Caption = "Difficulty Overrides",
                                         ButtonText = "Inherit from Previous",
                                         Action = inheritDifficultyFromPrevious,
-                                    },
-                                    sectionCircleSize = new FormNumberBox(allowDecimals: true)
-                                    {
-                                        Caption = "SectionCircleSize (0-11)",
-                                        TabbableContentContainer = this,
-                                    },
-                                    sectionApproachRate = new FormNumberBox(allowDecimals: true)
-                                    {
-                                        Caption = "SectionApproachRate (<= 11)",
-                                        TabbableContentContainer = this,
-                                    },
-                                    sectionOverallDifficulty = new FormNumberBox(allowDecimals: true)
-                                    {
-                                        Caption = "SectionOverallDifficulty (0-11)",
-                                        TabbableContentContainer = this,
                                     },
                                 }
                             },
@@ -753,6 +753,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                     return;
 
                 selectedSectionId.Value = v.NewValue?.Id ?? -1;
+
+                if (v.NewValue != null)
+                    clock.SeekSmoothlyTo(v.NewValue.StartTime);
             });
         }
 
@@ -943,12 +946,16 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private void updateSectionDropdown()
         {
-            var sections = model.Sections.OrderBy(s => s.StartTime).ToList();
+            var orderedSections = model.Sections.OrderBy(s => s.StartTime).ToList();
+
+            SectionGimmickSection? selected = orderedSections.FirstOrDefault(s => s.Id == selectedSectionId.Value);
+            var sections = selected == null
+                ? orderedSections
+                : orderedSections.Where(s => s.Id != selected.Id).Prepend(selected).ToList();
 
             updatingControls = true;
             sectionDropdown.Items = sections;
 
-            var selected = sections.FirstOrDefault(s => s.Id == selectedSectionId.Value);
             if (selected != null)
                 sectionDropdown.Current.Value = selected;
             updatingControls = false;
