@@ -417,10 +417,10 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 targetDifficulty.CircleSize = interpolate(baseDifficulty.CircleSize, settings.SectionCircleSize, progress, settings.EnableGradualDifficultyChange && allowGradual);
 
             if (!float.IsNaN(settings.SectionApproachRate))
-                targetDifficulty.ApproachRate = interpolate(baseDifficulty.ApproachRate, settings.SectionApproachRate, progress, false);
+                targetDifficulty.ApproachRate = interpolate(baseDifficulty.ApproachRate, settings.SectionApproachRate, progress, settings.EnableGradualDifficultyChange && allowGradual);
 
             if (!float.IsNaN(settings.SectionOverallDifficulty))
-                targetDifficulty.OverallDifficulty = interpolate(baseDifficulty.OverallDifficulty, settings.SectionOverallDifficulty, progress, false);
+                targetDifficulty.OverallDifficulty = interpolate(baseDifficulty.OverallDifficulty, settings.SectionOverallDifficulty, progress, settings.EnableGradualDifficultyChange && allowGradual);
 
             static float interpolate(float start, float end, double progress, bool quantizeToOneDecimal)
             {
