@@ -2,6 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Beatmaps.SectionGimmicks;
+using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 
 namespace osu.Game.Rulesets.Osu.Scoring
@@ -26,9 +28,11 @@ namespace osu.Game.Rulesets.Osu.Scoring
             countMiss = 0;
         }
 
-        public void Record(HitResult result)
+        public void Record(JudgementResult result, SectionGimmickSettings settings)
         {
-            switch (result)
+            HitResult mapped = mapResultForCountLimit(result, settings);
+
+            switch (mapped)
             {
                 case HitResult.Great:
                     count300++;
@@ -48,12 +52,14 @@ namespace osu.Game.Rulesets.Osu.Scoring
             }
         }
 
-        public bool Exceeds(SectionGimmickSettings settings, HitResult result)
+        public bool Exceeds(SectionGimmickSettings settings, JudgementResult result)
         {
             if (!settings.EnableCountLimits)
                 return false;
 
-            return result switch
+            HitResult mapped = mapResultForCountLimit(result, settings);
+
+            return mapped switch
             {
                 HitResult.Great => settings.Max300s >= 0 && count300 > settings.Max300s,
                 HitResult.Ok => settings.Max100s >= 0 && count100 > settings.Max100s,
@@ -61,6 +67,41 @@ namespace osu.Game.Rulesets.Osu.Scoring
                 HitResult.Miss => settings.MaxMisses >= 0 && countMiss > settings.MaxMisses,
                 _ => false
             };
+        }
+
+        private static HitResult mapResultForCountLimit(JudgementResult result, SectionGimmickSettings settings)
+        {
+            switch (result.Type)
+            {
+                case HitResult.Great:
+                case HitResult.Ok:
+                case HitResult.Meh:
+                case HitResult.Miss:
+                    return result.Type;
+
+                case HitResult.LargeTickHit:
+                case HitResult.SmallTickHit:
+                case HitResult.SliderTailHit:
+                    if (settings.Max300sAffectsSliderEndsAndTicks)
+                        return HitResult.Great;
+                    if (settings.Max100sAffectsSliderEndsAndTicks)
+                        return HitResult.Ok;
+                    if (settings.Max50sAffectsSliderEndsAndTicks)
+                        return HitResult.Meh;
+                    return HitResult.None;
+
+                case HitResult.LargeTickMiss:
+                case HitResult.SmallTickMiss:
+                    return settings.MaxMissesAffectsSliderEndAndTickMisses ? HitResult.Miss : HitResult.None;
+
+                case HitResult.IgnoreMiss:
+                    return settings.MaxMissesAffectsSliderEndAndTickMisses && result.HitObject is SliderEndCircle
+                        ? HitResult.Miss
+                        : HitResult.None;
+
+                default:
+                    return HitResult.None;
+            }
         }
     }
 }

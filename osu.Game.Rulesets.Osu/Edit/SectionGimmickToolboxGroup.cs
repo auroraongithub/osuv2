@@ -62,19 +62,29 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FillFlowContainer hpGroupFields = null!;
         private FormCheckBox noDrain = null!;
         private FormCheckBox reverseHp = null!;
+        private FormNumberBox hpStart = null!;
+        private FormNumberBox hpCap = null!;
         private FormNumberBox hp300 = null!;
+        private FormCheckBox hp300AffectsSliderEndsAndTicks = null!;
         private FormNumberBox hp100 = null!;
+        private FormCheckBox hp100AffectsSliderEndsAndTicks = null!;
         private FormNumberBox hp50 = null!;
+        private FormCheckBox hp50AffectsSliderEndsAndTicks = null!;
         private FormNumberBox hpMiss = null!;
+        private FormCheckBox hpMissAffectsSliderEndAndTickMisses = null!;
 
         private FormCheckBox enableNoMiss = null!;
 
         private FormCheckBox enableCountLimits = null!;
         private FillFlowContainer countLimitFields = null!;
         private FormNumberBox max300s = null!;
+        private FormCheckBox max300sAffectsSliderEndsAndTicks = null!;
         private FormNumberBox max100s = null!;
+        private FormCheckBox max100sAffectsSliderEndsAndTicks = null!;
         private FormNumberBox max50s = null!;
+        private FormCheckBox max50sAffectsSliderEndsAndTicks = null!;
         private FormNumberBox maxMisses = null!;
+        private FormCheckBox maxMissesAffectsSliderEndAndTickMisses = null!;
 
         private FormCheckBox enableNoMissedSliderEnd = null!;
 
@@ -225,25 +235,51 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         Caption = "ReverseHP",
                                     },
+                                    hpStart = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "HPStart (optional 0-1)",
+                                        TabbableContentContainer = this,
+                                    },
+                                    hpCap = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "HPCap (optional 0-1)",
+                                        TabbableContentContainer = this,
+                                    },
                                     hp300 = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "HP300",
                                         TabbableContentContainer = this,
+                                    },
+                                    hp300AffectsSliderEndsAndTicks = new FormCheckBox
+                                    {
+                                        Caption = "HP300 applies to slider end/reverse/tick hits",
                                     },
                                     hp100 = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "HP100",
                                         TabbableContentContainer = this,
                                     },
+                                    hp100AffectsSliderEndsAndTicks = new FormCheckBox
+                                    {
+                                        Caption = "HP100 applies to slider end/reverse/tick hits",
+                                    },
                                     hp50 = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "HP50",
                                         TabbableContentContainer = this,
                                     },
+                                    hp50AffectsSliderEndsAndTicks = new FormCheckBox
+                                    {
+                                        Caption = "HP50 applies to slider end/reverse/tick hits",
+                                    },
                                     hpMiss = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "HPMiss",
                                         TabbableContentContainer = this,
+                                    },
+                                    hpMissAffectsSliderEndAndTickMisses = new FormCheckBox
+                                    {
+                                        Caption = "HPMiss applies to slider end/reverse/tick misses",
                                     },
                                 }
                             },
@@ -270,20 +306,36 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Caption = "Max300s (-1 unlimited)",
                                         TabbableContentContainer = this,
                                     },
+                                    max300sAffectsSliderEndsAndTicks = new FormCheckBox
+                                    {
+                                        Caption = "Max300s counts slider end/reverse/tick hits",
+                                    },
                                     max100s = new FormNumberBox
                                     {
                                         Caption = "Max100s (-1 unlimited)",
                                         TabbableContentContainer = this,
+                                    },
+                                    max100sAffectsSliderEndsAndTicks = new FormCheckBox
+                                    {
+                                        Caption = "Max100s counts slider end/reverse/tick hits",
                                     },
                                     max50s = new FormNumberBox
                                     {
                                         Caption = "Max50s (-1 unlimited)",
                                         TabbableContentContainer = this,
                                     },
+                                    max50sAffectsSliderEndsAndTicks = new FormCheckBox
+                                    {
+                                        Caption = "Max50s counts slider end/reverse/tick hits",
+                                    },
                                     maxMisses = new FormNumberBox
                                     {
                                         Caption = "MaxMisses (-1 unlimited)",
                                         TabbableContentContainer = this,
+                                    },
+                                    maxMissesAffectsSliderEndAndTickMisses = new FormCheckBox
+                                    {
+                                        Caption = "MaxMisses counts slider end/reverse/tick misses",
                                     },
                                 }
                             },
@@ -415,7 +467,18 @@ namespace osu.Game.Rulesets.Osu.Edit
         private void bindModelEvents()
         {
             selectedHitObjects.BindTo(editorBeatmap.SelectedHitObjects);
-            selectedHitObjects.BindCollectionChanged((_, _) => trySelectSectionFromCurrentObjectSelection(), true);
+            selectedHitObjects.BindCollectionChanged((_, e) =>
+            {
+                if (e.NewItems != null && e.NewItems.Count > 0)
+                {
+                    if (e.NewItems[e.NewItems.Count - 1] is HitObject mostRecent)
+                        trySelectSectionForHitObject(mostRecent);
+                }
+                else
+                {
+                    trySelectSectionFromCurrentObjectSelection();
+                }
+            }, true);
 
             model.Sections.BindCollectionChanged((_, _) =>
             {
@@ -460,9 +523,15 @@ namespace osu.Game.Rulesets.Osu.Edit
             reverseHp.Current.BindValueChanged(v => mutateSetting(s => s.ReverseHP = v.NewValue));
 
             hp300.OnCommit += (_, _) => updateFloatSetting(hp300, (s, v) => s.HP300 = v);
+            hpStart.OnCommit += (_, _) => updateFloatSetting(hpStart, (s, v) => s.HPStart = v);
+            hpCap.OnCommit += (_, _) => updateFloatSetting(hpCap, (s, v) => s.HPCap = v);
             hp100.OnCommit += (_, _) => updateFloatSetting(hp100, (s, v) => s.HP100 = v);
             hp50.OnCommit += (_, _) => updateFloatSetting(hp50, (s, v) => s.HP50 = v);
             hpMiss.OnCommit += (_, _) => updateFloatSetting(hpMiss, (s, v) => s.HPMiss = v);
+            hp300AffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.HP300AffectsSliderEndsAndTicks = v.NewValue));
+            hp100AffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.HP100AffectsSliderEndsAndTicks = v.NewValue));
+            hp50AffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.HP50AffectsSliderEndsAndTicks = v.NewValue));
+            hpMissAffectsSliderEndAndTickMisses.Current.BindValueChanged(v => mutateSetting(s => s.HPMissAffectsSliderEndAndTickMisses = v.NewValue));
 
             enableNoMiss.Current.BindValueChanged(v => mutateSetting(s => s.EnableNoMiss = v.NewValue));
 
@@ -471,6 +540,10 @@ namespace osu.Game.Rulesets.Osu.Edit
             max100s.OnCommit += (_, _) => updateIntSetting(max100s, (s, v) => s.Max100s = v);
             max50s.OnCommit += (_, _) => updateIntSetting(max50s, (s, v) => s.Max50s = v);
             maxMisses.OnCommit += (_, _) => updateIntSetting(maxMisses, (s, v) => s.MaxMisses = v);
+            max300sAffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.Max300sAffectsSliderEndsAndTicks = v.NewValue));
+            max100sAffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.Max100sAffectsSliderEndsAndTicks = v.NewValue));
+            max50sAffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.Max50sAffectsSliderEndsAndTicks = v.NewValue));
+            maxMissesAffectsSliderEndAndTickMisses.Current.BindValueChanged(v => mutateSetting(s => s.MaxMissesAffectsSliderEndAndTickMisses = v.NewValue));
 
             enableNoMissedSliderEnd.Current.BindValueChanged(v => mutateSetting(s => s.EnableNoMissedSliderEnd = v.NewValue));
 
@@ -565,9 +638,15 @@ namespace osu.Game.Rulesets.Osu.Edit
                 noDrain.Current.Value = settings.NoDrain;
                 reverseHp.Current.Value = settings.ReverseHP;
                 hp300.Current.Value = formatFloat(settings.HP300);
+                hpStart.Current.Value = formatFloat(settings.HPStart);
+                hpCap.Current.Value = formatFloat(settings.HPCap);
                 hp100.Current.Value = formatFloat(settings.HP100);
                 hp50.Current.Value = formatFloat(settings.HP50);
                 hpMiss.Current.Value = formatFloat(settings.HPMiss);
+                hp300AffectsSliderEndsAndTicks.Current.Value = settings.HP300AffectsSliderEndsAndTicks;
+                hp100AffectsSliderEndsAndTicks.Current.Value = settings.HP100AffectsSliderEndsAndTicks;
+                hp50AffectsSliderEndsAndTicks.Current.Value = settings.HP50AffectsSliderEndsAndTicks;
+                hpMissAffectsSliderEndAndTickMisses.Current.Value = settings.HPMissAffectsSliderEndAndTickMisses;
 
                 enableNoMiss.Current.Value = settings.EnableNoMiss;
 
@@ -576,6 +655,10 @@ namespace osu.Game.Rulesets.Osu.Edit
                 max100s.Current.Value = settings.Max100s.ToString(CultureInfo.InvariantCulture);
                 max50s.Current.Value = settings.Max50s.ToString(CultureInfo.InvariantCulture);
                 maxMisses.Current.Value = settings.MaxMisses.ToString(CultureInfo.InvariantCulture);
+                max300sAffectsSliderEndsAndTicks.Current.Value = settings.Max300sAffectsSliderEndsAndTicks;
+                max100sAffectsSliderEndsAndTicks.Current.Value = settings.Max100sAffectsSliderEndsAndTicks;
+                max50sAffectsSliderEndsAndTicks.Current.Value = settings.Max50sAffectsSliderEndsAndTicks;
+                maxMissesAffectsSliderEndAndTickMisses.Current.Value = settings.MaxMissesAffectsSliderEndAndTickMisses;
 
                 enableNoMissedSliderEnd.Current.Value = settings.EnableNoMissedSliderEnd;
 
@@ -653,7 +736,15 @@ namespace osu.Game.Rulesets.Osu.Edit
             if (latestSelected == null)
                 return;
 
-            var section = SectionGimmickSectionResolver.Resolve(editorBeatmap.SectionGimmicks, latestSelected.StartTime);
+            trySelectSectionForHitObject(latestSelected);
+        }
+
+        private void trySelectSectionForHitObject(HitObject hitObject)
+        {
+            if (updatingControls)
+                return;
+
+            var section = SectionGimmickSectionResolver.Resolve(editorBeatmap.SectionGimmicks, hitObject.StartTime);
             if (section == null)
                 return;
 
