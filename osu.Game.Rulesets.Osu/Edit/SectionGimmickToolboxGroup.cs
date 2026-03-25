@@ -154,13 +154,13 @@ namespace osu.Game.Rulesets.Osu.Edit
                             {
                                 addSectionButton = new FormButton
                                 {
-                                    Caption = "Sections",
+                                    Caption = string.Empty,
                                     ButtonText = "Add",
                                     Action = () => model.AddSection(clock.CurrentTime),
                                 },
                                 removeSectionButton = new FormButton
                                 {
-                                    Caption = "Sections",
+                                    Caption = string.Empty,
                                     ButtonText = "Remove",
                                     Action = () => model.RemoveSelectedSection(),
                                 },
@@ -194,7 +194,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                             },
                             setStartHereButton = new FormButton
                             {
-                                Caption = "Start (ms)",
+                                Caption = string.Empty,
                                 ButtonText = "Use current",
                                 Action = () => model.SetSelectedStartTime(clock.CurrentTime),
                             },
@@ -206,7 +206,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                             },
                             setEndHereButton = new FormButton
                             {
-                                Caption = "End (ms, -1 map end)",
+                                Caption = string.Empty,
                                 ButtonText = "Use current",
                                 Action = () => model.SetSelectedEndTime(clock.CurrentTime),
                             },
@@ -223,13 +223,13 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         copySettingsButton = new FormButton
                                         {
-                                            Caption = "Settings",
+                                            Caption = string.Empty,
                                             ButtonText = "Copy",
                                             Action = () => model.CopySelectedSettings(),
                                         },
                                         pasteSettingsButton = new FormButton
                                         {
-                                            Caption = "Settings",
+                                            Caption = string.Empty,
                                             ButtonText = "Paste",
                                             Action = () => model.PasteSettingsTo(Array.Empty<int>()),
                                         },
@@ -244,7 +244,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                             },
                             applyScopeButton = new FormButton
                             {
-                                Caption = "Apply scope",
+                                Caption = string.Empty,
                                 ButtonText = "Apply",
                                 Action = applyCurrentSettingsByScope,
                             },
@@ -470,7 +470,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     },
                                     setGradualFinishTimeButton = new FormButton
                                     {
-                                        Caption = "Gradual finish time (ms)",
+                                        Caption = string.Empty,
                                         ButtonText = "Use current",
                                         Action = () => mutateSetting(s => s.GradualDifficultyChangeEndTimeMs = (float)clock.CurrentTime),
                                     },
@@ -480,7 +480,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     },
                                     inheritFromPreviousButton = new FormButton
                                     {
-                                        Caption = "Difficulty Overrides",
+                                        Caption = string.Empty,
                                         ButtonText = "Inherit previous",
                                         Action = inheritDifficultyFromPrevious,
                                     },
