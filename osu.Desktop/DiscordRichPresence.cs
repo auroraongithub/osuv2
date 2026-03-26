@@ -165,7 +165,14 @@ namespace osu.Desktop
             if (userActivity.Value != null)
             {
                 presence.State = clampLength(userActivity.Value.GetStatus(hideIdentifiableInformation));
-                presence.Details = clampLength(userActivity.Value.GetDetails(hideIdentifiableInformation) ?? string.Empty);
+
+                string details = userActivity.Value.GetDetails(hideIdentifiableInformation) ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(details))
+                    details = "osu!(v2)";
+                else if (!details.Contains("osu!(v2)", StringComparison.Ordinal))
+                    details = $"{details} • osu!(v2)";
+
+                presence.Details = clampLength(details);
 
                 if (userActivity.Value.GetBeatmapID(hideIdentifiableInformation) is int beatmapId && beatmapId > 0)
                 {
@@ -186,7 +193,7 @@ namespace osu.Desktop
             else
             {
                 presence.State = "Idle";
-                presence.Details = string.Empty;
+                presence.Details = "osu!(v2)";
             }
 
             // user party
