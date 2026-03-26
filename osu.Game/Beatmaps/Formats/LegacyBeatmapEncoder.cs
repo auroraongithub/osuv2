@@ -409,7 +409,7 @@ namespace osu.Game.Beatmaps.Formats
             foreach (var section in sectionGimmicks.Sections.OrderBy(s => s.StartTime))
             {
                 var pairs = serialiseSettings(section.Settings);
-                writer.WriteLine($"{section.Id},{section.StartTime},{section.EndTime},{string.Join('|', pairs)}");
+                writer.WriteLine(FormattableString.Invariant($"{section.Id},{section.StartTime},{section.EndTime},{string.Join('|', pairs)}"));
             }
         }
 
@@ -425,7 +425,7 @@ namespace osu.Game.Beatmaps.Formats
             foreach (var entry in hitObjectGimmicks.Entries.OrderBy(e => e.StartTime).ThenBy(e => e.ComboIndexWithOffsets))
             {
                 var pairs = serialiseHitObjectSettings(entry.Settings);
-                writer.WriteLine($"{entry.StartTime},{entry.ComboIndexWithOffsets},{string.Join('|', pairs)}");
+                writer.WriteLine(FormattableString.Invariant($"{entry.StartTime},{entry.ComboIndexWithOffsets},{string.Join('|', pairs)}"));
             }
         }
 
@@ -494,17 +494,17 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceSynesthesia) yield return "ForceSynesthesia=True";
             if (settings.ForceDepth) yield return "ForceDepth=True";
             if (settings.ForceBloom) yield return "ForceBloom=True";
-            if (settings.WiggleStrength != 1.0f) yield return $"WiggleStrength={settings.WiggleStrength}";
-            if (settings.GrowStartScale != 0.5f) yield return $"GrowStartScale={settings.GrowStartScale}";
-            if (settings.DeflateStartScale != 2.0f) yield return $"DeflateStartScale={settings.DeflateStartScale}";
-            if (settings.ApproachDifferentScale != 4.0f) yield return $"ApproachDifferentScale={settings.ApproachDifferentScale}";
+            if (settings.WiggleStrength != 1.0f) yield return $"WiggleStrength={settings.WiggleStrength.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.GrowStartScale != 0.5f) yield return $"GrowStartScale={settings.GrowStartScale.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.DeflateStartScale != 2.0f) yield return $"DeflateStartScale={settings.DeflateStartScale.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.ApproachDifferentScale != 4.0f) yield return $"ApproachDifferentScale={settings.ApproachDifferentScale.ToString(CultureInfo.InvariantCulture)}";
             if (settings.NoScopeHiddenComboCount != 10) yield return $"NoScopeHiddenComboCount={settings.NoScopeHiddenComboCount}";
-            if (settings.MagnetisedAttractionStrength != 0.5f) yield return $"MagnetisedAttractionStrength={settings.MagnetisedAttractionStrength}";
-            if (settings.RepelRepulsionStrength != 0.5f) yield return $"RepelRepulsionStrength={settings.RepelRepulsionStrength}";
-            if (settings.DepthMaxDepth != 100.0f) yield return $"DepthMaxDepth={settings.DepthMaxDepth}";
+            if (settings.MagnetisedAttractionStrength != 0.5f) yield return $"MagnetisedAttractionStrength={settings.MagnetisedAttractionStrength.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.RepelRepulsionStrength != 0.5f) yield return $"RepelRepulsionStrength={settings.RepelRepulsionStrength.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.DepthMaxDepth != 100.0f) yield return $"DepthMaxDepth={settings.DepthMaxDepth.ToString(CultureInfo.InvariantCulture)}";
             if (settings.BloomMaxSizeComboCount != 50) yield return $"BloomMaxSizeComboCount={settings.BloomMaxSizeComboCount}";
-            if (settings.BloomMaxCursorSize != 10.0f) yield return $"BloomMaxCursorSize={settings.BloomMaxCursorSize}";
-            if (settings.BarrelRollSpinSpeed != 0.5) yield return $"BarrelRollSpinSpeed={settings.BarrelRollSpinSpeed}";
+            if (settings.BloomMaxCursorSize != 10.0f) yield return $"BloomMaxCursorSize={settings.BloomMaxCursorSize.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.BarrelRollSpinSpeed != 0.5) yield return $"BarrelRollSpinSpeed={settings.BarrelRollSpinSpeed.ToString(CultureInfo.InvariantCulture)}";
             if (settings.MutedMuteComboCount != 100) yield return $"MutedMuteComboCount={settings.MutedMuteComboCount}";
 
             if (!string.IsNullOrEmpty(settings.SectionName)) yield return $"SectionName={settings.SectionName}";
