@@ -4,17 +4,15 @@
 
 # osu!(v2)
 
-community-driven fork of **osu!lazer** with advanced section and hitobject gimmick systems for mapping and gameplay experiments
+community-driven fork of **osu!lazer** with section and hitobject gimmick systems for mapping and gameplay experiments
 
-## what this fork adds
+## what this fork adds (in simplest terms)
 
-- section gimmicks and hitobject gimmicks with editor UI
-- runtime overlays for status/details/input blocking and custom section effects
-- expanded hp/count routing controls and safety handling
-- fun-mod forcing and tuning controls
-- forced flashlight radius controls with gradual behavior options
-- whole-mapset apply fixes and quality-of-life editor improvements
-- stronger validation and clamping for dangerous/custom values
+- section gimmicks and per-hitobject attributes with editor UI
+- control hp/judgment limits
+- force mods and allow customization
+
+# which means you can do a lot of things!!!
 
 ## project base
 
@@ -26,7 +24,7 @@ community-driven fork of **osu!lazer** with advanced section and hitobject gimmi
 - **debug builds** connect to osu!dev server
 - **release builds** connect to official osu! server
 
-if you are testing unstable gimmick changes, use debug builds first
+i **DO NOT** recommend building for release as this currently doesn't have systems in place that make it safe to use in the official osu! server
 
 ## quick build (desktop)
 
@@ -54,7 +52,7 @@ please include:
 
 ## contributing
 
-community contributions are welcome
+community contributions are welcome!!
 
 - open issue for bug reports/feature proposals
 - open pull request with focused changes
