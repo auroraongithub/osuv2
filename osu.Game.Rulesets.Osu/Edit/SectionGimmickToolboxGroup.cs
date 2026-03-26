@@ -9,11 +9,15 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets.Edit;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Compose;
 using osuTK;
@@ -25,10 +29,8 @@ namespace osu.Game.Rulesets.Osu.Edit
     {
         private readonly BindableInt selectedSectionId = new BindableInt(-1);
 
-        [Resolved(canBeNull: true)]
-        private SectionGimmickEditorModel? resolvedModel { get; set; }
-
-        private SectionGimmickEditorModel model = null!;
+        [Resolved]
+        private SectionGimmickEditorModel model { get; set; } = null!;
 
         [Resolved]
         private EditorClock clock { get; set; } = null!;
@@ -39,11 +41,13 @@ namespace osu.Game.Rulesets.Osu.Edit
         [Resolved(canBeNull: true)]
         private Editor? editor { get; set; }
 
-        private FormButton addSectionButton = null!;
-        private FormButton removeSectionButton = null!;
-        private FormButton copySettingsButton = null!;
-        private FormButton pasteSettingsButton = null!;
-        private FormButton applyScopeButton = null!;
+        private RoundedButton addSectionButton = null!;
+        private RoundedButton removeSectionButton = null!;
+        private CompositeDrawable sectionActionButtons = null!;
+        private RoundedButton copySettingsButton = null!;
+        private RoundedButton pasteSettingsButton = null!;
+        private RoundedButton applyScopeButton = null!;
+        private CompositeDrawable settingsActionButtons = null!;
 
         private SectionSelectionDropdown sectionDropdown = null!;
 
@@ -51,9 +55,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormNumberBox startTimeBox = null!;
         private FormNumberBox endTimeBox = null!;
 
-        private FormButton setStartHereButton = null!;
-        private FormButton setEndHereButton = null!;
-        private FormButton setGradualFinishTimeButton = null!;
+        private RoundedButton setStartHereButton = null!;
+        private RoundedButton setEndHereButton = null!;
+        private RoundedButton setGradualFinishTimeButton = null!;
 
         private FillFlowContainer selectedSectionFlow = null!;
 
@@ -61,19 +65,33 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FillFlowContainer hpGroupFields = null!;
         private FormCheckBox noDrain = null!;
         private FormCheckBox reverseHp = null!;
+        private FormNumberBox hpStart = null!;
+        private FormNumberBox hpCap = null!;
         private FormNumberBox hp300 = null!;
+        private FormCheckBox hp300AffectsSliderEndsAndTicks = null!;
         private FormNumberBox hp100 = null!;
+        private FormCheckBox hp100AffectsSliderEndsAndTicks = null!;
         private FormNumberBox hp50 = null!;
+        private FormCheckBox hp50AffectsSliderEndsAndTicks = null!;
         private FormNumberBox hpMiss = null!;
+        private FormCheckBox hpMissAffectsSliderEndAndTickMisses = null!;
+        private FormCheckBox showHpSliderRouting = null!;
+        private FillFlowContainer hpSliderRoutingFields = null!;
 
         private FormCheckBox enableNoMiss = null!;
 
         private FormCheckBox enableCountLimits = null!;
         private FillFlowContainer countLimitFields = null!;
         private FormNumberBox max300s = null!;
+        private FormCheckBox max300sAffectsSliderEndsAndTicks = null!;
         private FormNumberBox max100s = null!;
+        private FormCheckBox max100sAffectsSliderEndsAndTicks = null!;
         private FormNumberBox max50s = null!;
+        private FormCheckBox max50sAffectsSliderEndsAndTicks = null!;
         private FormNumberBox maxMisses = null!;
+        private FormCheckBox maxMissesAffectsSliderEndAndTickMisses = null!;
+        private FormCheckBox showCountSliderRouting = null!;
+        private FillFlowContainer countSliderRoutingFields = null!;
 
         private FormCheckBox enableNoMissedSliderEnd = null!;
 
@@ -84,10 +102,11 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private FormCheckBox enableDifficultyOverrides = null!;
         private FillFlowContainer difficultyOverrideFields = null!;
+        private FormCheckBox difficultyOverrideStartWithBeatmapValues = null!;
         private FormCheckBox enableGradualDifficultyChange = null!;
         private FormNumberBox gradualDifficultyChangeEndTime = null!;
         private FormCheckBox keepDifficultyOverridesAfterSection = null!;
-        private FormButton inheritFromPreviousButton = null!;
+        private RoundedButton inheritFromPreviousButton = null!;
         private FormNumberBox sectionCircleSize = null!;
         private FormNumberBox sectionApproachRate = null!;
         private FormNumberBox sectionOverallDifficulty = null!;
@@ -97,58 +116,15 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceHardRock = null!;
         private FormCheckBox forceFlashlight = null!;
         private FormCheckBox forceDoubleTime = null!;
-        private FormCheckBox forceSingleTap = null!;
-        private FormCheckBox forceAlternate = null!;
-
-        private FormCheckBox showFunMods = null!;
-        private FillFlowContainer funModsPanel = null!;
-        private FormCheckBox forceTransform = null!;
-        private FormCheckBox forceWiggle = null!;
-        private FormCheckBox forceSpinIn = null!;
-        private FormCheckBox forceGrow = null!;
-        private FormCheckBox forceDeflate = null!;
-        private FormCheckBox forceBarrelRoll = null!;
-        private FormCheckBox forceApproachDifferent = null!;
-        private FormCheckBox forceMuted = null!;
-        private FormCheckBox forceNoScope = null!;
-        private FormCheckBox forceMagnetised = null!;
-        private FormCheckBox forceRepel = null!;
-        private FormCheckBox forceFreezeFrame = null!;
-        private FormCheckBox forceBubbles = null!;
-        private FormCheckBox forceSynesthesia = null!;
-        private FormCheckBox forceDepth = null!;
-        private FormCheckBox forceBloom = null!;
-
-        // Fun mod adjustable value controls (shown when corresponding mod is enabled)
-        private FillFlowContainer wiggleSettings = null!;
-        private FormNumberBox wiggleStrength = null!;
-        private FillFlowContainer growSettings = null!;
-        private FormNumberBox growStartScale = null!;
-        private FillFlowContainer deflateSettings = null!;
-        private FormNumberBox deflateStartScale = null!;
-        private FillFlowContainer approachDifferentSettings = null!;
-        private FormNumberBox approachDifferentScale = null!;
-        private FillFlowContainer noScopeSettings = null!;
-        private FormNumberBox noScopeHiddenComboCount = null!;
-        private FillFlowContainer magnetisedSettings = null!;
-        private FormNumberBox magnetisedAttractionStrength = null!;
-        private FillFlowContainer repelSettings = null!;
-        private FormNumberBox repelRepulsionStrength = null!;
-        private FillFlowContainer depthSettings = null!;
-        private FormNumberBox depthMaxDepth = null!;
-        private FillFlowContainer bloomSettings = null!;
-        private FormNumberBox bloomMaxSizeComboCount = null!;
-        private FormNumberBox bloomMaxCursorSize = null!;
-        private FillFlowContainer barrelRollSettings = null!;
-        private FormNumberBox barrelRollSpinSpeed = null!;
-        private FillFlowContainer mutedSettings = null!;
-        private FormNumberBox mutedMuteComboCount = null!;
+        private FormCheckBox showForceMods = null!;
+        private FillFlowContainer forceModsFields = null!;
 
         private FormEnumDropdown<SectionGimmickApplyScope> applyScopeDropdown = null!;
 
         private OsuSpriteText validationStatus = null!;
 
         private bool updatingControls;
+        private readonly BindableList<HitObject> selectedHitObjects = new BindableList<HitObject>();
 
         public SectionGimmickToolboxGroup()
             : base("Section gimmicks")
@@ -158,7 +134,6 @@ namespace osu.Game.Rulesets.Osu.Edit
         [BackgroundDependencyLoader]
         private void load()
         {
-            model = resolvedModel ?? new SectionGimmickEditorModel(editorBeatmap);
             selectedSectionId.BindTo(model.SelectedSectionId);
 
             Child = new FillFlowContainer
@@ -169,22 +144,35 @@ namespace osu.Game.Rulesets.Osu.Edit
                 Direction = FillDirection.Vertical,
                 Children = new Drawable[]
                 {
-                    addSectionButton = new FormButton
-                    {
-                        Caption = "Sections",
-                        ButtonText = "Add Section",
-                        Action = () => model.AddSection(clock.CurrentTime),
-                    },
-                    removeSectionButton = new FormButton
-                    {
-                        Caption = "Sections",
-                        ButtonText = "Remove Selected",
-                        Action = () => model.RemoveSelectedSection(),
-                    },
                     sectionDropdown = new SectionSelectionDropdown
                     {
                         RelativeSizeAxes = Axes.X,
                         Caption = "Sections",
+                    },
+                    sectionActionButtons = new GridContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                        ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                        Content = new[]
+                        {
+                            new Drawable[]
+                            {
+                            addSectionButton = new RoundedButton
+                            {
+                                Text = "Add",
+                                RelativeSizeAxes = Axes.X,
+                                Action = () => model.AddSection(clock.CurrentTime),
+                            },
+                            removeSectionButton = new RoundedButton
+                            {
+                                Text = "Remove",
+                                RelativeSizeAxes = Axes.X,
+                                Action = () => model.RemoveSelectedSection(),
+                            },
+                            }
+                        }
                     },
                     selectedSectionFlow = new FillFlowContainer
                     {
@@ -196,46 +184,85 @@ namespace osu.Game.Rulesets.Osu.Edit
                         {
                             sectionNameBox = new FormTextBox
                             {
-                                Caption = "Section name",
+                                Caption = "Name",
                                 PlaceholderText = "e.g., Kiai time",
                                 TabbableContentContainer = this,
                             },
-                            startTimeBox = new FormNumberBox(allowDecimals: true)
+                            new GridContainer
                             {
-                                Caption = "Section start (ms)",
-                                Current = { Value = "0" },
-                                TabbableContentContainer = this,
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        startTimeBox = new FormNumberBox(allowDecimals: true)
+                                        {
+                                            Caption = "Start (ms)",
+                                            Current = { Value = "0" },
+                                            TabbableContentContainer = this,
+                                        },
+                                        setStartHereButton = new RoundedButton
+                                        {
+                                            Text = "Use current time",
+                                            RelativeSizeAxes = Axes.X,
+                                            Action = () => model.SetSelectedStartTime(clock.CurrentTime),
+                                        },
+                                    }
+                                }
                             },
-                            setStartHereButton = new FormButton
+                            new GridContainer
                             {
-                                Caption = "Section start (ms)",
-                                ButtonText = "Set Start Here",
-                                Action = () => model.SetSelectedStartTime(clock.CurrentTime),
-                            },
-                            endTimeBox = new FormNumberBox(allowDecimals: true)
-                            {
-                                Caption = "Section end (ms, -1 map end)",
-                                Current = { Value = "-1" },
-                                TabbableContentContainer = this,
-                            },
-                            setEndHereButton = new FormButton
-                            {
-                                Caption = "Section end (ms, -1 map end)",
-                                ButtonText = "Set End Here",
-                                Action = () => model.SetSelectedEndTime(clock.CurrentTime),
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        endTimeBox = new FormNumberBox(allowDecimals: true)
+                                        {
+                                            Caption = "End (ms, -1 map end)",
+                                            Current = { Value = "-1" },
+                                            TabbableContentContainer = this,
+                                        },
+                                        setEndHereButton = new RoundedButton
+                                        {
+                                            Text = "Use current time",
+                                            RelativeSizeAxes = Axes.X,
+                                            Action = () => model.SetSelectedEndTime(clock.CurrentTime),
+                                        },
+                                    }
+                                }
                             },
 
-                            copySettingsButton = new FormButton
+                            settingsActionButtons = new GridContainer
                             {
-                                Caption = "Settings",
-                                ButtonText = "Copy Gimmick Settings",
-                                Action = () => model.CopySelectedSettings(),
-                            },
-                            pasteSettingsButton = new FormButton
-                            {
-                                Caption = "Settings",
-                                ButtonText = "Paste Gimmick Settings",
-                                Action = () => model.PasteSettingsTo(Array.Empty<int>()),
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        copySettingsButton = new RoundedButton
+                                        {
+                                            Text = "Copy",
+                                            RelativeSizeAxes = Axes.X,
+                                            Action = () => model.CopySelectedSettings(),
+                                        },
+                                        pasteSettingsButton = new RoundedButton
+                                        {
+                                            Text = "Paste",
+                                            RelativeSizeAxes = Axes.X,
+                                            Action = () => model.PasteSettingsTo(Array.Empty<int>()),
+                                        },
+                                    }
+                                }
                             },
 
                             applyScopeDropdown = new FormEnumDropdown<SectionGimmickApplyScope>
@@ -243,16 +270,16 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 Caption = "Apply scope",
                                 Current = { Value = SectionGimmickApplyScope.ThisDifficulty },
                             },
-                            applyScopeButton = new FormButton
+                            applyScopeButton = new RoundedButton
                             {
-                                Caption = "Apply scope",
-                                ButtonText = "Apply Current Settings",
+                                Text = "Apply",
+                                RelativeSizeAxes = Axes.X,
                                 Action = applyCurrentSettingsByScope,
                             },
 
                             enableHpGimmick = new FormCheckBox
                             {
-                                Caption = "HP Adjustments",
+                                Caption = "HP",
                             },
                             hpGroupFields = new FillFlowContainer
                             {
@@ -264,11 +291,21 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 {
                                     noDrain = new FormCheckBox
                                     {
-                                        Caption = "NoDrain",
+                                        Caption = "No drain",
                                     },
                                     reverseHp = new FormCheckBox
                                     {
-                                        Caption = "ReverseHP",
+                                        Caption = "Reverse HP",
+                                    },
+                                    hpStart = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "HP start (opt. 0-1)",
+                                        TabbableContentContainer = this,
+                                    },
+                                    hpCap = new FormNumberBox(allowDecimals: true)
+                                    {
+                                        Caption = "HP cap (opt. 0-1)",
+                                        TabbableContentContainer = this,
                                     },
                                     hp300 = new FormNumberBox(allowDecimals: true)
                                     {
@@ -290,6 +327,36 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Caption = "HPMiss",
                                         TabbableContentContainer = this,
                                     },
+                                    showHpSliderRouting = new FormCheckBox
+                                    {
+                                        Caption = "Show slider HP routing",
+                                    },
+                                    hpSliderRoutingFields = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Children = new Drawable[]
+                                        {
+                                            hp300AffectsSliderEndsAndTicks = new FormCheckBox
+                                            {
+                                                Caption = "Use HP300 for slider hit judgements",
+                                            },
+                                            hp100AffectsSliderEndsAndTicks = new FormCheckBox
+                                            {
+                                                Caption = "Use HP100 for slider hit judgements",
+                                            },
+                                            hp50AffectsSliderEndsAndTicks = new FormCheckBox
+                                            {
+                                                Caption = "Use HP50 for slider hit judgements",
+                                            },
+                                            hpMissAffectsSliderEndAndTickMisses = new FormCheckBox
+                                            {
+                                                Caption = "Use HPMiss for slider miss judgements",
+                                            },
+                                        }
+                                    },
                                 }
                             },
 
@@ -300,7 +367,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                             enableCountLimits = new FormCheckBox
                             {
-                                Caption = "Count Limits",
+                                Caption = "Count limits",
                             },
                             countLimitFields = new FillFlowContainer
                             {
@@ -330,17 +397,47 @@ namespace osu.Game.Rulesets.Osu.Edit
                                         Caption = "MaxMisses (-1 unlimited)",
                                         TabbableContentContainer = this,
                                     },
+                                    showCountSliderRouting = new FormCheckBox
+                                    {
+                                        Caption = "Show slider count routing",
+                                    },
+                                    countSliderRoutingFields = new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(5),
+                                        Children = new Drawable[]
+                                        {
+                                            max300sAffectsSliderEndsAndTicks = new FormCheckBox
+                                            {
+                                                Caption = "Count slider hits as 300",
+                                            },
+                                            max100sAffectsSliderEndsAndTicks = new FormCheckBox
+                                            {
+                                                Caption = "Count slider hits as 100",
+                                            },
+                                            max50sAffectsSliderEndsAndTicks = new FormCheckBox
+                                            {
+                                                Caption = "Count slider hits as 50",
+                                            },
+                                            maxMissesAffectsSliderEndAndTickMisses = new FormCheckBox
+                                            {
+                                                Caption = "Count slider misses as Miss",
+                                            },
+                                        }
+                                    },
                                 }
                             },
 
                             enableNoMissedSliderEnd = new FormCheckBox
                             {
-                                Caption = "No Missed Slider End",
+                                Caption = "No missed slider ends",
                             },
 
                             enableGreatOffsetPenalty = new FormCheckBox
                             {
-                                Caption = "Great Offset Penalty",
+                                Caption = "Great offset penalty",
                             },
                             greatOffsetFields = new FillFlowContainer
                             {
@@ -365,7 +462,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                             enableDifficultyOverrides = new FormCheckBox
                             {
-                                Caption = "Difficulty Overrides (CS/AR/OD)",
+                                Caption = "Difficulty overrides (CS/AR/OD)",
                             },
                             difficultyOverrideFields = new FillFlowContainer
                             {
@@ -377,344 +474,95 @@ namespace osu.Game.Rulesets.Osu.Edit
                                 {
                                     sectionCircleSize = new FormNumberBox(allowDecimals: true)
                                     {
-                                        Caption = "SectionCircleSize (0-11)",
+                                        Caption = "CS (0-11)",
                                         TabbableContentContainer = this,
                                     },
                                     sectionApproachRate = new FormNumberBox(allowDecimals: true)
                                     {
-                                        Caption = "SectionApproachRate (<= 11)",
+                                        Caption = "AR (<= 11)",
                                         TabbableContentContainer = this,
                                     },
                                     sectionOverallDifficulty = new FormNumberBox(allowDecimals: true)
                                     {
-                                        Caption = "SectionOverallDifficulty (0-11)",
+                                        Caption = "OD (0-11)",
                                         TabbableContentContainer = this,
+                                    },
+                                    difficultyOverrideStartWithBeatmapValues = new FormCheckBox
+                                    {
+                                        Caption = "Start with beatmap values",
                                     },
                                     enableGradualDifficultyChange = new FormCheckBox
                                     {
                                         Caption = "Gradual change",
                                     },
-                                    gradualDifficultyChangeEndTime = new FormNumberBox(allowDecimals: true)
+                                    new GridContainer
                                     {
-                                        Caption = "Gradual finish time (ms)",
-                                        TabbableContentContainer = this,
-                                    },
-                                    setGradualFinishTimeButton = new FormButton
-                                    {
-                                        Caption = "Gradual finish time (ms)",
-                                        ButtonText = "Set Finish Here",
-                                        Action = () => mutateSetting(s => s.GradualDifficultyChangeEndTimeMs = (float)clock.CurrentTime),
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                        ColumnDimensions = new[] { new Dimension(), new Dimension() },
+                                        Content = new[]
+                                        {
+                                            new Drawable[]
+                                            {
+                                                gradualDifficultyChangeEndTime = new FormNumberBox(allowDecimals: true)
+                                                {
+                                                    Caption = "Gradual finish time (ms)",
+                                                    TabbableContentContainer = this,
+                                                },
+                                                setGradualFinishTimeButton = new RoundedButton
+                                                {
+                                                    Text = "Use current time",
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Action = () => mutateSetting(s => s.GradualDifficultyChangeEndTimeMs = (float)clock.CurrentTime),
+                                                },
+                                            }
+                                        }
                                     },
                                     keepDifficultyOverridesAfterSection = new FormCheckBox
                                     {
                                         Caption = "Keep overrides after section",
                                     },
-                                    inheritFromPreviousButton = new FormButton
+                                    inheritFromPreviousButton = new RoundedButton
                                     {
-                                        Caption = "Difficulty Overrides",
-                                        ButtonText = "Inherit from Previous",
+                                        Text = "Inherit from previous",
+                                        RelativeSizeAxes = Axes.X,
                                         Action = inheritDifficultyFromPrevious,
                                     },
                                 }
                             },
 
-                            forceHidden = new FormCheckBox
+                            showForceMods = new FormCheckBox
                             {
-                                Caption = "Force Hidden (HD)",
+                                Caption = "Show forced mods",
                             },
-                            forceNoApproachCircle = new FormCheckBox
-                            {
-                                Caption = "Force No Approach Circle",
-                            },
-                            forceHardRock = new FormCheckBox
-                            {
-                                Caption = "Force Hard Rock (HR)",
-                            },
-                            forceFlashlight = new FormCheckBox
-                            {
-                                Caption = "Force Flashlight (FL)",
-                            },
-                            forceDoubleTime = new FormCheckBox
-                            {
-                                Caption = "Force Double Time (DT)",
-                            },
-                            forceSingleTap = new FormCheckBox
-                            {
-                                Caption = "Force Single Tap (SG)",
-                            },
-                            forceAlternate = new FormCheckBox
-                            {
-                                Caption = "Force Alternate (AL)",
-                            },
-
-                            showFunMods = new FormCheckBox
-                            {
-                                Caption = "Show Fun Mods (collapsible)",
-                            },
-                            funModsPanel = new FillFlowContainer
+                            forceModsFields = new FillFlowContainer
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
                                 Spacing = new Vector2(5),
-                                Alpha = 0,
-                                AlwaysPresent = true,
                                 Children = new Drawable[]
                                 {
-                                    forceTransform = new FormCheckBox
+                                    forceHidden = new FormCheckBox
                                     {
-                                        Caption = "Force Transform (TR)",
+                                        Caption = "Force HD",
                                     },
-                                    forceWiggle = new FormCheckBox
+                                    forceNoApproachCircle = new FormCheckBox
                                     {
-                                        Caption = "Force Wiggle (WG)",
+                                        Caption = "Force no approach circle",
                                     },
-                                    forceSpinIn = new FormCheckBox
+                                    forceHardRock = new FormCheckBox
                                     {
-                                        Caption = "Force Spin In (SI)",
+                                        Caption = "Force HR",
                                     },
-                                    forceGrow = new FormCheckBox
+                                    forceFlashlight = new FormCheckBox
                                     {
-                                        Caption = "Force Grow (GR)",
+                                        Caption = "Force FL",
                                     },
-                                    forceDeflate = new FormCheckBox
+                                    forceDoubleTime = new FormCheckBox
                                     {
-                                        Caption = "Force Deflate (DF)",
-                                    },
-                                    forceBarrelRoll = new FormCheckBox
-                                    {
-                                        Caption = "Force Barrel Roll (BR)",
-                                    },
-                                    forceApproachDifferent = new FormCheckBox
-                                    {
-                                        Caption = "Force Approach Different (AD)",
-                                    },
-                                    forceMuted = new FormCheckBox
-                                    {
-                                        Caption = "Force Muted (MU)",
-                                    },
-                                    forceNoScope = new FormCheckBox
-                                    {
-                                        Caption = "Force No Scope (NS)",
-                                    },
-                                    forceMagnetised = new FormCheckBox
-                                    {
-                                        Caption = "Force Magnetised (MG)",
-                                    },
-                                    forceRepel = new FormCheckBox
-                                    {
-                                        Caption = "Force Repel (RP)",
-                                    },
-                                    forceFreezeFrame = new FormCheckBox
-                                    {
-                                        Caption = "Force Freeze Frame (FF)",
-                                    },
-                                    forceBubbles = new FormCheckBox
-                                    {
-                                        Caption = "Force Bubbles (BL)",
-                                    },
-                                    forceSynesthesia = new FormCheckBox
-                                    {
-                                        Caption = "Force Synesthesia (SY)",
-                                    },
-                                    forceDepth = new FormCheckBox
-                                    {
-                                        Caption = "Force Depth (DP)",
-                                    },
-                                    forceBloom = new FormCheckBox
-                                    {
-                                        Caption = "Force Bloom (BM)",
-                                    },
-
-                                    // Wiggle settings (shown when ForceWiggle is enabled)
-                                    wiggleSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            wiggleStrength = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Strength (min: 0.1, max: 2)",
-                                            },
-                                        }
-                                    },
-
-                                    // Grow settings
-                                    growSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            growStartScale = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Start Scale (min: 0, max: 0.99)",
-                                            },
-                                        }
-                                    },
-
-                                    // Deflate settings
-                                    deflateSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            deflateStartScale = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Start Scale (min: 1, max: 25)",
-                                            },
-                                        }
-                                    },
-
-                                    // ApproachDifferent settings
-                                    approachDifferentSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            approachDifferentScale = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Initial Size (min: 1.5, max: 10)",
-                                            },
-                                        }
-                                    },
-
-                                    // NoScope settings
-                                    noScopeSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            noScopeHiddenComboCount = new FormNumberBox
-                                            {
-                                                PlaceholderText = "Hidden Combo Count (min: 0, max: 50)",
-                                            },
-                                        }
-                                    },
-
-                                    // Magnetised settings
-                                    magnetisedSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            magnetisedAttractionStrength = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Attraction Strength (min: 0.05, max: 1)",
-                                            },
-                                        }
-                                    },
-
-                                    // Repel settings
-                                    repelSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            repelRepulsionStrength = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Repulsion Strength (min: 0.05, max: 1)",
-                                            },
-                                        }
-                                    },
-
-                                    // Depth settings
-                                    depthSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            depthMaxDepth = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Max Depth (min: 50, max: 200)",
-                                            },
-                                        }
-                                    },
-
-                                    // Bloom settings
-                                    bloomSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            bloomMaxSizeComboCount = new FormNumberBox
-                                            {
-                                                PlaceholderText = "Max Size Combo (min: 5, max: 100)",
-                                            },
-                                            bloomMaxCursorSize = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Max Cursor Size (min: 5, max: 15)",
-                                            },
-                                        }
-                                    },
-
-                                    // BarrelRoll settings
-                                    barrelRollSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            barrelRollSpinSpeed = new FormNumberBox(allowDecimals: true)
-                                            {
-                                                PlaceholderText = "Spin Speed RPM (min: 0.02, max: 12)",
-                                            },
-                                        }
-                                    },
-
-                                    // Muted settings
-                                    mutedSettings = new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(5),
-                                        Margin = new MarginPadding { Left = 20 },
-                                        Children = new Drawable[]
-                                        {
-                                            mutedMuteComboCount = new FormNumberBox
-                                            {
-                                                PlaceholderText = "Mute Combo Count (min: 0, max: 500)",
-                                            },
-                                        }
+                                        Caption = "Force DT",
                                     },
                                 }
                             },
@@ -739,6 +587,20 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private void bindModelEvents()
         {
+            selectedHitObjects.BindTo(editorBeatmap.SelectedHitObjects);
+            selectedHitObjects.BindCollectionChanged((_, e) =>
+            {
+                if (e.NewItems != null && e.NewItems.Count > 0)
+                {
+                    if (e.NewItems[e.NewItems.Count - 1] is HitObject mostRecent)
+                        trySelectSectionForHitObject(mostRecent);
+                }
+                else
+                {
+                    trySelectSectionFromCurrentObjectSelection();
+                }
+            }, true);
+
             model.Sections.BindCollectionChanged((_, _) =>
             {
                 updateSectionDropdown();
@@ -782,9 +644,16 @@ namespace osu.Game.Rulesets.Osu.Edit
             reverseHp.Current.BindValueChanged(v => mutateSetting(s => s.ReverseHP = v.NewValue));
 
             hp300.OnCommit += (_, _) => updateFloatSetting(hp300, (s, v) => s.HP300 = v);
+            hpStart.OnCommit += (_, _) => updateFloatSetting(hpStart, (s, v) => s.HPStart = v);
+            hpCap.OnCommit += (_, _) => updateFloatSetting(hpCap, (s, v) => s.HPCap = v);
             hp100.OnCommit += (_, _) => updateFloatSetting(hp100, (s, v) => s.HP100 = v);
             hp50.OnCommit += (_, _) => updateFloatSetting(hp50, (s, v) => s.HP50 = v);
             hpMiss.OnCommit += (_, _) => updateFloatSetting(hpMiss, (s, v) => s.HPMiss = v);
+            hp300AffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.HP300AffectsSliderEndsAndTicks = v.NewValue));
+            hp100AffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.HP100AffectsSliderEndsAndTicks = v.NewValue));
+            hp50AffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.HP50AffectsSliderEndsAndTicks = v.NewValue));
+            hpMissAffectsSliderEndAndTickMisses.Current.BindValueChanged(v => mutateSetting(s => s.HPMissAffectsSliderEndAndTickMisses = v.NewValue));
+            showHpSliderRouting.Current.BindValueChanged(_ => updateGroupVisibility());
 
             enableNoMiss.Current.BindValueChanged(v => mutateSetting(s => s.EnableNoMiss = v.NewValue));
 
@@ -793,6 +662,11 @@ namespace osu.Game.Rulesets.Osu.Edit
             max100s.OnCommit += (_, _) => updateIntSetting(max100s, (s, v) => s.Max100s = v);
             max50s.OnCommit += (_, _) => updateIntSetting(max50s, (s, v) => s.Max50s = v);
             maxMisses.OnCommit += (_, _) => updateIntSetting(maxMisses, (s, v) => s.MaxMisses = v);
+            max300sAffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.Max300sAffectsSliderEndsAndTicks = v.NewValue));
+            max100sAffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.Max100sAffectsSliderEndsAndTicks = v.NewValue));
+            max50sAffectsSliderEndsAndTicks.Current.BindValueChanged(v => mutateSetting(s => s.Max50sAffectsSliderEndsAndTicks = v.NewValue));
+            maxMissesAffectsSliderEndAndTickMisses.Current.BindValueChanged(v => mutateSetting(s => s.MaxMissesAffectsSliderEndAndTickMisses = v.NewValue));
+            showCountSliderRouting.Current.BindValueChanged(_ => updateGroupVisibility());
 
             enableNoMissedSliderEnd.Current.BindValueChanged(v => mutateSetting(s => s.EnableNoMissedSliderEnd = v.NewValue));
 
@@ -801,6 +675,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             greatOffsetPenaltyHp.OnCommit += (_, _) => updateFloatSetting(greatOffsetPenaltyHp, (s, v) => s.GreatOffsetPenaltyHP = v);
 
             enableDifficultyOverrides.Current.BindValueChanged(v => mutateSetting(s => s.EnableDifficultyOverrides = v.NewValue));
+            difficultyOverrideStartWithBeatmapValues.Current.BindValueChanged(v => mutateSetting(s => s.DifficultyOverrideStartWithBeatmapValues = v.NewValue));
             enableGradualDifficultyChange.Current.BindValueChanged(v => mutateSetting(s => s.EnableGradualDifficultyChange = v.NewValue));
             gradualDifficultyChangeEndTime.OnCommit += (_, _) => updateFloatSetting(gradualDifficultyChangeEndTime, (s, v) => s.GradualDifficultyChangeEndTimeMs = v);
             keepDifficultyOverridesAfterSection.Current.BindValueChanged(v => mutateSetting(s => s.KeepDifficultyOverridesAfterSection = v.NewValue));
@@ -813,127 +688,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceHardRock.Current.BindValueChanged(v => mutateSetting(s => s.ForceHardRock = v.NewValue));
             forceFlashlight.Current.BindValueChanged(v => mutateSetting(s => s.ForceFlashlight = v.NewValue));
             forceDoubleTime.Current.BindValueChanged(v => mutateSetting(s => s.ForceDoubleTime = v.NewValue));
-            forceSingleTap.Current.BindValueChanged(v => mutateSetting(s =>
-            {
-                s.ForceSingleTap = v.NewValue;
-                if (v.NewValue)
-                    s.ForceAlternate = false;
-            }));
-            forceAlternate.Current.BindValueChanged(v => mutateSetting(s =>
-            {
-                s.ForceAlternate = v.NewValue;
-                if (v.NewValue)
-                    s.ForceSingleTap = false;
-            }));
-
-            showFunMods.Current.BindValueChanged(v =>
-            {
-                funModsPanel.FadeTo(v.NewValue ? 1 : 0, 200, Easing.OutQuint);
-            });
-
-            forceTransform.Current.BindValueChanged(v => mutateSetting(s => s.ForceTransform = v.NewValue));
-            forceWiggle.Current.BindValueChanged(v => mutateSetting(s => s.ForceWiggle = v.NewValue));
-            forceSpinIn.Current.BindValueChanged(v => mutateSetting(s => s.ForceSpinIn = v.NewValue));
-            forceGrow.Current.BindValueChanged(v => mutateSetting(s => s.ForceGrow = v.NewValue));
-            forceDeflate.Current.BindValueChanged(v => mutateSetting(s => s.ForceDeflate = v.NewValue));
-            forceBarrelRoll.Current.BindValueChanged(v => mutateSetting(s => s.ForceBarrelRoll = v.NewValue));
-            forceApproachDifferent.Current.BindValueChanged(v => mutateSetting(s => s.ForceApproachDifferent = v.NewValue));
-            forceMuted.Current.BindValueChanged(v => mutateSetting(s => s.ForceMuted = v.NewValue));
-            forceNoScope.Current.BindValueChanged(v => mutateSetting(s => s.ForceNoScope = v.NewValue));
-            forceMagnetised.Current.BindValueChanged(v => mutateSetting(s => s.ForceMagnetised = v.NewValue));
-            forceRepel.Current.BindValueChanged(v => mutateSetting(s => s.ForceRepel = v.NewValue));
-            forceFreezeFrame.Current.BindValueChanged(v => mutateSetting(s => s.ForceFreezeFrame = v.NewValue));
-            forceBubbles.Current.BindValueChanged(v => mutateSetting(s => s.ForceBubbles = v.NewValue));
-            forceSynesthesia.Current.BindValueChanged(v => mutateSetting(s => s.ForceSynesthesia = v.NewValue));
-            forceDepth.Current.BindValueChanged(v => mutateSetting(s => s.ForceDepth = v.NewValue));
-            forceBloom.Current.BindValueChanged(v =>
-            {
-                mutateSetting(s => s.ForceBloom = v.NewValue);
-                updateFunModSettingsVisibility();
-            });
-
-            // Fun mod settings bindings - also toggle visibility when corresponding checkbox changes
-            forceWiggle.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            wiggleStrength.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(wiggleStrength.Current.Value, out float value))
-                    mutateSetting(s => s.WiggleStrength = Math.Clamp(value, 0.1f, 2f));
-            };
-
-            forceGrow.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            growStartScale.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(growStartScale.Current.Value, out float value))
-                    mutateSetting(s => s.GrowStartScale = Math.Clamp(value, 0f, 0.99f));
-            };
-
-            forceDeflate.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            deflateStartScale.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(deflateStartScale.Current.Value, out float value))
-                    mutateSetting(s => s.DeflateStartScale = Math.Clamp(value, 1f, 25f));
-            };
-
-            forceApproachDifferent.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            approachDifferentScale.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(approachDifferentScale.Current.Value, out float value))
-                    mutateSetting(s => s.ApproachDifferentScale = Math.Clamp(value, 1.5f, 10f));
-            };
-
-            forceNoScope.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            noScopeHiddenComboCount.OnCommit += (_, _) =>
-            {
-                if (int.TryParse(noScopeHiddenComboCount.Current.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
-                    mutateSetting(s => s.NoScopeHiddenComboCount = Math.Clamp(value, 0, 50));
-            };
-
-            forceMagnetised.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            magnetisedAttractionStrength.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(magnetisedAttractionStrength.Current.Value, out float value))
-                    mutateSetting(s => s.MagnetisedAttractionStrength = Math.Clamp(value, 0.05f, 1f));
-            };
-
-            forceRepel.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            repelRepulsionStrength.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(repelRepulsionStrength.Current.Value, out float value))
-                    mutateSetting(s => s.RepelRepulsionStrength = Math.Clamp(value, 0.05f, 1f));
-            };
-
-            forceDepth.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            depthMaxDepth.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(depthMaxDepth.Current.Value, out float value))
-                    mutateSetting(s => s.DepthMaxDepth = Math.Clamp(value, 50f, 200f));
-            };
-
-            forceBloom.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            bloomMaxSizeComboCount.OnCommit += (_, _) =>
-            {
-                if (int.TryParse(bloomMaxSizeComboCount.Current.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
-                    mutateSetting(s => s.BloomMaxSizeComboCount = Math.Clamp(value, 5, 100));
-            };
-            bloomMaxCursorSize.OnCommit += (_, _) =>
-            {
-                if (tryParseFloat(bloomMaxCursorSize.Current.Value, out float value))
-                    mutateSetting(s => s.BloomMaxCursorSize = Math.Clamp(value, 5f, 15f));
-            };
-
-            forceBarrelRoll.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            barrelRollSpinSpeed.OnCommit += (_, _) =>
-            {
-                if (tryParseDouble(barrelRollSpinSpeed.Current.Value, out double value))
-                    mutateSetting(s => s.BarrelRollSpinSpeed = Math.Clamp(value, 0.02, 12));
-            };
-
-            forceMuted.Current.BindValueChanged(v => updateFunModSettingsVisibility());
-            mutedMuteComboCount.OnCommit += (_, _) =>
-            {
-                if (int.TryParse(mutedMuteComboCount.Current.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
-                    mutateSetting(s => s.MutedMuteComboCount = Math.Clamp(value, 0, 500));
-            };
+            showForceMods.Current.BindValueChanged(_ => updateGroupVisibility());
         }
 
         private void mutateSetting(Action<SectionGimmickSettings> settingMutation)
@@ -1008,9 +763,19 @@ namespace osu.Game.Rulesets.Osu.Edit
                 noDrain.Current.Value = settings.NoDrain;
                 reverseHp.Current.Value = settings.ReverseHP;
                 hp300.Current.Value = formatFloat(settings.HP300);
+                hpStart.Current.Value = formatFloat(settings.HPStart);
+                hpCap.Current.Value = formatFloat(settings.HPCap);
                 hp100.Current.Value = formatFloat(settings.HP100);
                 hp50.Current.Value = formatFloat(settings.HP50);
                 hpMiss.Current.Value = formatFloat(settings.HPMiss);
+                hp300AffectsSliderEndsAndTicks.Current.Value = settings.HP300AffectsSliderEndsAndTicks;
+                hp100AffectsSliderEndsAndTicks.Current.Value = settings.HP100AffectsSliderEndsAndTicks;
+                hp50AffectsSliderEndsAndTicks.Current.Value = settings.HP50AffectsSliderEndsAndTicks;
+                hpMissAffectsSliderEndAndTickMisses.Current.Value = settings.HPMissAffectsSliderEndAndTickMisses;
+                showHpSliderRouting.Current.Value = settings.HP300AffectsSliderEndsAndTicks
+                                                    || settings.HP100AffectsSliderEndsAndTicks
+                                                    || settings.HP50AffectsSliderEndsAndTicks
+                                                    || settings.HPMissAffectsSliderEndAndTickMisses;
 
                 enableNoMiss.Current.Value = settings.EnableNoMiss;
 
@@ -1019,6 +784,14 @@ namespace osu.Game.Rulesets.Osu.Edit
                 max100s.Current.Value = settings.Max100s.ToString(CultureInfo.InvariantCulture);
                 max50s.Current.Value = settings.Max50s.ToString(CultureInfo.InvariantCulture);
                 maxMisses.Current.Value = settings.MaxMisses.ToString(CultureInfo.InvariantCulture);
+                max300sAffectsSliderEndsAndTicks.Current.Value = settings.Max300sAffectsSliderEndsAndTicks;
+                max100sAffectsSliderEndsAndTicks.Current.Value = settings.Max100sAffectsSliderEndsAndTicks;
+                max50sAffectsSliderEndsAndTicks.Current.Value = settings.Max50sAffectsSliderEndsAndTicks;
+                maxMissesAffectsSliderEndAndTickMisses.Current.Value = settings.MaxMissesAffectsSliderEndAndTickMisses;
+                showCountSliderRouting.Current.Value = settings.Max300sAffectsSliderEndsAndTicks
+                                                       || settings.Max100sAffectsSliderEndsAndTicks
+                                                       || settings.Max50sAffectsSliderEndsAndTicks
+                                                       || settings.MaxMissesAffectsSliderEndAndTickMisses;
 
                 enableNoMissedSliderEnd.Current.Value = settings.EnableNoMissedSliderEnd;
 
@@ -1027,6 +800,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                 greatOffsetPenaltyHp.Current.Value = formatFloat(settings.GreatOffsetPenaltyHP);
 
                 enableDifficultyOverrides.Current.Value = settings.EnableDifficultyOverrides;
+                difficultyOverrideStartWithBeatmapValues.Current.Value = settings.DifficultyOverrideStartWithBeatmapValues;
                 enableGradualDifficultyChange.Current.Value = settings.EnableGradualDifficultyChange;
                 gradualDifficultyChangeEndTime.Current.Value = formatFloat(settings.GradualDifficultyChangeEndTimeMs);
                 keepDifficultyOverridesAfterSection.Current.Value = settings.KeepDifficultyOverridesAfterSection;
@@ -1039,55 +813,17 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceHardRock.Current.Value = settings.ForceHardRock;
                 forceFlashlight.Current.Value = settings.ForceFlashlight;
                 forceDoubleTime.Current.Value = settings.ForceDoubleTime;
-                forceSingleTap.Current.Value = settings.ForceSingleTap;
-                forceAlternate.Current.Value = settings.ForceAlternate;
-
-                // Fun mods - only update checkbox state, don't auto-show panel
-                // The user controls panel visibility via the checkbox
-                bool anyFunMod = settings.ForceTransform || settings.ForceWiggle || settings.ForceSpinIn
-                    || settings.ForceGrow || settings.ForceDeflate || settings.ForceBarrelRoll
-                    || settings.ForceApproachDifferent || settings.ForceMuted || settings.ForceNoScope
-                    || settings.ForceMagnetised || settings.ForceRepel || settings.ForceFreezeFrame
-                    || settings.ForceBubbles || settings.ForceSynesthesia || settings.ForceDepth || settings.ForceBloom;
-                showFunMods.Current.Value = anyFunMod;
-
-                forceTransform.Current.Value = settings.ForceTransform;
-                forceWiggle.Current.Value = settings.ForceWiggle;
-                forceSpinIn.Current.Value = settings.ForceSpinIn;
-                forceGrow.Current.Value = settings.ForceGrow;
-                forceDeflate.Current.Value = settings.ForceDeflate;
-                forceBarrelRoll.Current.Value = settings.ForceBarrelRoll;
-                forceApproachDifferent.Current.Value = settings.ForceApproachDifferent;
-                forceMuted.Current.Value = settings.ForceMuted;
-                forceNoScope.Current.Value = settings.ForceNoScope;
-                forceMagnetised.Current.Value = settings.ForceMagnetised;
-                forceRepel.Current.Value = settings.ForceRepel;
-                forceFreezeFrame.Current.Value = settings.ForceFreezeFrame;
-                forceBubbles.Current.Value = settings.ForceBubbles;
-                forceSynesthesia.Current.Value = settings.ForceSynesthesia;
-                forceDepth.Current.Value = settings.ForceDepth;
-                forceBloom.Current.Value = settings.ForceBloom;
-
-                // Fun mod adjustable values
-                wiggleStrength.Current.Value = formatFloat(settings.WiggleStrength);
-                growStartScale.Current.Value = formatFloat(settings.GrowStartScale);
-                deflateStartScale.Current.Value = formatFloat(settings.DeflateStartScale);
-                approachDifferentScale.Current.Value = formatFloat(settings.ApproachDifferentScale);
-                noScopeHiddenComboCount.Current.Value = settings.NoScopeHiddenComboCount.ToString(CultureInfo.InvariantCulture);
-                magnetisedAttractionStrength.Current.Value = formatFloat(settings.MagnetisedAttractionStrength);
-                repelRepulsionStrength.Current.Value = formatFloat(settings.RepelRepulsionStrength);
-                depthMaxDepth.Current.Value = formatFloat(settings.DepthMaxDepth);
-                bloomMaxSizeComboCount.Current.Value = settings.BloomMaxSizeComboCount.ToString(CultureInfo.InvariantCulture);
-                bloomMaxCursorSize.Current.Value = formatFloat(settings.BloomMaxCursorSize);
-                barrelRollSpinSpeed.Current.Value = settings.BarrelRollSpinSpeed.ToString(CultureInfo.InvariantCulture);
-                mutedMuteComboCount.Current.Value = settings.MutedMuteComboCount.ToString(CultureInfo.InvariantCulture);
+                showForceMods.Current.Value = settings.ForceHidden
+                                               || settings.ForceNoApproachCircle
+                                               || settings.ForceHardRock
+                                               || settings.ForceFlashlight
+                                               || settings.ForceDoubleTime;
             }
 
             updatingControls = false;
 
             updateGroupVisibility();
             updateValidationState();
-            updateFunModSettingsVisibility();
         }
 
         private void updateGroupVisibility()
@@ -1095,8 +831,14 @@ namespace osu.Game.Rulesets.Osu.Edit
             hpGroupFields.FadeTo(enableHpGimmick.Current.Value ? 1 : 0, 200, Easing.OutQuint);
             hpGroupFields.AlwaysPresent = enableHpGimmick.Current.Value;
 
+            hpSliderRoutingFields.FadeTo(enableHpGimmick.Current.Value && showHpSliderRouting.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            hpSliderRoutingFields.AlwaysPresent = enableHpGimmick.Current.Value && showHpSliderRouting.Current.Value;
+
             countLimitFields.FadeTo(enableCountLimits.Current.Value ? 1 : 0, 200, Easing.OutQuint);
             countLimitFields.AlwaysPresent = enableCountLimits.Current.Value;
+
+            countSliderRoutingFields.FadeTo(enableCountLimits.Current.Value && showCountSliderRouting.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            countSliderRoutingFields.AlwaysPresent = enableCountLimits.Current.Value && showCountSliderRouting.Current.Value;
 
             greatOffsetFields.FadeTo(enableGreatOffsetPenalty.Current.Value ? 1 : 0, 200, Easing.OutQuint);
             greatOffsetFields.AlwaysPresent = enableGreatOffsetPenalty.Current.Value;
@@ -1109,44 +851,9 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             setGradualFinishTimeButton.FadeTo(enableGradualDifficultyChange.Current.Value ? 1 : 0, 200, Easing.OutQuint);
             setGradualFinishTimeButton.AlwaysPresent = enableGradualDifficultyChange.Current.Value;
-        }
 
-        private void updateFunModSettingsVisibility()
-        {
-            if (updatingControls) return;
-
-            wiggleSettings.FadeTo(forceWiggle.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            wiggleSettings.AlwaysPresent = forceWiggle.Current.Value;
-
-            growSettings.FadeTo(forceGrow.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            growSettings.AlwaysPresent = forceGrow.Current.Value;
-
-            deflateSettings.FadeTo(forceDeflate.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            deflateSettings.AlwaysPresent = forceDeflate.Current.Value;
-
-            approachDifferentSettings.FadeTo(forceApproachDifferent.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            approachDifferentSettings.AlwaysPresent = forceApproachDifferent.Current.Value;
-
-            noScopeSettings.FadeTo(forceNoScope.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            noScopeSettings.AlwaysPresent = forceNoScope.Current.Value;
-
-            magnetisedSettings.FadeTo(forceMagnetised.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            magnetisedSettings.AlwaysPresent = forceMagnetised.Current.Value;
-
-            repelSettings.FadeTo(forceRepel.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            repelSettings.AlwaysPresent = forceRepel.Current.Value;
-
-            depthSettings.FadeTo(forceDepth.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            depthSettings.AlwaysPresent = forceDepth.Current.Value;
-
-            bloomSettings.FadeTo(forceBloom.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            bloomSettings.AlwaysPresent = forceBloom.Current.Value;
-
-            barrelRollSettings.FadeTo(forceBarrelRoll.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            barrelRollSettings.AlwaysPresent = forceBarrelRoll.Current.Value;
-
-            mutedSettings.FadeTo(forceMuted.Current.Value ? 1 : 0, 200, Easing.OutQuint);
-            mutedSettings.AlwaysPresent = forceMuted.Current.Value;
+            forceModsFields.FadeTo(showForceMods.Current.Value ? 1 : 0, 200, Easing.OutQuint);
+            forceModsFields.AlwaysPresent = showForceMods.Current.Value;
         }
 
         private void updateValidationState()
@@ -1163,6 +870,37 @@ namespace osu.Game.Rulesets.Osu.Edit
                 validationStatus.Text = $"Validation: {e.Message}";
                 validationStatus.Colour = Color4.IndianRed;
             }
+        }
+
+        private void trySelectSectionFromCurrentObjectSelection()
+        {
+            if (updatingControls)
+                return;
+
+            if (!selectedHitObjects.Any())
+                return;
+
+            var latestSelected = selectedHitObjects.LastOrDefault();
+            if (latestSelected == null)
+                return;
+
+            trySelectSectionForHitObject(latestSelected);
+        }
+
+        private void trySelectSectionForHitObject(HitObject hitObject)
+        {
+            if (updatingControls)
+                return;
+
+            var section = SectionGimmickSectionResolver.Resolve(editorBeatmap.SectionGimmicks, hitObject.StartTime);
+            if (section == null)
+                return;
+
+            if (selectedSectionId.Value == section.Id)
+                return;
+
+            selectedSectionId.Value = section.Id;
+            clock.SeekSmoothlyTo(section.StartTime);
         }
 
         private void updateFloatSetting(FormNumberBox box, Action<SectionGimmickSettings, float> mutation)

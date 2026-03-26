@@ -44,6 +44,9 @@ namespace osu.Game.Rulesets.Osu.Scoring
 
             var settings = section.Settings;
 
+            if (settings.EnableHPGimmick && !float.IsNaN(settings.HPCap))
+                Health.Value = Math.Min(Health.Value, settings.HPCap);
+
             if ((settings.EnableHPGimmick && settings.NoDrain) || settings.EnableGreatOffsetPenalty)
             {
                 // cancel out frame drain while this mode is active.
@@ -67,14 +70,16 @@ namespace osu.Game.Rulesets.Osu.Scoring
                     return;
                 }
 
-                if (settings.EnableNoMissedSliderEnd && result.HitObject is SliderTailCircle && result.Type == HitResult.IgnoreMiss)
+                if (settings.EnableNoMissedSliderEnd &&
+                    (result.HitObject is SliderEndCircle || result.HitObject is SliderTick) &&
+                    (result.Type == HitResult.IgnoreMiss || result.Type == HitResult.LargeTickMiss || result.Type == HitResult.SmallTickMiss))
                 {
                     TriggerFailure();
                     return;
                 }
 
-                countTracker.Record(result.Type);
-                if (countTracker.Exceeds(settings, result.Type))
+                countTracker.Record(result, settings);
+                if (countTracker.Exceeds(settings, result))
                 {
                     TriggerFailure();
                     return;
@@ -106,7 +111,7 @@ namespace osu.Game.Rulesets.Osu.Scoring
             if (!settings.EnableHPGimmick)
                 return base.GetHealthIncreaseFor(result);
 
-            float hpValue = result.Type switch
+            float hpValue = mapResultForHp(result, settings) switch
             {
                 HitResult.Great => settings.HP300,
                 HitResult.Ok => settings.HP100,
@@ -120,7 +125,47 @@ namespace osu.Game.Rulesets.Osu.Scoring
 
             // When ReverseHP is false, positive HP values should drain (subtract from health)
             // When ReverseHP is true, positive HP values should heal (add to health)
-            return settings.ReverseHP ? hpValue : -hpValue;
+            double delta = settings.ReverseHP ? hpValue : -hpValue;
+
+            if (!float.IsNaN(settings.HPCap))
+                delta = Math.Min(delta, settings.HPCap - Health.Value);
+
+            return delta;
+        }
+
+        private static HitResult mapResultForHp(JudgementResult result, SectionGimmickSettings settings)
+        {
+            switch (result.Type)
+            {
+                case HitResult.Great:
+                case HitResult.Ok:
+                case HitResult.Meh:
+                case HitResult.Miss:
+                    return result.Type;
+
+                case HitResult.LargeTickHit:
+                case HitResult.SmallTickHit:
+                case HitResult.SliderTailHit:
+                    if (settings.HP300AffectsSliderEndsAndTicks)
+                        return HitResult.Great;
+                    if (settings.HP100AffectsSliderEndsAndTicks)
+                        return HitResult.Ok;
+                    if (settings.HP50AffectsSliderEndsAndTicks)
+                        return HitResult.Meh;
+                    return HitResult.None;
+
+                case HitResult.LargeTickMiss:
+                case HitResult.SmallTickMiss:
+                    return settings.HPMissAffectsSliderEndAndTickMisses ? HitResult.Miss : HitResult.None;
+
+                case HitResult.IgnoreMiss:
+                    return settings.HPMissAffectsSliderEndAndTickMisses && result.HitObject is SliderEndCircle
+                        ? HitResult.Miss
+                        : HitResult.None;
+
+                default:
+                    return HitResult.None;
+            }
         }
 
         private SectionGimmickSection? resolveSection(double time)
@@ -139,6 +184,10 @@ namespace osu.Game.Rulesets.Osu.Scoring
                 countTracker.EnterSection(section.Id);
 
                 var settings = section.Settings;
+
+                if (settings.EnableHPGimmick && !float.IsNaN(settings.HPStart))
+                    Health.Value = settings.HPStart;
+
                 if ((settings.EnableHPGimmick && settings.NoDrain && !settings.ReverseHP) && settings.EnableGreatOffsetPenalty)
                 {
                     // both enabled: no-op special case, handled by per-hit logic.

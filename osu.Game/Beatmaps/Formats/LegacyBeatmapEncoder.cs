@@ -441,11 +441,21 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.Max100s >= 0) yield return $"Max100s={settings.Max100s}";
             if (settings.Max50s >= 0) yield return $"Max50s={settings.Max50s}";
             if (settings.MaxMisses >= 0) yield return $"MaxMisses={settings.MaxMisses}";
+            if (settings.Max300sAffectsSliderEndsAndTicks) yield return "Max300sAffectsSliderEndsAndTicks=True";
+            if (settings.Max100sAffectsSliderEndsAndTicks) yield return "Max100sAffectsSliderEndsAndTicks=True";
+            if (settings.Max50sAffectsSliderEndsAndTicks) yield return "Max50sAffectsSliderEndsAndTicks=True";
+            if (settings.MaxMissesAffectsSliderEndAndTickMisses) yield return "MaxMissesAffectsSliderEndAndTickMisses=True";
 
             if (!float.IsNaN(settings.HP300)) yield return $"HP300={settings.HP300.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.HP100)) yield return $"HP100={settings.HP100.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.HP50)) yield return $"HP50={settings.HP50.ToString(CultureInfo.InvariantCulture)}";
             if (!float.IsNaN(settings.HPMiss)) yield return $"HPMiss={settings.HPMiss.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.HPStart)) yield return $"HPStart={settings.HPStart.ToString(CultureInfo.InvariantCulture)}";
+            if (!float.IsNaN(settings.HPCap)) yield return $"HPCap={settings.HPCap.ToString(CultureInfo.InvariantCulture)}";
+            if (settings.HP300AffectsSliderEndsAndTicks) yield return "HP300AffectsSliderEndsAndTicks=True";
+            if (settings.HP100AffectsSliderEndsAndTicks) yield return "HP100AffectsSliderEndsAndTicks=True";
+            if (settings.HP50AffectsSliderEndsAndTicks) yield return "HP50AffectsSliderEndsAndTicks=True";
+            if (settings.HPMissAffectsSliderEndAndTickMisses) yield return "HPMissAffectsSliderEndAndTickMisses=True";
 
             if (settings.NoDrain) yield return "NoDrain=True";
             if (settings.ReverseHP) yield return "ReverseHP=True";
@@ -454,6 +464,7 @@ namespace osu.Game.Beatmaps.Formats
             if (!float.IsNaN(settings.GreatOffsetPenaltyHP)) yield return $"GreatOffsetPenaltyHP={settings.GreatOffsetPenaltyHP.ToString(CultureInfo.InvariantCulture)}";
 
             if (settings.EnableDifficultyOverrides) yield return "EnableDifficultyOverrides=True";
+            if (settings.DifficultyOverrideStartWithBeatmapValues) yield return "DifficultyOverrideStartWithBeatmapValues=True";
             if (settings.EnableGradualDifficultyChange) yield return "EnableGradualDifficultyChange=True";
             if (!float.IsNaN(settings.GradualDifficultyChangeEndTimeMs)) yield return $"GradualDifficultyChangeEndTimeMs={settings.GradualDifficultyChangeEndTimeMs.ToString(CultureInfo.InvariantCulture)}";
             if (settings.KeepDifficultyOverridesAfterSection) yield return "KeepDifficultyOverridesAfterSection=True";

@@ -30,6 +30,7 @@ using osu.Framework.Timing;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Configuration;
 using osu.Game.Database;
 using osu.Game.Extensions;
@@ -586,6 +587,9 @@ namespace osu.Game.Screens.Edit
                 return false;
             }
 
+            if (!validateSectionGimmicksForSaveOrExit())
+                return false;
+
             try
             {
                 // save the loaded beatmap's data stream.
@@ -892,6 +896,9 @@ namespace osu.Game.Screens.Edit
 
             if (!ExitConfirmed)
             {
+                if (!validateSectionGimmicksForSaveOrExit())
+                    return true;
+
                 // dialog overlay may not be available in visual tests.
                 if (dialogOverlay == null)
                 {
@@ -986,6 +993,23 @@ namespace osu.Game.Screens.Edit
         }
 
         #region Clipboard support
+
+        private bool validateSectionGimmicksForSaveOrExit()
+        {
+            try
+            {
+                SectionGimmicksValidator.Validate(editorBeatmap.SectionGimmicks ?? new BeatmapSectionGimmicks());
+                return true;
+            }
+            catch (Exception ex)
+            {
+                notifications?.Post(new SimpleErrorNotification
+                {
+                    Text = $"Section gimmicks are invalid: {ex.Message}. Fix before saving or exiting."
+                });
+                return false;
+            }
+        }
 
         private EditorMenuItem cutMenuItem;
         private EditorMenuItem copyMenuItem;

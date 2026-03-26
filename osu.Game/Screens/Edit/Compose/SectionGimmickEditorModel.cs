@@ -39,18 +39,15 @@ namespace osu.Game.Screens.Edit.Compose
 
                 double startTime = time;
 
-                if (sections.Count > 0)
-                {
-                    var latest = sections.MaxBy(s => s.StartTime)!;
+                // Keep new section anchored to user timeline position.
+                // If the previous section spans past this point (or is open-ended), cap it here.
+                var previous = sections
+                    .Where(s => s.StartTime < startTime)
+                    .OrderBy(s => s.StartTime)
+                    .LastOrDefault();
 
-                    if (latest.EndTime < 0)
-                    {
-                        startTime = Math.Max(startTime, latest.StartTime + 1);
-                        latest.EndTime = startTime;
-                    }
-                    else if (startTime < latest.EndTime)
-                        startTime = latest.EndTime;
-                }
+                if (previous != null && (previous.EndTime < 0 || previous.EndTime > startTime))
+                    previous.EndTime = startTime;
 
                 var newSettings = new SectionGimmickSettings();
 
@@ -58,14 +55,18 @@ namespace osu.Game.Screens.Edit.Compose
                 // inherit difficulty override values from the previous section
                 if (sections.Count > 0)
                 {
-                    var latest = sections.MaxBy(s => s.StartTime)!;
-                    if (latest.Settings.KeepDifficultyOverridesAfterSection &&
-                        latest.Settings.EnableDifficultyOverrides)
+                    var source = sections
+                        .Where(s => s.StartTime < startTime)
+                        .OrderBy(s => s.StartTime)
+                        .LastOrDefault();
+
+                    if (source?.Settings.KeepDifficultyOverridesAfterSection == true &&
+                        source.Settings.EnableDifficultyOverrides)
                     {
                         newSettings.EnableDifficultyOverrides = true;
-                        newSettings.SectionCircleSize = latest.Settings.SectionCircleSize;
-                        newSettings.SectionApproachRate = latest.Settings.SectionApproachRate;
-                        newSettings.SectionOverallDifficulty = latest.Settings.SectionOverallDifficulty;
+                        newSettings.SectionCircleSize = source.Settings.SectionCircleSize;
+                        newSettings.SectionApproachRate = source.Settings.SectionApproachRate;
+                        newSettings.SectionOverallDifficulty = source.Settings.SectionOverallDifficulty;
                     }
                 }
 
@@ -90,8 +91,29 @@ namespace osu.Game.Screens.Edit.Compose
 
             mutate(sections =>
             {
+                var orderedBefore = sections.OrderBy(s => s.StartTime).ToList();
+                int removedIndex = orderedBefore.FindIndex(s => s.Id == selectedId);
+
+                if (removedIndex < 0)
+                    return sections.FirstOrDefault()?.Id ?? -1;
+
                 sections.RemoveAll(s => s.Id == selectedId);
-                return sections.FirstOrDefault()?.Id ?? -1;
+
+                var orderedAfter = sections.OrderBy(s => s.StartTime).ToList();
+
+                // Re-number section IDs to keep them contiguous after deletion.
+                for (int i = 0; i < orderedAfter.Count; i++)
+                    orderedAfter[i].Id = i;
+
+                sections.Clear();
+                sections.AddRange(orderedAfter);
+
+                if (orderedAfter.Count == 0)
+                    return -1;
+
+                // Select the previous section (or first remaining if deleted section was first).
+                int newSelectedIndex = Math.Clamp(removedIndex - 1, 0, orderedAfter.Count - 1);
+                return orderedAfter[newSelectedIndex].Id;
             });
         }
 
@@ -244,15 +266,26 @@ namespace osu.Game.Screens.Edit.Compose
                 Max100s = settings.Max100s,
                 Max50s = settings.Max50s,
                 MaxMisses = settings.MaxMisses,
+                Max300sAffectsSliderEndsAndTicks = settings.Max300sAffectsSliderEndsAndTicks,
+                Max100sAffectsSliderEndsAndTicks = settings.Max100sAffectsSliderEndsAndTicks,
+                Max50sAffectsSliderEndsAndTicks = settings.Max50sAffectsSliderEndsAndTicks,
+                MaxMissesAffectsSliderEndAndTickMisses = settings.MaxMissesAffectsSliderEndAndTickMisses,
                 HP300 = settings.HP300,
                 HP100 = settings.HP100,
                 HP50 = settings.HP50,
                 HPMiss = settings.HPMiss,
+                HPStart = settings.HPStart,
+                HPCap = settings.HPCap,
+                HP300AffectsSliderEndsAndTicks = settings.HP300AffectsSliderEndsAndTicks,
+                HP100AffectsSliderEndsAndTicks = settings.HP100AffectsSliderEndsAndTicks,
+                HP50AffectsSliderEndsAndTicks = settings.HP50AffectsSliderEndsAndTicks,
+                HPMissAffectsSliderEndAndTickMisses = settings.HPMissAffectsSliderEndAndTickMisses,
                 NoDrain = settings.NoDrain,
                 ReverseHP = settings.ReverseHP,
                 GreatOffsetThresholdMs = settings.GreatOffsetThresholdMs,
                 GreatOffsetPenaltyHP = settings.GreatOffsetPenaltyHP,
                 EnableDifficultyOverrides = settings.EnableDifficultyOverrides,
+                DifficultyOverrideStartWithBeatmapValues = settings.DifficultyOverrideStartWithBeatmapValues,
                 EnableGradualDifficultyChange = settings.EnableGradualDifficultyChange,
                 GradualDifficultyChangeEndTimeMs = settings.GradualDifficultyChangeEndTimeMs,
                 KeepDifficultyOverridesAfterSection = settings.KeepDifficultyOverridesAfterSection,

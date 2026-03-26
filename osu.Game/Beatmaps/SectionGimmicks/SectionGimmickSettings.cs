@@ -18,10 +18,23 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public int Max50s { get; set; } = -1;
         public int MaxMisses { get; set; } = -1;
 
+        public bool Max300sAffectsSliderEndsAndTicks { get; set; }
+        public bool Max100sAffectsSliderEndsAndTicks { get; set; }
+        public bool Max50sAffectsSliderEndsAndTicks { get; set; }
+        public bool MaxMissesAffectsSliderEndAndTickMisses { get; set; }
+
         public float HP300 { get; set; } = float.NaN;
         public float HP100 { get; set; } = float.NaN;
         public float HP50 { get; set; } = float.NaN;
         public float HPMiss { get; set; } = float.NaN;
+
+        public float HPStart { get; set; } = float.NaN;
+        public float HPCap { get; set; } = float.NaN;
+
+        public bool HP300AffectsSliderEndsAndTicks { get; set; }
+        public bool HP100AffectsSliderEndsAndTicks { get; set; }
+        public bool HP50AffectsSliderEndsAndTicks { get; set; }
+        public bool HPMissAffectsSliderEndAndTickMisses { get; set; }
 
         public bool NoDrain { get; set; }
         public bool ReverseHP { get; set; }
@@ -30,6 +43,7 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public float GreatOffsetPenaltyHP { get; set; } = float.NaN;
 
         public bool EnableDifficultyOverrides { get; set; }
+        public bool DifficultyOverrideStartWithBeatmapValues { get; set; }
         public bool EnableGradualDifficultyChange { get; set; }
         public float GradualDifficultyChangeEndTimeMs { get; set; } = float.NaN;
         public bool KeepDifficultyOverridesAfterSection { get; set; }
