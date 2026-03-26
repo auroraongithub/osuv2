@@ -56,14 +56,16 @@ namespace osu.Game.Rulesets.Osu.UI
 
             bool isForced = isFlashlightForcedAtCurrentTime();
             float? radius = getFlashlightRadiusAtCurrentTime();
+            float fade = getFlashlightFadeAtCurrentTime(isForced);
 
-            if (isForced == wasFlashlightForced && nullableFloatEquals(radius, lastRadius))
+            if (isForced == wasFlashlightForced && nullableFloatEquals(radius, lastRadius) && Math.Abs(fade - forcedFlashlightMod.CurrentSectionFade) <= 0.001f)
                 return;
 
             wasFlashlightForced = isForced;
             lastRadius = radius;
             forcedFlashlightMod.SetSectionForceActive(isForced);
             forcedFlashlightMod.SetSectionRadius(radius);
+            forcedFlashlightMod.SetSectionFade(fade);
         }
 
         private bool isFlashlightForcedAtCurrentTime()
@@ -102,6 +104,32 @@ namespace osu.Game.Rulesets.Osu.UI
             return null;
         }
 
+        private float getFlashlightFadeAtCurrentTime(bool isForced)
+        {
+            if (!isForced)
+                return 0;
+
+            SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(gimmicks, Time.Current);
+            if (section == null || !section.Settings.ForceFlashlight)
+                return 1;
+
+            var settings = section.Settings;
+
+            if (!settings.EnableGradualFlashlightFadeIn)
+                return 1;
+
+            double sectionEnd = section.EndTime >= 0 ? section.EndTime : double.MaxValue;
+            double gradualEnd = float.IsNaN(settings.GradualFlashlightRadiusEndTimeMs) ? sectionEnd : settings.GradualFlashlightRadiusEndTimeMs;
+
+            if (gradualEnd > sectionEnd)
+                gradualEnd = sectionEnd;
+
+            if (gradualEnd <= section.StartTime)
+                return 1;
+
+            return (float)Math.Clamp((Time.Current - section.StartTime) / (gradualEnd - section.StartTime), 0, 1);
+        }
+
         private static float computeSectionRadius(SectionGimmickSection section, double currentTime)
         {
             var settings = section.Settings;
@@ -123,8 +151,10 @@ namespace osu.Game.Rulesets.Osu.UI
 
             double progress = Math.Clamp((currentTime - section.StartTime) / (gradualEnd - section.StartTime), 0, 1);
             const float defaultRadius = 125f;
+            const float shrinkStartRadius = 400f;
+            float startRadius = settings.EnableGradualFlashlightRadiusChange ? shrinkStartRadius : defaultRadius;
 
-            return (float)(defaultRadius + (settings.FlashlightRadius - defaultRadius) * progress);
+            return (float)(startRadius + (settings.FlashlightRadius - startRadius) * progress);
         }
 
         private static bool nullableFloatEquals(float? a, float? b)
@@ -166,6 +196,11 @@ namespace osu.Game.Rulesets.Osu.UI
             public void SetSectionRadius(float? radius)
                 => flashlight?.SetSectionRadius(radius);
 
+            public void SetSectionFade(float fade)
+                => flashlight?.SetSectionFade(fade);
+
+            public float CurrentSectionFade => flashlight?.CurrentSectionFade ?? 0;
+
             public void ApplyToDrawableHitObject(DrawableHitObject drawable)
             {
                 if (drawable is DrawableSlider slider)
@@ -179,6 +214,8 @@ namespace osu.Game.Rulesets.Osu.UI
 
             private bool sectionActive;
             private float? sectionRadius;
+            private float sectionFade = 1;
+            public float CurrentSectionFade => Alpha;
 
             public SectionForcedFlashlight(ModFlashlight modFlashlight)
                 : base(modFlashlight)
@@ -196,8 +233,7 @@ namespace osu.Game.Rulesets.Osu.UI
 
                 sectionActive = active;
 
-                ClearTransforms(targetMember: nameof(Alpha));
-                this.FadeTo(sectionActive ? 1 : 0, 120);
+                sectionFade = sectionActive ? 1 : 0;
 
                 if (!sectionActive)
                     FlashlightDim = 0;
@@ -212,6 +248,14 @@ namespace osu.Game.Rulesets.Osu.UI
 
                 if (sectionActive)
                     applyRadius();
+            }
+
+            public void SetSectionFade(float fade)
+            {
+                if (!sectionActive)
+                    return;
+
+                sectionFade = Math.Clamp(fade, 0, 1);
             }
 
             public void OnSliderTrackingChange(DrawableSlider slider)
@@ -233,13 +277,19 @@ namespace osu.Game.Rulesets.Osu.UI
             protected override void UpdateFlashlightSize(float size)
             {
                 float target = sectionActive && sectionRadius.HasValue ? sectionRadius.Value : size;
-                this.TransformTo(nameof(FlashlightSize), new Vector2(0, target), ModFlashlight<OsuHitObject>.FLASHLIGHT_FADE_DURATION);
+                FlashlightSize = new Vector2(0, target);
             }
 
             private void applyRadius()
             {
                 float target = sectionRadius ?? GetSize();
-                this.TransformTo(nameof(FlashlightSize), new Vector2(0, target), ModFlashlight<OsuHitObject>.FLASHLIGHT_FADE_DURATION);
+                FlashlightSize = new Vector2(0, target);
+            }
+
+            protected override void Update()
+            {
+                base.Update();
+                Alpha = sectionActive ? sectionFade : 0;
             }
 
             protected override string FragmentShader => "CircularFlashlight";
