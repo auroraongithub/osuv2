@@ -180,19 +180,13 @@ namespace osu.Game.Rulesets.Osu.Edit
         }
 
         private void bindFloat(FormNumberBox source, Action<osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickSettings, float> setter, Func<float, float> clamp)
-        {
-            source.OnCommit += (_, _) => setFloat(source, setter, clamp);
-            source.Current.BindValueChanged(_ => setFloat(source, setter, clamp));
-        }
+            => source.OnCommit += (_, _) => setFloat(source, setter, clamp);
 
         private void bindFloatOnCommitOnly(FormNumberBox source, Action<osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickSettings, float> setter, Func<float, float> clamp)
             => source.OnCommit += (_, _) => setFloat(source, setter, clamp);
 
         private void bindInt(FormNumberBox source, Action<osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickSettings, int> setter, Func<int, int> clamp)
-        {
-            source.OnCommit += (_, _) => setInt(source, setter, clamp);
-            source.Current.BindValueChanged(_ => setInt(source, setter, clamp));
-        }
+            => source.OnCommit += (_, _) => setInt(source, setter, clamp);
 
         private void scheduleSelectionUpdate()
         {

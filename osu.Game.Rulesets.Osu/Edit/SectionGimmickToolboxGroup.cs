@@ -1503,25 +1503,16 @@ namespace osu.Game.Rulesets.Osu.Edit
         }
 
         private void bindFloatSetting(FormNumberBox box, Action<SectionGimmickSettings, float> mutation, Func<float, float> clamp)
-        {
-            box.OnCommit += (_, _) => updateClampedFloatSetting(box, mutation, clamp);
-            box.Current.BindValueChanged(_ => updateClampedFloatSetting(box, mutation, clamp));
-        }
+            => box.OnCommit += (_, _) => updateClampedFloatSetting(box, mutation, clamp);
 
         private void bindFloatSettingOnCommitOnly(FormNumberBox box, Action<SectionGimmickSettings, float> mutation, Func<float, float> clamp)
             => box.OnCommit += (_, _) => updateClampedFloatSetting(box, mutation, clamp);
 
         private void bindIntSetting(FormNumberBox box, Action<SectionGimmickSettings, int> mutation, Func<int, int> clamp)
-        {
-            box.OnCommit += (_, _) => updateClampedIntSetting(box, mutation, clamp);
-            box.Current.BindValueChanged(_ => updateClampedIntSetting(box, mutation, clamp));
-        }
+            => box.OnCommit += (_, _) => updateClampedIntSetting(box, mutation, clamp);
 
         private void bindDoubleSetting(FormNumberBox box, Action<SectionGimmickSettings, double> mutation, Func<double, double> clamp)
-        {
-            box.OnCommit += (_, _) => updateClampedDoubleSetting(box, mutation, clamp);
-            box.Current.BindValueChanged(_ => updateClampedDoubleSetting(box, mutation, clamp));
-        }
+            => box.OnCommit += (_, _) => updateClampedDoubleSetting(box, mutation, clamp);
 
         private void updateClampedFloatSetting(FormNumberBox box, Action<SectionGimmickSettings, float> mutation, Func<float, float> clamp)
         {
