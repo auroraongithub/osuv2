@@ -618,6 +618,14 @@ namespace osu.Game.Rulesets.Osu.Edit
             if (updatingControls)
                 return;
 
+            // Avoid mutating defaults while controls are disabled (can happen during initial load / selection sync).
+            if (sectionCircleSize.Current.Disabled
+                || sectionApproachRate.Current.Disabled
+                || sectionOverallDifficulty.Current.Disabled
+                || sectionStackLeniency.Current.Disabled
+                || sectionTickRate.Current.Disabled)
+                return;
+
             sectionCircleSize.Current.Default = editorBeatmap.Difficulty.CircleSize;
             sectionApproachRate.Current.Default = editorBeatmap.Difficulty.ApproachRate;
             sectionOverallDifficulty.Current.Default = editorBeatmap.Difficulty.OverallDifficulty;
