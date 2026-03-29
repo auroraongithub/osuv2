@@ -1131,9 +1131,9 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private void bindControlEvents()
         {
-            // Use bindable change instead of commit-only so section names are not lost
-            // when user presses apply/save while text box still has focus.
-            sectionNameBox.Current.BindValueChanged(v => mutateSetting(s => s.SectionName = v.NewValue));
+            // Commit section names on commit/focus loss to avoid reloading controls every keypress,
+            // which can steal focus from the textbox while typing.
+            sectionNameBox.OnCommit += (_, _) => mutateSetting(s => s.SectionName = sectionNameBox.Current.Value);
 
             startTimeBox.OnCommit += (_, _) =>
             {
