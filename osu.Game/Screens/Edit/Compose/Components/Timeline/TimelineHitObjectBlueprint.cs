@@ -329,6 +329,9 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
 
             private ScheduledDelegate? dragOperation;
 
+            private double? dragStartDuration;
+            private double? dragStartSliderVelocity;
+
             public Action<DragEvent?>? OnDragHandled;
 
             public override bool HandlePositionalInput => hitObject != null;
@@ -408,6 +411,15 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
             {
                 changeHandler?.BeginChange();
 
+                dragStartDuration = null;
+                dragStartSliderVelocity = null;
+
+                if (hitObject is IHasRepeats repeatHitObject && hitObject is IHasSliderVelocity hasSliderVelocity)
+                {
+                    dragStartDuration = repeatHitObject.Duration;
+                    dragStartSliderVelocity = hasSliderVelocity.SliderVelocityMultiplier;
+                }
+
                 var selectionItems = beatmap.SelectedHitObjects;
 
                 if (!selectionItems.Contains(hitObject))
@@ -447,7 +459,34 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
 
                                 if (e.CurrentState.Keyboard.ShiftPressed && hitObject is IHasSliderVelocity hasSliderVelocity)
                                 {
-                                    double newVelocity = hasSliderVelocity.SliderVelocityMultiplier * (repeatHitObject.Duration / proposedDuration);
+                                    if (!dragStartDuration.HasValue || !dragStartSliderVelocity.HasValue)
+                                        return;
+
+                                    // If snapped time resolves to non-positive duration, only allow unsnapped continuation
+                                    // once at 1/16 (or finer) where the user may want to go below the smallest snapped step.
+                                    if (!double.IsFinite(proposedDuration) || proposedDuration <= 0)
+                                    {
+                                        if (beatSnapProvider.BeatDivisor < 16)
+                                            return;
+
+                                        double unsnappedTime = timeline.TimeAtScreenSpacePosition(e.ScreenSpaceMousePosition);
+                                        proposedDuration = unsnappedTime - hitObject.StartTime;
+
+                                        if (!double.IsFinite(proposedDuration) || proposedDuration <= 0)
+                                            return;
+                                    }
+
+                                    // Derive from drag-start baseline to avoid multiplicative runaway
+                                    // when duration updates are temporarily out-of-date during drag.
+                                    double durationAtUnitVelocity = dragStartDuration.Value * dragStartSliderVelocity.Value;
+
+                                    if (!double.IsFinite(durationAtUnitVelocity) || durationAtUnitVelocity <= 0)
+                                        return;
+
+                                    double newVelocity = durationAtUnitVelocity / proposedDuration;
+
+                                    if (!double.IsFinite(newVelocity) || newVelocity < 0)
+                                        return;
 
                                     if (Precision.AlmostEquals(newVelocity, hasSliderVelocity.SliderVelocityMultiplier))
                                         return;
@@ -501,6 +540,9 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                 changeHandler?.EndChange();
                 OnDragHandled?.Invoke(null);
                 objsToAdjust.Clear();
+
+                dragStartDuration = null;
+                dragStartSliderVelocity = null;
             }
         }
 

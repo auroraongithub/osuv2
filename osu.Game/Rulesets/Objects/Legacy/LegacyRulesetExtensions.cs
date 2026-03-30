@@ -30,7 +30,9 @@ namespace osu.Game.Rulesets.Objects.Legacy
 
                 case "osu":
                 case "fruits":
-                    bpmMultiplier = sliderVelocityAsBeatLength < 0 ? Math.Clamp((float)-sliderVelocityAsBeatLength, 10, 1000) / 100.0 : 1;
+                    // Historically clamped to [10, 1000], which hard-capped effective slider velocity at 10x.
+                    // Use a much smaller lower bound so high SV values can continue to reduce effective beat length.
+                    bpmMultiplier = sliderVelocityAsBeatLength < 0 ? Math.Clamp((float)-sliderVelocityAsBeatLength, 0.1f, 1000) / 100.0 : 1;
                     break;
 
                 default:

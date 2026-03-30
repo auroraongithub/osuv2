@@ -334,6 +334,11 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
             return x / Content.DrawWidth * editorClock.TrackLength;
         }
 
+        public double TimeAtScreenSpacePosition(Vector2 screenSpacePosition)
+        {
+            return TimeAtPosition(Content.ToLocalSpace(screenSpacePosition).X);
+        }
+
         public float PositionAtTime(double time)
         {
             return (float)(time / editorClock.TrackLength * Content.DrawWidth);
