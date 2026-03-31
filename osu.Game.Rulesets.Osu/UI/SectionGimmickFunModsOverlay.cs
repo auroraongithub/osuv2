@@ -66,6 +66,7 @@ namespace osu.Game.Rulesets.Osu.UI
         private bool selectedMuted;
         private bool selectedBarrelRoll;
         private bool selectedNoScope;
+        private bool selectedTraceable;
         private bool selectedBloom;
         private bool selectedMagnetised;
         private bool selectedRepel;
@@ -116,6 +117,7 @@ namespace osu.Game.Rulesets.Osu.UI
             selectedMuted = hasSelectedMod<OsuModMuted>();
             selectedBarrelRoll = hasSelectedMod<OsuModBarrelRoll>();
             selectedNoScope = hasSelectedMod<OsuModNoScope>();
+            selectedTraceable = hasSelectedMod<OsuModTraceable>();
             selectedBloom = hasSelectedMod<OsuModBloom>();
             selectedMagnetised = hasSelectedMod<OsuModMagnetised>();
             selectedRepel = hasSelectedMod<OsuModRepel>();
@@ -224,6 +226,9 @@ namespace osu.Game.Rulesets.Osu.UI
 
                 if (settings.ForceFreezeFrame && !selectedFreezeFrame)
                     applyCustomFreezeFrame(drawable);
+
+                if (settings.ForceTraceable && !selectedTraceable)
+                    applyModToDrawable(new OsuModTraceable(), drawable);
             }
         }
 
@@ -611,6 +616,7 @@ namespace osu.Game.Rulesets.Osu.UI
                 ForceNoApproachCircle = source.ForceNoApproachCircle,
                 ForceHardRock = source.ForceHardRock,
                 ForceFlashlight = source.ForceFlashlight,
+                ForceTraceable = source.ForceTraceable,
                 FlashlightRadius = source.FlashlightRadius,
             };
 
@@ -633,6 +639,7 @@ namespace osu.Game.Rulesets.Osu.UI
                 || s.Settings.ForceApproachDifferent
                 || s.Settings.ForceMuted
                 || s.Settings.ForceNoScope
+                || s.Settings.ForceTraceable
                 || s.Settings.ForceMagnetised
                 || s.Settings.ForceRepel
                 || s.Settings.ForceFreezeFrame

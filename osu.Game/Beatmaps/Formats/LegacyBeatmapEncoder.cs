@@ -496,6 +496,7 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
             if (settings.ForceHardRock) yield return "ForceHardRock=True";
             if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
+            if (settings.ForceTraceable) yield return "ForceTraceable=True";
             if (!float.IsNaN(settings.FlashlightRadius)) yield return $"FlashlightRadius={settings.FlashlightRadius.ToString(CultureInfo.InvariantCulture)}";
             if (settings.EnableGradualFlashlightRadiusChange) yield return "EnableGradualFlashlightRadiusChange=True";
             if (settings.EnableGradualFlashlightFadeIn) yield return "EnableGradualFlashlightFadeIn=True";
@@ -577,6 +578,7 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
             if (settings.ForceHardRock) yield return "ForceHardRock=True";
             if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
+            if (settings.ForceTraceable) yield return "ForceTraceable=True";
             if (!float.IsNaN(settings.FlashlightRadius)) yield return $"FlashlightRadius={settings.FlashlightRadius.ToString(CultureInfo.InvariantCulture)}";
         }
 

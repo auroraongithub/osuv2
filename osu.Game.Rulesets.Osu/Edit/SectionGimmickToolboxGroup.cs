@@ -173,6 +173,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceMuted = null!;
         private FormNumberBox mutedMuteComboCount = null!;
         private FormCheckBox forceNoScope = null!;
+        private FormCheckBox forceTraceable = null!;
         private FormNumberBox noScopeHiddenComboCount = null!;
         private FormCheckBox forceMagnetised = null!;
         private FormNumberBox magnetisedAttractionStrength = null!;
@@ -1013,6 +1014,10 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         Caption = "Force No Scope",
                                     },
+                                    forceTraceable = new FormCheckBox
+                                    {
+                                        Caption = "Force Traceable",
+                                    },
                                     noScopeHiddenComboCount = new FormNumberBox
                                     {
                                         Caption = "No scope hidden combo count",
@@ -1272,6 +1277,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceMuted.Current.BindValueChanged(v => mutateSetting(s => s.ForceMuted = v.NewValue));
             bindIntSetting(mutedMuteComboCount, (s, v) => s.MutedMuteComboCount = v, v => Math.Clamp(v, 0, 500));
             forceNoScope.Current.BindValueChanged(v => mutateSetting(s => s.ForceNoScope = v.NewValue));
+            forceTraceable.Current.BindValueChanged(v => mutateSetting(s => s.ForceTraceable = v.NewValue));
             bindIntSetting(noScopeHiddenComboCount, (s, v) => s.NoScopeHiddenComboCount = v, v => Math.Clamp(v, 0, 50));
             forceMagnetised.Current.BindValueChanged(v => mutateSetting(s => s.ForceMagnetised = v.NewValue));
             bindFloatSetting(magnetisedAttractionStrength, (s, v) => s.MagnetisedAttractionStrength = v, v => Math.Clamp(v, 0.05f, 1f));
@@ -1452,6 +1458,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceMuted.Current.Value = settings.ForceMuted;
                 mutedMuteComboCount.Current.Value = settings.MutedMuteComboCount.ToString(CultureInfo.InvariantCulture);
                 forceNoScope.Current.Value = settings.ForceNoScope;
+                forceTraceable.Current.Value = settings.ForceTraceable;
                 noScopeHiddenComboCount.Current.Value = settings.NoScopeHiddenComboCount.ToString(CultureInfo.InvariantCulture);
                 forceMagnetised.Current.Value = settings.ForceMagnetised;
                 magnetisedAttractionStrength.Current.Value = formatFloat(settings.MagnetisedAttractionStrength);
@@ -1809,6 +1816,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                || settings.ForceApproachDifferent
                || settings.ForceMuted
                || settings.ForceNoScope
+               || settings.ForceTraceable
                || settings.ForceMagnetised
                || settings.ForceRepel
                || settings.ForceFreezeFrame

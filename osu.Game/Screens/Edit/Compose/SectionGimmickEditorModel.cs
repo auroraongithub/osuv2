@@ -323,6 +323,7 @@ namespace osu.Game.Screens.Edit.Compose
                 ForceNoApproachCircle = settings.ForceNoApproachCircle,
                 ForceHardRock = settings.ForceHardRock,
                 ForceFlashlight = settings.ForceFlashlight,
+                ForceTraceable = settings.ForceTraceable,
                 FlashlightRadius = settings.FlashlightRadius,
                 EnableGradualFlashlightRadiusChange = settings.EnableGradualFlashlightRadiusChange,
                 EnableGradualFlashlightFadeIn = settings.EnableGradualFlashlightFadeIn,

@@ -717,6 +717,7 @@ namespace osu.Game.Beatmaps.Formats
                         case "ForceNoApproachCircle": section.Settings.ForceNoApproachCircle = parseBool(value); break;
                         case "ForceHardRock": section.Settings.ForceHardRock = parseBool(value); break;
                         case "ForceFlashlight": section.Settings.ForceFlashlight = parseBool(value); break;
+                        case "ForceTraceable": section.Settings.ForceTraceable = parseBool(value); break;
                         case "FlashlightRadius": section.Settings.FlashlightRadius = Parsing.ParseFloat(value); break;
                         case "EnableGradualFlashlightRadiusChange": section.Settings.EnableGradualFlashlightRadiusChange = parseBool(value); break;
                         case "EnableGradualFlashlightFadeIn": section.Settings.EnableGradualFlashlightFadeIn = parseBool(value); break;
@@ -889,6 +890,9 @@ namespace osu.Game.Beatmaps.Formats
                             break;
                         case "ForceFlashlight":
                             entry.Settings.ForceFlashlight = parseBool(value);
+                            break;
+                        case "ForceTraceable":
+                            entry.Settings.ForceTraceable = parseBool(value);
                             break;
                         case "FlashlightRadius":
                             entry.Settings.FlashlightRadius = Parsing.ParseFloat(value);

@@ -97,6 +97,7 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public bool ForceSynesthesia { get; set; }
         public bool ForceDepth { get; set; }
         public bool ForceBloom { get; set; }
+        public bool ForceTraceable { get; set; }
 
         // Fun mod adjustable values
         public float WiggleStrength { get; set; } = 1.0f;

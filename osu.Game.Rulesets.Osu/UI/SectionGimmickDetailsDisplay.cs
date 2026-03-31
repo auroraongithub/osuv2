@@ -192,6 +192,8 @@ namespace osu.Game.Rulesets.Osu.UI
                     details.Add("MU");
                 if (settings.ForceNoScope)
                     details.Add("NS");
+                if (settings.ForceTraceable)
+                    details.Add("TC");
                 if (settings.ForceMagnetised)
                     details.Add("MG");
                 if (settings.ForceRepel)

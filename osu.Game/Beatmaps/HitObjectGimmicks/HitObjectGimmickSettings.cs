@@ -37,6 +37,7 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
         public bool ForceNoApproachCircle { get; set; }
         public bool ForceHardRock { get; set; }
         public bool ForceFlashlight { get; set; }
+        public bool ForceTraceable { get; set; }
         public float FlashlightRadius { get; set; } = float.NaN;
     }
 }

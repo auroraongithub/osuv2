@@ -283,6 +283,7 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
                 ForceNoApproachCircle = source.ForceNoApproachCircle,
                 ForceHardRock = source.ForceHardRock,
                 ForceFlashlight = source.ForceFlashlight,
+                ForceTraceable = source.ForceTraceable,
                 FlashlightRadius = source.FlashlightRadius,
             };
 
