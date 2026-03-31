@@ -73,9 +73,11 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                     bool objectForceHidden = objectSettings?.ForceHidden == true;
                     bool objectForceHardRock = objectSettings?.ForceHardRock == true;
                     bool objectNoApproach = objectSettings?.ForceNoApproachCircle == true;
+                    bool objectForceTraceable = objectSettings?.ForceTraceable == true;
 
                     setHiddenFlagRecursive(hitObject, objectForceHidden);
                     setNoApproachCircleFlagRecursive(hitObject, objectNoApproach);
+                    setTraceableFlagRecursive(hitObject, objectForceTraceable);
 
                     if (objectForceHardRock)
                         applyHardRockTransforms(hitObject);
@@ -105,6 +107,10 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 bool objectNoApproach = objectSettings?.ForceNoApproachCircle == true;
                 bool sectionNoApproach = section?.Settings.ForceNoApproachCircle == true;
                 setNoApproachCircleFlagRecursive(hitObject, sectionNoApproach || objectNoApproach);
+
+                bool objectForceTraceable = objectSettings?.ForceTraceable == true;
+                bool sectionForceTraceable = section?.Settings.ForceTraceable == true;
+                setTraceableFlagRecursive(hitObject, sectionForceTraceable || objectForceTraceable);
 
                 bool forceHardRock = section?.Settings.ForceHardRock == true || objectSettings?.ForceHardRock == true;
 
@@ -160,6 +166,14 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
             foreach (var nested in osuObject.NestedHitObjects.OfType<OsuHitObject>())
                 setNoApproachCircleFlagRecursive(nested, noApproachCircle);
+        }
+
+        private static void setTraceableFlagRecursive(OsuHitObject osuObject, bool traceable)
+        {
+            osuObject.ForceTraceable = traceable;
+
+            foreach (var nested in osuObject.NestedHitObjects.OfType<OsuHitObject>())
+                setTraceableFlagRecursive(nested, traceable);
         }
 
         private static void applyHiddenEffect(OsuHitObject hitObject)

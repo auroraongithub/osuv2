@@ -65,6 +65,12 @@ namespace osu.Game.Rulesets.Osu.Objects
         public bool ForceNoApproachCircle { get; set; }
 
         /// <summary>
+        /// Whether this hitobject should have Traceable (TC) visuals applied.
+        /// Set by section or object gimmicks during PostProcess.
+        /// </summary>
+        public bool ForceTraceable { get; set; }
+
+        /// <summary>
         /// Baseline non-HR position used to make section force-HR reversible.
         /// </summary>
         [JsonIgnore]

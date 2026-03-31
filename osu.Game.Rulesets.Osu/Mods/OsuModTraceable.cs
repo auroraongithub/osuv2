@@ -36,7 +36,7 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         protected override void ApplyNormalVisibilityState(DrawableHitObject hitObject, ArmedState state) => applyTraceableState(hitObject, state);
 
-        private void applyTraceableState(DrawableHitObject drawable, ArmedState state)
+        internal static void ApplyTraceableState(DrawableHitObject drawable, ArmedState state)
         {
             if (!(drawable is DrawableOsuHitObject))
                 return;
@@ -66,14 +66,16 @@ namespace osu.Game.Rulesets.Osu.Mods
             }
         }
 
-        private void applyCirclePieceState(DrawableOsuHitObject hitObject, IDrawable? hitCircle = null)
+        private void applyTraceableState(DrawableHitObject drawable, ArmedState state) => ApplyTraceableState(drawable, state);
+
+        private static void applyCirclePieceState(DrawableOsuHitObject hitObject, IDrawable? hitCircle = null)
         {
             var h = hitObject.HitObject;
             using (hitObject.BeginAbsoluteSequence(h.StartTime - h.TimePreempt))
                 (hitCircle ?? hitObject).Hide();
         }
 
-        private void applySliderState(DrawableSlider slider)
+        private static void applySliderState(DrawableSlider slider)
         {
             ((PlaySliderBody)slider.Body.Drawable).AccentColour = slider.AccentColour.Value.Opacity(0);
             ((PlaySliderBody)slider.Body.Drawable).BorderColour = slider.AccentColour.Value;

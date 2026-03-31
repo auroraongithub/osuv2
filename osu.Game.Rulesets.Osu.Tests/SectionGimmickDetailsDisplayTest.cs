@@ -150,6 +150,26 @@ namespace osu.Game.Rulesets.Osu.Tests
             Assert.That(alternateLabel, Does.Contain("AL"));
         }
 
+        [Test]
+        public void TestBuildDetailsLabelShowsTraceableMarker()
+        {
+            var section = new SectionGimmickSection
+            {
+                Id = 7,
+                StartTime = 0,
+                EndTime = 1000,
+                Settings = new SectionGimmickSettings
+                {
+                    EnableDifficultyOverrides = true,
+                    SectionApproachRate = 8,
+                    ForceTraceable = true,
+                }
+            };
+
+            string label = invokeBuildLabel(section, false);
+            Assert.That(label, Does.Contain("TC"));
+        }
+
         private static string invokeBuildLabel(SectionGimmickSection section, bool multiline, IBeatmapDifficultyInfo? difficulty = null)
         {
             var method = typeof(SectionGimmickDetailsDisplay).GetMethod("BuildDetailsLabelForTest", BindingFlags.NonPublic | BindingFlags.Static);

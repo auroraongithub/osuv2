@@ -109,6 +109,11 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             {
                 applyHiddenEffect();
             }
+
+            if (HitObject.ForceTraceable)
+            {
+                applyTraceableEffect();
+            }
         }
 
         private void applyNoApproachCircleEffect()
@@ -144,6 +149,22 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                 return;
 
             OsuModHidden.ApplyHiddenState(drawable, increaseVisibility: false, onlyFadeApproachCircles: false);
+        }
+
+        private void applyTraceableEffect()
+        {
+            ApplyCustomUpdateState -= applySectionTraceableState;
+            ApplyCustomUpdateState += applySectionTraceableState;
+
+            applySectionTraceableState(this, State.Value);
+        }
+
+        private void applySectionTraceableState(DrawableHitObject drawable, ArmedState state)
+        {
+            if (!HitObject.ForceTraceable)
+                return;
+
+            OsuModTraceable.ApplyTraceableState(drawable, state);
         }
 
         protected override void ClearNestedHitObjects()

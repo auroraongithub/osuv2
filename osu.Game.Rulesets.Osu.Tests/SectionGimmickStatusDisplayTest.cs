@@ -64,6 +64,23 @@ namespace osu.Game.Rulesets.Osu.Tests
             Assert.That(label, Is.EqualTo("Section 5 (AL)"));
         }
 
+        [Test]
+        public void TestBuildLabelIncludesTraceableTag()
+        {
+            var section = new SectionGimmickSection
+            {
+                Id = 6,
+                Settings = new SectionGimmickSettings
+                {
+                    ForceTraceable = true,
+                },
+            };
+
+            string label = invokeBuildLabel(section);
+
+            Assert.That(label, Is.EqualTo("Section 6 (TC)"));
+        }
+
         private static string invokeBuildLabel(SectionGimmickSection section)
         {
             var method = typeof(SectionGimmickStatusDisplay).GetMethod("buildLabel", BindingFlags.NonPublic | BindingFlags.Static);
