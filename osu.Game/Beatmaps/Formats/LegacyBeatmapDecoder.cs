@@ -813,51 +813,39 @@ namespace osu.Game.Beatmaps.Formats
                             entry.Settings.IsFakeNote = parseBool(value);
                             break;
                         case "FakePunishMode":
-                            entry.Settings.IsFakeNote = true;
-
                             if (!Enum.TryParse(value, true, out FakePunishMode fakePunishMode))
                                 fakePunishMode = FakePunishMode.None;
 
                             entry.Settings.FakePunishMode = fakePunishMode;
                             break;
                         case "FakePlayHitsound":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakePlayHitsound = parseBool(value);
                             break;
                         case "FakeRevealEnabled":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealEnabled = parseBool(value);
                             break;
                         case "FakeRevealRed":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealRed = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealGreen":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealGreen = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealBlue":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealBlue = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealStrength":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealStrength = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealLeadInStartMs":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealLeadInStartMs = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealLeadInLengthMs":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealLeadInLengthMs = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealFadeOutStartMs":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealFadeOutStartMs = Parsing.ParseFloat(value);
                             break;
                         case "FakeRevealFadeOutLengthMs":
-                            entry.Settings.IsFakeNote = true;
                             entry.Settings.FakeRevealFadeOutLengthMs = Parsing.ParseFloat(value);
                             break;
                         case "ObjectId":
