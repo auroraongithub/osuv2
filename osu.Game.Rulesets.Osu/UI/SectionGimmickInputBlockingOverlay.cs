@@ -14,10 +14,6 @@ using osu.Game.Rulesets.UI;
 
 namespace osu.Game.Rulesets.Osu.UI
 {
-    /// <summary>
-    /// Adds section-scoped InputBlockingMod behaviour (SingleTap/Alternate)
-    /// without requiring the corresponding global gameplay mods.
-    /// </summary>
     public partial class SectionGimmickInputBlockingOverlay : CompositeDrawable
     {
         private readonly BeatmapSectionGimmicks gimmicks;
@@ -78,7 +74,7 @@ namespace osu.Game.Rulesets.Osu.UI
 
             public override string Acronym => "SIB";
 
-            public override LocalisableString Description => "Applies section-scoped Single Tap / Alternate behaviour.";
+            public override LocalisableString Description => "applies section single tap / alternate behaviour";
 
             public override bool Ranked => false;
 

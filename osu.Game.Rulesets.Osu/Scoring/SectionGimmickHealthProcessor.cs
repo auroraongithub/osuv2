@@ -55,7 +55,7 @@ namespace osu.Game.Rulesets.Osu.Scoring
             if ((settings.EnableHPGimmick && settings.NoDrain) || settings.EnableGreatOffsetPenalty)
             {
                 // cancel out frame drain while this mode is active.
-                // this intentionally keeps behaviour section-scoped.
+                // keep this section-scoped
                 Health.Value += DrainRate * Time.Elapsed;
             }
         }

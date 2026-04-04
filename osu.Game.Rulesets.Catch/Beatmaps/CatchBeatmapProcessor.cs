@@ -26,7 +26,7 @@ namespace osu.Game.Rulesets.Catch.Beatmaps
         {
             IHasComboInformation? lastObj = null;
 
-            // For sanity, ensures that both the first hitobject and the first hitobject after a banana shower start a new combo.
+            // make sure the first object and the first after a banana shower start a new combo
             // This is normally enforced by the legacy decoder, but is not enforced by the editor.
             foreach (var obj in Beatmap.HitObjects.OfType<IHasComboInformation>())
             {

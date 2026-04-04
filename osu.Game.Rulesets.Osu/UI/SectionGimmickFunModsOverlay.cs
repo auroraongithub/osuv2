@@ -29,9 +29,6 @@ using osuTK;
 
 namespace osu.Game.Rulesets.Osu.UI
 {
-    /// <summary>
-    /// Applies section-forced fun mods with section-scoped behaviour.
-    /// </summary>
     public partial class SectionGimmickFunModsOverlay : CompositeDrawable
     {
         private const float no_scope_min_alpha = 0.0002f;

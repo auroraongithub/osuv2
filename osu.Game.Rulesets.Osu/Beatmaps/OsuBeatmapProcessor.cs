@@ -37,7 +37,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
         {
             IHasComboInformation? lastObj = null;
 
-            // For sanity, ensures that both the first hitobject and the first hitobject after a spinner start a new combo.
+            // make sure the first object and the first after a spinner start a new combo
             // This is normally enforced by the legacy decoder, but is not enforced by the editor.
             foreach (var obj in Beatmap.HitObjects.OfType<IHasComboInformation>())
             {
@@ -99,7 +99,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
             {
                 SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(beatmap.SectionGimmicks, hitObject.StartTime);
 
-                // Always write the flag so drawable layer can reliably detect section-forced HD.
+                // write the flag for every object so drawable code can pick up section-forced hd
                 // Also propagate to nested objects because Hidden is applied per drawable hitobject.
                 var objectSettings = getObjectSettings(hitObject, objectSettingsLookup);
                 objectSettings ??= getObjectSettings(hitObject, objectSettingsById, objectSettingsLookup);
@@ -282,7 +282,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
         private static void applyHiddenEffect(OsuHitObject hitObject)
         {
-            // Reuse exact hidden fade-in adjustment logic from OsuModHidden for 1:1 behaviour.
+            // use the same hidden fade-in adjustment as osu mod hidden
             OsuModHidden.ApplyFadeInAdjustment(hitObject);
         }
 

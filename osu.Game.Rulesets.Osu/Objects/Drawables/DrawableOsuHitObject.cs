@@ -136,8 +136,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         private void applyHiddenEffect()
         {
-            // Reuse exact hidden visual logic from OsuModHidden for 1:1 behaviour.
-            // Apply on every state update to mirror mod behaviour and ensure approach circles stay hidden.
+            // use the same hidden visual logic as osu mod hidden
+            // apply this every state update so approach circles stay hidden
             ApplyCustomUpdateState -= applySectionHiddenState;
             ApplyCustomUpdateState += applySectionHiddenState;
 

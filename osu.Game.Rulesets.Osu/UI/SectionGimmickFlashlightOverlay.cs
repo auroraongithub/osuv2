@@ -10,7 +10,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
-using osu.Framework.Logging;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.HitObjectGimmicks;
@@ -27,9 +26,6 @@ using osuTK;
 
 namespace osu.Game.Rulesets.Osu.UI
 {
-    /// <summary>
-    /// Adds a section-scoped Flashlight effect without requiring FL to be selected as a global gameplay mod.
-    /// </summary>
     public partial class SectionGimmickFlashlightOverlay : CompositeDrawable
     {
         private readonly BeatmapSectionGimmicks gimmicks;
@@ -40,8 +36,6 @@ namespace osu.Game.Rulesets.Osu.UI
 
         private bool wasFlashlightForced;
         private float? lastRadius;
-        private double lastDebugLogTime = double.NegativeInfinity;
-
         [Resolved(canBeNull: true)]
         private HealthProcessor? healthProcessor { get; set; }
 
@@ -56,8 +50,6 @@ namespace osu.Game.Rulesets.Osu.UI
 
             forcedFlashlightMod = new SectionForcedFlashlightMod();
             forcedFlashlightMod.ApplyToDrawableRuleset(drawableRuleset);
-
-            Logger.Log($"[section-fl] init sections={gimmicks.Sections.Count}, sectionForce={gimmicks.Sections.Count(s => s.Settings.ForceFlashlight)}, objectEntriesForce={hitObjectGimmicks.Entries.Count(e => e.Settings?.ForceFlashlight == true)}", LoggingTarget.Runtime, LogLevel.Debug);
         }
 
         protected override void Update()
@@ -67,18 +59,6 @@ namespace osu.Game.Rulesets.Osu.UI
             bool isForced = isFlashlightForcedAtCurrentTime();
             float? radius = getFlashlightRadiusAtCurrentTime();
             float fade = getFlashlightFadeAtCurrentTime(isForced);
-
-            if (Time.Current - lastDebugLogTime >= 500)
-            {
-                SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(gimmicks, Time.Current);
-                bool fromHealth = healthProcessor is SectionGimmickHealthProcessor sectionHealth && sectionHealth.ActiveSection?.Settings.ForceFlashlight == true;
-                int objectForcedCount = drawableHitObjectsAtCurrentTime().Count(h =>
-                    HitObjectGimmickBindingUtils.TryGetSettings(h, hitObjectSettingsById, hitObjectSettingsByLegacyKey, out var settings)
-                    && settings.ForceFlashlight);
-
-                Logger.Log($"[section-fl] t={Time.Current:0} forced={isForced} fade={fade:0.00} alpha={forcedFlashlightMod.CurrentSectionFade:0.00} radius={(radius.HasValue ? radius.Value.ToString("0.0") : "null")} sec={(section?.Id.ToString() ?? "none")} secForce={(section?.Settings.ForceFlashlight == true)} hpSecForce={fromHealth} objForceCount={objectForcedCount}", LoggingTarget.Runtime, LogLevel.Debug);
-                lastDebugLogTime = Time.Current;
-            }
 
             if (isForced == wasFlashlightForced && nullableFloatEquals(radius, lastRadius) && Math.Abs(fade - forcedFlashlightMod.CurrentSectionFade) <= 0.001f)
                 return;
