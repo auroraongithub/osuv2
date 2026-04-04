@@ -46,7 +46,7 @@ namespace osu.Game.Rulesets.Osu.UI
         [BackgroundDependencyLoader]
         private void load(ReplayPlayer? replayPlayer)
         {
-            if (!Mods.Any(m => m is ModFlashlight) && SectionGimmickFlashlightOverlay.HasAnyForcedFlashlightSection(Beatmap))
+            if (!Mods.Any(m => m is ModFlashlight))
             {
                 Overlays.Add(new SectionGimmickFlashlightOverlay(Beatmap, this)
                 {

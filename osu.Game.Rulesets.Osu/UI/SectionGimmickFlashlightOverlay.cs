@@ -10,6 +10,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
+using osu.Framework.Logging;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.HitObjectGimmicks;
@@ -39,6 +40,7 @@ namespace osu.Game.Rulesets.Osu.UI
 
         private bool wasFlashlightForced;
         private float? lastRadius;
+        private double lastDebugLogTime = double.NegativeInfinity;
 
         [Resolved(canBeNull: true)]
         private HealthProcessor? healthProcessor { get; set; }
@@ -54,6 +56,8 @@ namespace osu.Game.Rulesets.Osu.UI
 
             forcedFlashlightMod = new SectionForcedFlashlightMod();
             forcedFlashlightMod.ApplyToDrawableRuleset(drawableRuleset);
+
+            Logger.Log($"[section-fl] init sections={gimmicks.Sections.Count}, sectionForce={gimmicks.Sections.Count(s => s.Settings.ForceFlashlight)}, objectEntriesForce={hitObjectGimmicks.Entries.Count(e => e.Settings?.ForceFlashlight == true)}", LoggingTarget.Runtime, LogLevel.Debug);
         }
 
         protected override void Update()
@@ -63,6 +67,18 @@ namespace osu.Game.Rulesets.Osu.UI
             bool isForced = isFlashlightForcedAtCurrentTime();
             float? radius = getFlashlightRadiusAtCurrentTime();
             float fade = getFlashlightFadeAtCurrentTime(isForced);
+
+            if (Time.Current - lastDebugLogTime >= 500)
+            {
+                SectionGimmickSection? section = SectionGimmickSectionResolver.Resolve(gimmicks, Time.Current);
+                bool fromHealth = healthProcessor is SectionGimmickHealthProcessor sectionHealth && sectionHealth.ActiveSection?.Settings.ForceFlashlight == true;
+                int objectForcedCount = drawableHitObjectsAtCurrentTime().Count(h =>
+                    HitObjectGimmickBindingUtils.TryGetSettings(h, hitObjectSettingsById, hitObjectSettingsByLegacyKey, out var settings)
+                    && settings.ForceFlashlight);
+
+                Logger.Log($"[section-fl] t={Time.Current:0} forced={isForced} fade={fade:0.00} alpha={forcedFlashlightMod.CurrentSectionFade:0.00} radius={(radius.HasValue ? radius.Value.ToString("0.0") : "null")} sec={(section?.Id.ToString() ?? "none")} secForce={(section?.Settings.ForceFlashlight == true)} hpSecForce={fromHealth} objForceCount={objectForcedCount}", LoggingTarget.Runtime, LogLevel.Debug);
+                lastDebugLogTime = Time.Current;
+            }
 
             if (isForced == wasFlashlightForced && nullableFloatEquals(radius, lastRadius) && Math.Abs(fade - forcedFlashlightMod.CurrentSectionFade) <= 0.001f)
                 return;
@@ -128,6 +144,9 @@ namespace osu.Game.Rulesets.Osu.UI
             var settings = section.Settings;
 
             if (!settings.EnableGradualFlashlightFadeIn)
+                return 1;
+
+            if (float.IsNaN(settings.GradualFlashlightRadiusEndTimeMs))
                 return 1;
 
             double sectionEnd = section.EndTime >= 0 ? section.EndTime : double.MaxValue;
@@ -235,6 +254,7 @@ namespace osu.Game.Rulesets.Osu.UI
         private sealed partial class SectionForcedFlashlight : ModFlashlight<OsuHitObject>.Flashlight, IRequireHighFrequencyMousePosition
         {
             private const double follow_delay = 120;
+            private const double section_fade_in_duration = 120;
 
             private bool sectionActive;
             private float? sectionRadius;
@@ -244,6 +264,7 @@ namespace osu.Game.Rulesets.Osu.UI
             public SectionForcedFlashlight(ModFlashlight modFlashlight)
                 : base(modFlashlight)
             {
+                AlwaysPresent = true;
                 FlashlightSize = new Vector2(0, GetSize());
                 FlashlightSmoothness = 1.4f;
                 Alpha = 0;
@@ -258,6 +279,11 @@ namespace osu.Game.Rulesets.Osu.UI
                 sectionActive = active;
 
                 sectionFade = sectionActive ? 1 : 0;
+
+                if (sectionActive)
+                    this.FadeTo(sectionFade, section_fade_in_duration, Easing.OutQuint);
+                else
+                    this.FadeTo(0, 50, Easing.Out);
 
                 if (!sectionActive)
                     FlashlightDim = 0;
@@ -280,6 +306,7 @@ namespace osu.Game.Rulesets.Osu.UI
                     return;
 
                 sectionFade = Math.Clamp(fade, 0, 1);
+                Alpha = sectionFade;
             }
 
             public void OnSliderTrackingChange(DrawableSlider slider)
