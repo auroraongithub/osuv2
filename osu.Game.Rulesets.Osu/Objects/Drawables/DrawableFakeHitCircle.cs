@@ -6,6 +6,7 @@ using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
 using osu.Game.Rulesets.Osu.Objects;
+using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Scoring;
 using osuTK.Graphics;
@@ -15,6 +16,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
     public partial class DrawableFakeHitCircle : DrawableHitCircle
     {
         private bool displayPunishJudgement;
+        private bool autoHitTriggered;
 
         public new FakeHitCircle HitObject => (FakeHitCircle)base.HitObject;
 
@@ -33,11 +35,28 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         protected override void Update()
         {
             base.Update();
+
+            if (!autoHitTriggered
+                && HitObject.FakeAutoHitOnApproachClose
+                && Time.Current >= HitObject.StartTime
+                && !Judged)
+            {
+                autoHitTriggered = true;
+                displayPunishJudgement = false;
+                ApplyResult(static (r, _) => ((OsuHitCircleJudgementResult)r).Type = HitResult.IgnoreHit, 0);
+
+                if (HitObject.FakeAutoHitPlayHitsound)
+                    base.PlaySamples();
+            }
+
             updateFakeRevealTint();
         }
 
         protected override void CheckForResult(bool userTriggered, double timeOffset)
         {
+            if (autoHitTriggered)
+                return;
+
             if (!userTriggered)
             {
                 if (!HitObject.HitWindows.CanBeHit(timeOffset))
@@ -60,25 +79,22 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (result == HitResult.None || clickAction != ClickAction.Hit)
                 return;
 
-            if (HitObject.FakePunishMode == FakePunishMode.Miss)
+            if (FakeHitObjectPunishmentHelper.ShouldPunishAsMiss(HitObject.FakePunishMode))
             {
                 displayPunishJudgement = true;
                 ApplyResult(static (r, _) => ((OsuHitCircleJudgementResult)r).Type = HitResult.Miss, 0);
-
-                // Keep miss judgement semantics, but force hit-state visuals.
                 UpdateState(ArmedState.Hit, true);
             }
             else
             {
                 displayPunishJudgement = false;
-
-                // No-punish fake hit: use IgnoreHit so score/accuracy/health are not affected.
                 ApplyResult(static (r, _) => ((OsuHitCircleJudgementResult)r).Type = HitResult.IgnoreHit, 0);
             }
         }
 
         protected override void OnFree()
         {
+            autoHitTriggered = false;
             displayPunishJudgement = false;
             Colour = Color4.White;
             base.OnFree();

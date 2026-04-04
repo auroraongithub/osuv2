@@ -254,6 +254,8 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
                 IsFakeNote = source.IsFakeNote,
                 FakePunishMode = source.FakePunishMode,
                 FakePlayHitsound = source.FakePlayHitsound,
+                FakeAutoHitOnApproachClose = source.FakeAutoHitOnApproachClose,
+                FakeAutoHitPlayHitsound = source.FakeAutoHitPlayHitsound,
                 FakeRevealEnabled = source.FakeRevealEnabled,
                 FakeRevealRed = source.FakeRevealRed,
                 FakeRevealGreen = source.FakeRevealGreen,

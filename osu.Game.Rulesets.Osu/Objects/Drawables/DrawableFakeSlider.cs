@@ -1,101 +1,73 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using osu.Game.Beatmaps.HitObjectGimmicks;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
-using osu.Game.Rulesets.Scoring;
+using System;
+using osu.Game.Rulesets.Osu.Objects;
+using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
     public partial class DrawableFakeSlider : DrawableSlider
     {
-        private bool interactionRegistered;
-        private bool wasTracking;
-
         public new FakeSlider HitObject => (FakeSlider)base.HitObject;
-
-        public new DrawableFakeSliderHead HeadCircle => (DrawableFakeSliderHead)base.HeadCircle;
 
         public DrawableFakeSlider()
             : this(null)
         {
         }
 
-        public DrawableFakeSlider(FakeSlider? slider)
-            : base(slider)
+        public DrawableFakeSlider(FakeSlider? h)
+            : base(h)
         {
-        }
-
-        public override bool DisplayResult => false;
-
-        protected override DrawableHitObject CreateNestedHitObject(HitObject hitObject)
-        {
-            switch (hitObject)
-            {
-                case FakeSliderHeadCircle head:
-                    return new DrawableFakeSliderHead(head);
-
-                case FakeSliderTailCircle tail:
-                    return new DrawableFakeSliderTail(tail);
-
-                case FakeSliderTick tick:
-                    return new DrawableFakeSliderTick(tick);
-
-                case FakeSliderRepeat repeat:
-                    return new DrawableFakeSliderRepeat(repeat);
-            }
-
-            return base.CreateNestedHitObject(hitObject);
-        }
-
-        internal bool IsMissPunishMode => HitObject.FakePunishMode == FakePunishMode.Miss;
-
-        internal void RegisterInteraction(bool fromHead)
-        {
-            if (interactionRegistered)
-                return;
-
-            interactionRegistered = true;
-
-            if (IsMissPunishMode)
-                HeadCircle.ApplyPunishMiss(fromHead);
         }
 
         protected override void Update()
         {
             base.Update();
-
-            if (!wasTracking && Tracking.Value && Time.Current >= HitObject.StartTime && Time.Current <= HitObject.EndTime)
-                RegisterInteraction(fromHead: false);
-
-            wasTracking = Tracking.Value;
-        }
-
-        protected override void CheckForResult(bool userTriggered, double timeOffset)
-        {
-            if (userTriggered && Time.Current >= HitObject.StartTime && Time.Current <= HitObject.EndTime && SliderInputManager.Tracking)
-                RegisterInteraction(fromHead: false);
-
-            if (userTriggered || !TailCircle.Judged || Time.Current < HitObject.EndTime)
-                return;
-
-            HeadCircle.FinaliseNoInteractionResult();
-
-            ApplyResult(static (r, _) => r.Type = HitResult.IgnoreHit, 0);
-        }
-
-        public override void PlaySamples()
-        {
-            if (HitObject.FakePlayHitsound)
-                base.PlaySamples();
+            updateFakeRevealTint();
         }
 
         protected override void OnFree()
         {
-            interactionRegistered = false;
-            wasTracking = false;
+            Colour = Color4.White;
             base.OnFree();
+        }
+
+        private void updateFakeRevealTint()
+        {
+            if (!HitObject.FakeRevealEnabled)
+            {
+                Colour = Color4.White;
+                return;
+            }
+
+            double startTime = HitObject.StartTime;
+            double sequenceStart = startTime - HitObject.FakeRevealLeadInStartMs;
+            double fadeInEnd = sequenceStart + HitObject.FakeRevealLeadInLengthMs;
+            double fadeOutStart = startTime - HitObject.FakeRevealFadeOutStartMs;
+            double fadeOutEnd = fadeOutStart + HitObject.FakeRevealFadeOutLengthMs;
+            double time = Time.Current;
+
+            float revealAlpha;
+
+            if (time < sequenceStart || time > fadeOutEnd)
+                revealAlpha = 0;
+            else if (time <= fadeInEnd && HitObject.FakeRevealLeadInLengthMs > 0)
+                revealAlpha = (float)Math.Clamp((time - sequenceStart) / HitObject.FakeRevealLeadInLengthMs, 0, 1);
+            else if (time < fadeOutStart)
+                revealAlpha = 1;
+            else if (HitObject.FakeRevealFadeOutLengthMs > 0)
+                revealAlpha = 1f - (float)Math.Clamp((time - fadeOutStart) / HitObject.FakeRevealFadeOutLengthMs, 0, 1);
+            else
+                revealAlpha = 0;
+
+            float blend = Math.Clamp(HitObject.FakeRevealStrength * revealAlpha, 0, 1);
+            var revealColour = new Color4(HitObject.FakeRevealRed, HitObject.FakeRevealGreen, HitObject.FakeRevealBlue, 1);
+            Colour = new Color4(
+                Color4.White.R + (revealColour.R - Color4.White.R) * blend,
+                Color4.White.G + (revealColour.G - Color4.White.G) * blend,
+                Color4.White.B + (revealColour.B - Color4.White.B) * blend,
+                1);
         }
     }
 }

@@ -10,6 +10,7 @@ using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Beatmaps;
+using osu.Game.Rulesets.Osu.Judgements;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Rulesets.Scoring;
@@ -336,16 +337,16 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             processor.PostProcess();
 
-            // AR8 preempt is 600ms, AR10 preempt is 450ms
-            var ar8Preempt = 600;
+            // AR8 preempt is 750ms, AR10 preempt is 450ms
+            var ar8Preempt = 750;
             var ar10Preempt = 450;
 
             // Section 0 object should have AR=8
             Assert.That(section0Object.TimePreempt, Is.EqualTo(ar8Preempt).Within(0.0001));
 
             // Section 1 early object should be halfway through gradual shift from AR8 to AR10
-            // At 1500ms (progress 0.5), should be AR9 = (600 + 450) / 2 = 525ms
-            var ar9Preempt = 525;
+            // At 1500ms (progress 0.5), should be AR9 = (750 + 450) / 2 = 600ms
+            var ar9Preempt = 600;
             Assert.That(section1EarlyObject.TimePreempt, Is.EqualTo(ar9Preempt).Within(0.0001));
 
             // Section 1 late object should have AR=10 (after gradual shift completes)
@@ -927,6 +928,182 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             Assert.That(target.ForceNoApproachCircle, Is.True);
             Assert.That(other.ForceNoApproachCircle, Is.False);
+        }
+
+        [Test]
+        public void TestFakeSliderConversionPreservesPathAndRepeats()
+        {
+            var fakeSliderSource = new Slider
+            {
+                StartTime = 1000,
+                Position = new Vector2(128, 192),
+                Path = new SliderPath(PathType.LINEAR, new[]
+                {
+                    Vector2.Zero,
+                    new Vector2(200, 0),
+                }, 200),
+                RepeatCount = 2,
+            };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(fakeSliderSource);
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            fakeSliderSource.UpdateComboInformation(null);
+            fakeSliderSource.GimmickObjectId = 9001;
+
+            beatmap.HitObjectGimmicks.Entries.Add(new HitObjectGimmickEntry
+            {
+                ObjectId = fakeSliderSource.GimmickObjectId,
+                StartTime = fakeSliderSource.StartTime,
+                ComboIndexWithOffsets = fakeSliderSource.ComboIndexWithOffsets,
+                Settings = new HitObjectGimmickSettings
+                {
+                    IsFakeNote = true,
+                },
+            });
+
+            processor.PostProcess();
+
+            Assert.That(beatmap.HitObjects[0], Is.TypeOf<FakeSlider>());
+
+            var fakeSlider = (FakeSlider)beatmap.HitObjects[0];
+            Assert.That(fakeSlider.RepeatCount, Is.EqualTo(2));
+            Assert.That(fakeSlider.Path.ControlPoints.Count, Is.EqualTo(2));
+            Assert.That(fakeSlider.NestedHitObjects.OfType<SliderTick>().Count(), Is.GreaterThan(0));
+            Assert.That(fakeSlider.NestedHitObjects.OfType<SliderTailCircle>().Count(), Is.EqualTo(1));
+            Assert.That(fakeSlider.NestedHitObjects.OfType<SliderRepeat>().Count(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void TestFakeSliderNestedHitObjectsUseFakeJudgement()
+        {
+            var fakeSlider = new FakeSlider
+            {
+                StartTime = 1000,
+                Position = new Vector2(128, 192),
+                Path = new SliderPath(PathType.LINEAR, new[]
+                {
+                    Vector2.Zero,
+                    new Vector2(220, 0),
+                }, 220),
+                RepeatCount = 1,
+            };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(fakeSlider);
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            processor.PostProcess();
+
+            Assert.That(fakeSlider.HeadCircle.CreateJudgement(), Is.TypeOf<FakeCircleJudgement>());
+
+            var tail = fakeSlider.NestedHitObjects.OfType<SliderTailCircle>().Single();
+            Assert.That(tail.CreateJudgement(), Is.TypeOf<FakeCircleJudgement>());
+
+            var repeat = fakeSlider.NestedHitObjects.OfType<SliderRepeat>().Single();
+            Assert.That(repeat.CreateJudgement(), Is.TypeOf<FakeCircleJudgement>());
+
+            var tick = fakeSlider.NestedHitObjects.OfType<SliderTick>().First();
+            Assert.That(tick.CreateJudgement(), Is.TypeOf<FakeCircleJudgement>());
+        }
+
+        [Test]
+        public void TestFakePunishModeLegacyHpDrainMapsToMiss()
+        {
+            var beatmap = new OsuBeatmap
+            {
+                HitObjects =
+                {
+                    new HitCircle
+                    {
+                        StartTime = 1000,
+                        Position = new Vector2(128, 128),
+                        GimmickObjectId = 7777,
+                    }
+                },
+                HitObjectGimmicks = new BeatmapHitObjectGimmicks
+                {
+                    Entries =
+                    {
+                        new HitObjectGimmickEntry
+                        {
+                            ObjectId = 7777,
+                            StartTime = 1000,
+                            ComboIndexWithOffsets = 1,
+                            Settings = new HitObjectGimmickSettings
+                            {
+                                IsFakeNote = true,
+                                FakePunishMode = (FakePunishMode)2,
+                            }
+                        }
+                    }
+                }
+            };
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+            processor.PostProcess();
+
+            var fake = beatmap.HitObjects.OfType<FakeHitCircle>().Single();
+            Assert.That(fake.FakePunishMode, Is.EqualTo(FakePunishMode.Miss));
+        }
+
+        [Test]
+        public void TestFakeAutoHitFlagsAreCopiedToFakeSlider()
+        {
+            var source = new Slider
+            {
+                StartTime = 1000,
+                Position = new Vector2(128, 192),
+                Path = new SliderPath(PathType.LINEAR, new[]
+                {
+                    Vector2.Zero,
+                    new Vector2(180, 0),
+                }, 180),
+                RepeatCount = 1,
+            };
+
+            var beatmap = new OsuBeatmap();
+            beatmap.HitObjects.Add(source);
+
+            var processor = new OsuBeatmapProcessor(beatmap);
+            processor.PreProcess();
+
+            foreach (var obj in beatmap.HitObjects)
+                obj.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            source.UpdateComboInformation(null);
+            source.GimmickObjectId = 5050;
+
+            beatmap.HitObjectGimmicks.Entries.Add(new HitObjectGimmickEntry
+            {
+                ObjectId = source.GimmickObjectId,
+                StartTime = source.StartTime,
+                ComboIndexWithOffsets = source.ComboIndexWithOffsets,
+                Settings = new HitObjectGimmickSettings
+                {
+                    IsFakeNote = true,
+                    FakeAutoHitOnApproachClose = true,
+                    FakeAutoHitPlayHitsound = true,
+                },
+            });
+
+            processor.PostProcess();
+
+            var fakeSlider = (FakeSlider)beatmap.HitObjects[0];
+            Assert.That(fakeSlider.FakeAutoHitOnApproachClose, Is.True);
+            Assert.That(fakeSlider.FakeAutoHitPlayHitsound, Is.True);
         }
     }
 }

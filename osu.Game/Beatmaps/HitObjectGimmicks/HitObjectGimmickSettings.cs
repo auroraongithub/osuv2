@@ -20,6 +20,8 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
         public bool IsFakeNote { get; set; }
         public FakePunishMode FakePunishMode { get; set; } = FakePunishMode.None;
         public bool FakePlayHitsound { get; set; }
+        public bool FakeAutoHitOnApproachClose { get; set; }
+        public bool FakeAutoHitPlayHitsound { get; set; }
         public bool FakeRevealEnabled { get; set; } = true;
         public float FakeRevealRed { get; set; } = 1f;
         public float FakeRevealGreen { get; set; } = 0.3019608f;

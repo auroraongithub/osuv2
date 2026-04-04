@@ -14,6 +14,10 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
 {
     public abstract partial class PlaySliderBody : SnakingSliderBody
     {
+        private ISkinSource skinSource = null!;
+
+        private Color4 defaultBorderColour;
+
         protected IBindable<float> ScaleBindable { get; private set; } = null!;
 
         protected IBindable<Color4> AccentColourBindable { get; private set; } = null!;
@@ -28,6 +32,8 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
         [BackgroundDependencyLoader]
         private void load(ISkinSource skin, DrawableHitObject drawableObject)
         {
+            skinSource = skin;
+
             var drawableSlider = (DrawableSlider)drawableObject;
 
             ScaleBindable = drawableSlider.ScaleBindable.GetBoundCopy();
@@ -44,7 +50,14 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
 
             SnakingOut.BindTo(configSnakingOut);
 
-            BorderColour = GetBorderColour(skin);
+            defaultBorderColour = GetBorderColour(skin);
+            BorderColour = defaultBorderColour;
+        }
+
+        public void RestoreDefaultAppearance()
+        {
+            AccentColour = GetBodyAccentColour(skinSource, AccentColourBindable.Value);
+            BorderColour = defaultBorderColour;
         }
 
         protected virtual Color4 GetBorderColour(ISkinSource skin) => Color4.White;

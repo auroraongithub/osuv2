@@ -22,6 +22,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
     {
         public new SliderRepeat HitObject => (SliderRepeat)base.HitObject;
 
+        public override bool DisplayResult => Slider is FakeSlider ? false : base.DisplayResult;
+
         [CanBeNull]
         public Slider Slider => DrawableSlider?.HitObject;
 

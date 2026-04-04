@@ -13,6 +13,8 @@ namespace osu.Game.Rulesets.Osu.Objects
 
         public FakePunishMode FakePunishMode { get; set; }
         public bool FakePlayHitsound { get; set; }
+        public bool FakeAutoHitOnApproachClose { get; set; }
+        public bool FakeAutoHitPlayHitsound { get; set; }
         public bool FakeRevealEnabled { get; set; } = true;
         public float FakeRevealRed { get; set; } = 1f;
         public float FakeRevealGreen { get; set; } = 0.3019608f;

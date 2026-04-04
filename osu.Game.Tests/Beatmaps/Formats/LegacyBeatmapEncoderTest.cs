@@ -604,6 +604,71 @@ namespace osu.Game.Tests.Beatmaps.Formats
         }
 
         [Test]
+        public void TestEncodeDecodeHitObjectGimmicksPersistsFakeSettings()
+        {
+            var hitObject = new HitCircle
+            {
+                StartTime = 19602.104294478526,
+                GimmickObjectId = 54321,
+            };
+
+            var beatmap = new Beatmap
+            {
+                HitObjects =
+                {
+                    hitObject,
+                },
+                HitObjectGimmicks = new BeatmapHitObjectGimmicks
+                {
+                    Entries =
+                    {
+                        new HitObjectGimmickEntry
+                        {
+                            ObjectId = 54321,
+                            StartTime = 19602.104294478526,
+                            ComboIndexWithOffsets = 1,
+                            Settings = new HitObjectGimmickSettings
+                            {
+                                IsFakeNote = true,
+                                FakePunishMode = FakePunishMode.Miss,
+                                FakePlayHitsound = false,
+                                FakeAutoHitOnApproachClose = true,
+                                FakeAutoHitPlayHitsound = true,
+                                FakeRevealEnabled = true,
+                                FakeRevealRed = 1f,
+                                FakeRevealGreen = 0.3019608f,
+                                FakeRevealBlue = 0.3019608f,
+                                FakeRevealStrength = 0.55f,
+                                FakeRevealLeadInStartMs = 900,
+                                FakeRevealLeadInLengthMs = 200,
+                                FakeRevealFadeOutStartMs = 300,
+                                FakeRevealFadeOutLengthMs = 250,
+                            }
+                        }
+                    }
+                }
+            };
+
+            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+
+            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
+
+            var entry = decodedAfterEncode.beatmap.HitObjectGimmicks.Entries[0];
+            Assert.That(entry.Settings.IsFakeNote, Is.True);
+            Assert.That(entry.Settings.FakePunishMode, Is.EqualTo(FakePunishMode.Miss));
+            Assert.That(entry.Settings.FakePlayHitsound, Is.False);
+            Assert.That(entry.Settings.FakeAutoHitOnApproachClose, Is.True);
+            Assert.That(entry.Settings.FakeAutoHitPlayHitsound, Is.True);
+            Assert.That(entry.Settings.FakeRevealEnabled, Is.True);
+            Assert.That(entry.Settings.FakeRevealStrength, Is.EqualTo(0.55f).Within(0.001));
+            Assert.That(entry.Settings.FakeRevealLeadInStartMs, Is.EqualTo(900).Within(0.001));
+            Assert.That(entry.Settings.FakeRevealLeadInLengthMs, Is.EqualTo(200).Within(0.001));
+            Assert.That(entry.Settings.FakeRevealFadeOutStartMs, Is.EqualTo(300).Within(0.001));
+            Assert.That(entry.Settings.FakeRevealFadeOutLengthMs, Is.EqualTo(250).Within(0.001));
+        }
+
+        [Test]
         public void TestEncodeDecodeHitObjectGimmicksPersistsHighSliderVelocityViaObjectBinding()
         {
             var beatmap = new Beatmap<OsuHitObject>

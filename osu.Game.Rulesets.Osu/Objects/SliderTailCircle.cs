@@ -20,7 +20,13 @@ namespace osu.Game.Rulesets.Osu.Objects
         {
         }
 
-        public override Judgement CreateJudgement() => ClassicSliderBehaviour ? new LegacyTailJudgement() : new TailJudgement();
+        public override Judgement CreateJudgement()
+        {
+            if (ParentSlider is FakeSlider)
+                return new FakeCircleJudgement();
+
+            return ClassicSliderBehaviour ? new LegacyTailJudgement() : new TailJudgement();
+        }
 
         public class LegacyTailJudgement : OsuJudgement
         {

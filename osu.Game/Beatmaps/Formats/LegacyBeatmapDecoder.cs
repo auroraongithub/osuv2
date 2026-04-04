@@ -816,10 +816,19 @@ namespace osu.Game.Beatmaps.Formats
                             if (!Enum.TryParse(value, true, out FakePunishMode fakePunishMode))
                                 fakePunishMode = FakePunishMode.None;
 
+                            if (fakePunishMode != FakePunishMode.None && fakePunishMode != FakePunishMode.Miss)
+                                fakePunishMode = FakePunishMode.Miss;
+
                             entry.Settings.FakePunishMode = fakePunishMode;
                             break;
                         case "FakePlayHitsound":
                             entry.Settings.FakePlayHitsound = parseBool(value);
+                            break;
+                        case "FakeAutoHitOnApproachClose":
+                            entry.Settings.FakeAutoHitOnApproachClose = parseBool(value);
+                            break;
+                        case "FakeAutoHitPlayHitsound":
+                            entry.Settings.FakeAutoHitPlayHitsound = parseBool(value);
                             break;
                         case "FakeRevealEnabled":
                             entry.Settings.FakeRevealEnabled = parseBool(value);
@@ -941,6 +950,8 @@ namespace osu.Game.Beatmaps.Formats
             }
 
             beatmap.HitObjectGimmicks.Entries.Add(entry);
+
+            SectionGimmickValueClamper.ClampHitObjectSettingsInPlace(entry.Settings);
 
             static bool parseBool(string boolValue)
                 => boolValue == "1" || boolValue.Equals("true", StringComparison.OrdinalIgnoreCase);

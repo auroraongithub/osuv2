@@ -35,6 +35,8 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox fakeNote = null!;
         private FormEnumDropdown<FakePunishMode> fakePunishMode = null!;
         private FormCheckBox fakePlayHitsound = null!;
+        private FormCheckBox fakeAutoHitOnApproachClose = null!;
+        private FormCheckBox fakeAutoHitPlayHitsound = null!;
         private FormCheckBox fakeRevealEnabled = null!;
         private FormNumberBox fakeRevealRed = null!;
         private FormNumberBox fakeRevealGreen = null!;
@@ -47,6 +49,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private FillFlowContainer fakeNoteFields = null!;
         private FillFlowContainer fakeRevealFields = null!;
+        private static HitObjectGimmickSettings? fakeTintClipboard;
         private FormNumberBox hp300 = null!;
         private FormNumberBox hp100 = null!;
         private FormNumberBox hp50 = null!;
@@ -125,6 +128,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                             Current = { Value = FakePunishMode.None },
                         },
                         fakePlayHitsound = new FormCheckBox { Caption = "Fake Play Hitsound" },
+                        fakeAutoHitOnApproachClose = new FormCheckBox { Caption = "Fake Auto Hit on Approach Close" },
+                        fakeAutoHitPlayHitsound = new FormCheckBox { Caption = "Fake Auto Hit Play Hitsound" },
                         fakeRevealEnabled = new FormCheckBox { Caption = "Fake Reveal Tint" },
                         fakeRevealFields = createContainer(
                             fakeRevealStrength = new FormSliderBar<float>
@@ -147,7 +152,19 @@ namespace osu.Game.Rulesets.Osu.Edit
                             fakeRevealLeadInStartMs = new FormNumberBox(allowDecimals: true) { Caption = "Reveal Lead-In Start (ms)", TabbableContentContainer = this },
                             fakeRevealLeadInLengthMs = new FormNumberBox(allowDecimals: true) { Caption = "Reveal Lead-In Length (ms)", TabbableContentContainer = this },
                             fakeRevealFadeOutStartMs = new FormNumberBox(allowDecimals: true) { Caption = "Reveal Fade-Out Start (ms)", TabbableContentContainer = this },
-                            fakeRevealFadeOutLengthMs = new FormNumberBox(allowDecimals: true) { Caption = "Reveal Fade-Out Length (ms)", TabbableContentContainer = this })),
+                            fakeRevealFadeOutLengthMs = new FormNumberBox(allowDecimals: true) { Caption = "Reveal Fade-Out Length (ms)", TabbableContentContainer = this },
+                            new FormButton
+                            {
+                                Caption = "Fake Tint",
+                                ButtonText = "Copy",
+                                Action = copyFakeTintSettings,
+                            },
+                            new FormButton
+                            {
+                                Caption = "Fake Tint",
+                                ButtonText = "Paste",
+                                Action = pasteFakeTintSettings,
+                            })),
 
                     enableHpGimmick = new FormCheckBox { Caption = "HP Gimmick" },
                     hpFields = createContainer(
@@ -277,6 +294,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                 scheduleSelectionUpdate();
             });
             fakePlayHitsound.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FakePlayHitsound = value));
+            fakeAutoHitOnApproachClose.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FakeAutoHitOnApproachClose = value));
+            fakeAutoHitPlayHitsound.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FakeAutoHitPlayHitsound = value));
             fakeRevealEnabled.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FakeRevealEnabled = value));
             bindSlider(fakeRevealStrength, (s, value) => s.FakeRevealStrength = value, v => Math.Clamp(v, 0f, 1f));
             bindFloat(fakeRevealRed, (s, value) => s.FakeRevealRed = value, v => Math.Clamp(v, 0f, 1f));
@@ -410,7 +429,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             setEnabledState(true,
                 enableHpGimmick,
                 hp300, hp100, hp50, hpMiss,
-                fakeNote, fakePunishMode, fakePlayHitsound, fakeRevealEnabled, fakeRevealStrength,
+                fakeNote, fakePunishMode, fakePlayHitsound, fakeAutoHitOnApproachClose, fakeAutoHitPlayHitsound, fakeRevealEnabled, fakeRevealStrength,
                 fakeRevealRed, fakeRevealGreen, fakeRevealBlue,
                 fakeRevealLeadInStartMs, fakeRevealLeadInLengthMs, fakeRevealFadeOutStartMs, fakeRevealFadeOutLengthMs,
                 enableNoMiss,
@@ -453,6 +472,8 @@ namespace osu.Game.Rulesets.Osu.Edit
             greatOffsetPenaltyHp.Current.Value = formatFloat(representative?.GreatOffsetPenaltyHP ?? float.NaN);
 
             fakePlayHitsound.Current.Value = hasSelection && (representative?.FakePlayHitsound ?? false);
+            fakeAutoHitOnApproachClose.Current.Value = hasSelection && state.FakeAutoHitOnApproachClose;
+            fakeAutoHitPlayHitsound.Current.Value = hasSelection && state.FakeAutoHitPlayHitsound;
             fakeRevealEnabled.Current.Value = !hasSelection || (representative?.FakeRevealEnabled ?? true);
             fakeRevealStrength.Current.Value = hasSelection ? (representative?.FakeRevealStrength ?? HitObjectGimmickSettings.DEFAULT_FAKE_REVEAL_STRENGTH) : HitObjectGimmickSettings.DEFAULT_FAKE_REVEAL_STRENGTH;
             fakeRevealRed.Current.Value = formatFloat(hasSelection ? (representative?.FakeRevealRed ?? 1f) : 1f);
@@ -518,7 +539,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                 setEnabledState(enabled,
                     enableHpGimmick,
                     hp300, hp100, hp50, hpMiss,
-                    fakeNote, fakePunishMode, fakePlayHitsound, fakeRevealEnabled, fakeRevealStrength,
+                    fakeNote, fakePunishMode, fakePlayHitsound, fakeAutoHitOnApproachClose, fakeAutoHitPlayHitsound, fakeRevealEnabled, fakeRevealStrength,
                     fakeRevealRed, fakeRevealGreen, fakeRevealBlue,
                     fakeRevealLeadInStartMs, fakeRevealLeadInLengthMs, fakeRevealFadeOutStartMs, fakeRevealFadeOutLengthMs,
                     enableNoMiss,
@@ -529,9 +550,12 @@ namespace osu.Game.Rulesets.Osu.Edit
                     forceHidden, forceHardRock, forceFlashlight, flashlightRadius, forceNoApproachCircle);
 
                 setEnabledState(enabled && fakeNote.Current.Value,
-                    fakePunishMode, fakePlayHitsound, fakeRevealEnabled,
+                    fakePunishMode, fakePlayHitsound, fakeAutoHitOnApproachClose, fakeAutoHitPlayHitsound, fakeRevealEnabled,
                     fakeRevealStrength, fakeRevealRed, fakeRevealGreen, fakeRevealBlue,
                     fakeRevealLeadInStartMs, fakeRevealLeadInLengthMs, fakeRevealFadeOutStartMs, fakeRevealFadeOutLengthMs);
+
+                setEnabledState(enabled && fakeNote.Current.Value && fakeAutoHitOnApproachClose.Current.Value,
+                    fakeAutoHitPlayHitsound);
 
                 setEnabledState(enabled && fakeNote.Current.Value && fakeRevealEnabled.Current.Value,
                     fakeRevealStrength, fakeRevealRed, fakeRevealGreen, fakeRevealBlue,
@@ -716,6 +740,66 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private static string formatDouble(double value)
             => double.IsNaN(value) ? string.Empty : value.ToString(CultureInfo.InvariantCulture);
+
+        private void copyFakeTintSettings()
+        {
+            if (!model.HasSelection)
+                return;
+
+            var settings = model.GetSelectionRepresentativeSettings();
+            if (settings == null)
+                return;
+
+            fakeTintClipboard = new HitObjectGimmickSettings
+            {
+                FakeRevealEnabled = settings.FakeRevealEnabled,
+                FakeRevealRed = settings.FakeRevealRed,
+                FakeRevealGreen = settings.FakeRevealGreen,
+                FakeRevealBlue = settings.FakeRevealBlue,
+                FakeRevealStrength = settings.FakeRevealStrength,
+                FakeRevealLeadInStartMs = settings.FakeRevealLeadInStartMs,
+                FakeRevealLeadInLengthMs = settings.FakeRevealLeadInLengthMs,
+                FakeRevealFadeOutStartMs = settings.FakeRevealFadeOutStartMs,
+                FakeRevealFadeOutLengthMs = settings.FakeRevealFadeOutLengthMs,
+            };
+
+            notifications?.Post(new SimpleNotification
+            {
+                Text = "copied fake tint settings",
+            });
+        }
+
+        private void pasteFakeTintSettings()
+        {
+            if (!model.HasSelection || fakeTintClipboard == null)
+                return;
+
+            if (!fakeNote.Current.Value)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = "enable fake note before pasting fake tint settings",
+                });
+                return;
+            }
+
+            model.SetSelectionBoolSetting((s, value) => s.FakeRevealEnabled = value, fakeTintClipboard.FakeRevealEnabled);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealRed = value, fakeTintClipboard.FakeRevealRed);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealGreen = value, fakeTintClipboard.FakeRevealGreen);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealBlue = value, fakeTintClipboard.FakeRevealBlue);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealStrength = value, fakeTintClipboard.FakeRevealStrength);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealLeadInStartMs = value, fakeTintClipboard.FakeRevealLeadInStartMs);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealLeadInLengthMs = value, fakeTintClipboard.FakeRevealLeadInLengthMs);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealFadeOutStartMs = value, fakeTintClipboard.FakeRevealFadeOutStartMs);
+            model.SetSelectionFloatSetting((s, value) => s.FakeRevealFadeOutLengthMs = value, fakeTintClipboard.FakeRevealFadeOutLengthMs);
+
+            scheduleSelectionUpdate();
+
+            notifications?.Post(new SimpleNotification
+            {
+                Text = "pasted fake tint settings",
+            });
+        }
 
         private bool isUnsafeDifficultyOverrideEnabled()
             => allowUnsafeDifficultyOverrideValues.Current.Value;

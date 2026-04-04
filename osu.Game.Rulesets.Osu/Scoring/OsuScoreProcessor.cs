@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Osu.Judgements;
+using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
@@ -34,5 +35,24 @@ namespace osu.Game.Rulesets.Osu.Scoring
 
         protected override HitEvent CreateHitEvent(JudgementResult result)
             => base.CreateHitEvent(result).With((result as OsuHitCircleJudgementResult)?.CursorPositionAtHit);
+
+        protected override bool AffectsAccuracyDenominator(JudgementResult result)
+            => base.AffectsAccuracyDenominator(result)
+               || (result.HitObject is FakeHitCircle or FakeSlider
+                   && result.Type == HitResult.Miss
+                   && result.Judgement.MaxResult == HitResult.IgnoreHit);
+
+        protected override int GetAccuracyMaxBaseScoreForResult(JudgementResult result)
+        {
+            if (result.HitObject is FakeHitCircle or FakeSlider
+                && result.Type == HitResult.Miss
+                && result.Judgement.MaxResult == HitResult.IgnoreHit)
+            {
+                // Treat fake miss punishment as a regular osu! miss for accuracy denominator.
+                return GetBaseScoreForResult(HitResult.Great);
+            }
+
+            return base.GetAccuracyMaxBaseScoreForResult(result);
+        }
     }
 }

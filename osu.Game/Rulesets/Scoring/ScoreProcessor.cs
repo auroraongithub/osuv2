@@ -242,9 +242,9 @@ namespace osu.Game.Rulesets.Scoring
             result.ComboAfterJudgement = Combo.Value;
             result.HighestComboAfterJudgement = HighestCombo.Value;
 
-            if (result.Judgement.MaxResult.AffectsAccuracy())
+            if (AffectsAccuracyDenominator(result))
             {
-                currentMaximumBaseScore += GetBaseScoreForResult(result.Judgement.MaxResult);
+                currentMaximumBaseScore += GetAccuracyMaxBaseScoreForResult(result);
                 currentAccuracyJudgementCount++;
             }
 
@@ -294,9 +294,9 @@ namespace osu.Game.Rulesets.Scoring
 
             ScoreResultCounts[result.Type] = ScoreResultCounts.GetValueOrDefault(result.Type) - 1;
 
-            if (result.Judgement.MaxResult.AffectsAccuracy())
+            if (AffectsAccuracyDenominator(result))
             {
-                currentMaximumBaseScore -= GetBaseScoreForResult(result.Judgement.MaxResult);
+                currentMaximumBaseScore -= GetAccuracyMaxBaseScoreForResult(result);
                 currentAccuracyJudgementCount--;
             }
 
@@ -365,6 +365,16 @@ namespace osu.Game.Rulesets.Scoring
                     return 50;
             }
         }
+
+        /// <summary>
+        /// Whether the judgement contributes to the maximum (denominator) portion of accuracy.
+        /// </summary>
+        protected virtual bool AffectsAccuracyDenominator(JudgementResult result) => result.Judgement.MaxResult.AffectsAccuracy();
+
+        /// <summary>
+        /// The max-base-score contribution to use for accuracy denominator updates.
+        /// </summary>
+        protected virtual int GetAccuracyMaxBaseScoreForResult(JudgementResult result) => GetBaseScoreForResult(result.Judgement.MaxResult);
 
         protected virtual void ApplyScoreChange(JudgementResult result)
         {

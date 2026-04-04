@@ -263,5 +263,6 @@ namespace osu.Game.Rulesets.Osu.Tests
             Assert.That(settings.SectionApproachRate, Is.EqualTo(11));
             Assert.That(settings.SectionOverallDifficulty, Is.EqualTo(11));
         }
+
     }
 }

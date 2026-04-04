@@ -12,6 +12,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
+using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Screens.Play;
 using osuTK;
 
@@ -170,6 +171,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             if (!slider.HeadCircle.Judged)
                 return;
+
+            if (slider.HitObject is FakeSlider fakeSlider && fakeSlider.FakeAutoHitOnApproachClose)
+            {
+                nestedObject.HitForcefully();
+                return;
+            }
 
             if (Tracking)
                 nestedObject.HitForcefully();

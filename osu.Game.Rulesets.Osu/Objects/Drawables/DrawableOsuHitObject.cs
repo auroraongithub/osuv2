@@ -16,6 +16,7 @@ using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
 using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Scoring;
+using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Scoring;
 using osuTK;
@@ -162,7 +163,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         private void applySectionTraceableState(DrawableHitObject drawable, ArmedState state)
         {
             if (!HitObject.ForceTraceable)
+            {
+                if (drawable is DrawableSlider slider && slider.Body.Drawable is PlaySliderBody sliderBody)
+                    sliderBody.RestoreDefaultAppearance();
+
                 return;
+            }
 
             OsuModTraceable.ApplyTraceableState(drawable, state);
         }

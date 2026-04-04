@@ -16,6 +16,8 @@ namespace osu.Game.Rulesets.Osu.Objects
     {
         protected readonly Slider Slider;
 
+        internal Slider ParentSlider => Slider;
+
         protected SliderEndCircle(Slider slider)
         {
             Slider = slider;
@@ -46,7 +48,7 @@ namespace osu.Game.Rulesets.Osu.Objects
 
         protected override HitWindows CreateHitWindows() => HitWindows.Empty;
 
-        public override Judgement CreateJudgement() => new SliderEndJudgement();
+        public override Judgement CreateJudgement() => Slider is FakeSlider ? new FakeCircleJudgement() : new SliderEndJudgement();
 
         public class SliderEndJudgement : OsuJudgement
         {

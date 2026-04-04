@@ -18,6 +18,7 @@ using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
+using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
@@ -72,6 +73,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         private PausableSkinnableSound slidingSample;
 
         private readonly LayoutValue relativeAnchorPositionLayout;
+        private bool fakeAutoHitTriggered;
 
         public DrawableSlider()
             : this(null)
@@ -144,6 +146,11 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.OnApply();
 
+            fakeAutoHitTriggered = false;
+
+            if (!HitObject.ForceTraceable && Body.Drawable is PlaySliderBody sliderBody)
+                sliderBody.RestoreDefaultAppearance();
+
             // Ensure that the version will change after the upcoming BindTo().
             pathVersion.Value = int.MaxValue;
             PathVersion.BindTo(HitObject.Path.Version);
@@ -155,6 +162,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.OnFree();
 
+            fakeAutoHitTriggered = false;
             PathVersion.UnbindFrom(HitObject.Path.Version);
 
             slidingSample?.ClearSamples();
@@ -238,6 +246,22 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.Update();
 
+            if (HitObject is FakeSlider fakeSlider
+                && !fakeAutoHitTriggered
+                && fakeSlider.FakeAutoHitOnApproachClose
+                && Time.Current >= HitObject.StartTime
+                && !HeadCircle.Judged)
+            {
+                fakeAutoHitTriggered = true;
+
+                HeadCircle.HitForcefully();
+
+                SliderInputManager.PostProcessHeadJudgement(HeadCircle);
+
+                if (fakeSlider.FakeAutoHitPlayHitsound)
+                    HeadCircle.PlaySamples();
+            }
+
             Tracking.Value = SliderInputManager.Tracking;
 
             if (slidingSample != null)
@@ -292,6 +316,35 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         protected override void CheckForResult(bool userTriggered, double timeOffset)
         {
+            if (HitObject is FakeSlider fakeSlider)
+            {
+                if (userTriggered || !TailCircle.Judged || Time.Current < HitObject.EndTime)
+                    return;
+
+                if (fakeSlider.FakeAutoHitOnApproachClose)
+                {
+                    ApplyResult(HitResult.IgnoreHit);
+
+                    if (Result.IsHit)
+                        UpdateState(ArmedState.Hit, true);
+
+                    return;
+                }
+
+                bool fakeSliderInteracted = NestedHitObjects.Any(h => h.Result?.Type is HitResult.LargeTickHit or HitResult.SliderTailHit)
+                                           || SliderInputManager.Tracking;
+
+                if (FakeHitObjectPunishmentHelper.ShouldPunishAsMiss(fakeSlider.FakePunishMode) && fakeSliderInteracted)
+                    ApplyResult(HitResult.Miss);
+                else
+                    ApplyResult(HitResult.IgnoreMiss);
+
+                if (Result.IsHit)
+                    UpdateState(ArmedState.Hit, true);
+
+                return;
+            }
+
             if (userTriggered || !TailCircle.Judged || Time.Current < HitObject.EndTime)
                 return;
 
@@ -327,6 +380,15 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         public override void PlaySamples()
         {
+            if (HitObject is FakeSlider fakeSlider)
+            {
+                bool allowFakeHitsound = fakeSlider.FakePlayHitsound
+                                         || (fakeAutoHitTriggered && fakeSlider.FakeAutoHitPlayHitsound);
+
+                if (!allowFakeHitsound)
+                    return;
+            }
+
             // rather than doing it this way, we should probably attach the sample to the tail circle.
             // this can only be done if we stop using LastTick.
             if (!TailCircle.SamplePlaysOnlyOnHit || TailCircle.IsHit)

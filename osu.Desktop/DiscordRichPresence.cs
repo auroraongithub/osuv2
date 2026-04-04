@@ -29,7 +29,7 @@ namespace osu.Desktop
 {
     internal partial class DiscordRichPresence : Component
     {
-        private const string client_id = "1216669957799018608";
+        private const string client_id = "1489812313459396751";
 
         private DiscordRpcClient client = null!;
 
@@ -57,7 +57,7 @@ namespace osu.Desktop
 
         private readonly RichPresence presence = new RichPresence
         {
-            Assets = new Assets { LargeImageKey = "osu_logo_lazer" },
+            Assets = new Assets { LargeImageKey = "deltalogo" },
             Timestamps = Timestamps.Now,
             Secrets = new Secrets
             {
@@ -168,9 +168,9 @@ namespace osu.Desktop
 
                 string details = userActivity.Value.GetDetails(hideIdentifiableInformation) ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(details))
-                    details = "osu!(v2)";
-                else if (!details.Contains("osu!(v2)", StringComparison.Ordinal))
-                    details = $"{details} • osu!(v2)";
+                    details = "delta";
+                else if (!details.Contains("delta", StringComparison.Ordinal))
+                    details = $"{details} • delta";
 
                 presence.Details = clampLength(details);
 
@@ -193,7 +193,7 @@ namespace osu.Desktop
             else
             {
                 presence.State = "Idle";
-                presence.Details = "osu!(v2)";
+                presence.Details = "delta";
             }
 
             // user party

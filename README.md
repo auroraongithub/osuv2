@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/ppy/osu/master/assets/lazer.png" width="180" alt="osu! logo" />
 </p>
 
-# osu!(v2)
+# delta
 
 community-driven fork of **osu!lazer** with section and hitobject gimmick systems for mapping and gameplay experiments
 

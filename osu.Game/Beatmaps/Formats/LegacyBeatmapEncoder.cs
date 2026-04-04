@@ -549,6 +549,8 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.IsFakeNote) yield return "IsFakeNote=True";
             if (settings.FakePunishMode != FakePunishMode.None) yield return $"FakePunishMode={settings.FakePunishMode}";
             if (settings.FakePlayHitsound) yield return "FakePlayHitsound=True";
+            if (settings.FakeAutoHitOnApproachClose) yield return "FakeAutoHitOnApproachClose=True";
+            if (settings.FakeAutoHitPlayHitsound) yield return "FakeAutoHitPlayHitsound=True";
             if (!settings.FakeRevealEnabled) yield return "FakeRevealEnabled=False";
             if (Math.Abs(settings.FakeRevealRed - 1f) > 0.0001f) yield return $"FakeRevealRed={settings.FakeRevealRed.ToString(CultureInfo.InvariantCulture)}";
             if (Math.Abs(settings.FakeRevealGreen - 0.3019608f) > 0.0001f) yield return $"FakeRevealGreen={settings.FakeRevealGreen.ToString(CultureInfo.InvariantCulture)}";

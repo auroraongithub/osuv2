@@ -60,7 +60,13 @@ namespace osu.Game.Rulesets.Osu.Mods
                     break;
 
                 case DrawableSlider slider:
-                    slider.Body.OnSkinChanged += () => applySliderState(slider);
+                    slider.Body.OnSkinChanged += () =>
+                    {
+                        if (slider.HitObject.ForceTraceable)
+                            applySliderState(slider);
+                        else if (slider.Body.Drawable is PlaySliderBody sliderBody)
+                            sliderBody.RestoreDefaultAppearance();
+                    };
                     applySliderState(slider);
                     break;
             }

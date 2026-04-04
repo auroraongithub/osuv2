@@ -11,6 +11,8 @@ namespace osu.Game.Rulesets.Osu.Objects
 {
     public class SliderTick : OsuHitObject
     {
+        public Slider? Slider { get; set; }
+
         public int SpanIndex { get; set; }
         public double SpanStartTime { get; set; }
         public double PathProgress { get; set; }
@@ -33,6 +35,6 @@ namespace osu.Game.Rulesets.Osu.Objects
 
         protected override HitWindows CreateHitWindows() => HitWindows.Empty;
 
-        public override Judgement CreateJudgement() => new SliderTickJudgement();
+        public override Judgement CreateJudgement() => Slider is FakeSlider ? new FakeCircleJudgement() : new SliderTickJudgement();
     }
 }

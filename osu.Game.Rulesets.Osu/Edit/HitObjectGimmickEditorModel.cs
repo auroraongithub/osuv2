@@ -20,6 +20,8 @@ namespace osu.Game.Rulesets.Osu.Edit
             public readonly bool EnableHPGimmick;
             public readonly bool IsFakeNote;
             public readonly FakePunishMode FakePunishMode;
+            public readonly bool FakeAutoHitOnApproachClose;
+            public readonly bool FakeAutoHitPlayHitsound;
             public readonly bool EnableNoMiss;
             public readonly bool EnableCountLimits;
             public readonly bool EnableGreatOffsetPenalty;
@@ -37,6 +39,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                 bool enableHpGimmick,
                 bool isFakeNote,
                 FakePunishMode fakePunishMode,
+                bool fakeAutoHitOnApproachClose,
+                bool fakeAutoHitPlayHitsound,
                 bool enableNoMiss,
                 bool enableCountLimits,
                 bool enableGreatOffsetPenalty,
@@ -53,6 +57,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                 EnableHPGimmick = enableHpGimmick;
                 IsFakeNote = isFakeNote;
                 FakePunishMode = fakePunishMode;
+                FakeAutoHitOnApproachClose = fakeAutoHitOnApproachClose;
+                FakeAutoHitPlayHitsound = fakeAutoHitPlayHitsound;
                 EnableNoMiss = enableNoMiss;
                 EnableCountLimits = enableCountLimits;
                 EnableGreatOffsetPenalty = enableGreatOffsetPenalty;
@@ -148,7 +154,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             HitObjectGimmickBindingUtils.EnsureObjectIds(selected);
 
             if (selected.Count == 0)
-                return new SelectionState(false, 0, false, false, FakePunishMode.None, false, false, false, false, false, false, false, false, false, null);
+                return new SelectionState(false, 0, false, false, FakePunishMode.None, false, false, false, false, false, false, false, false, false, false, false, null);
 
             var objectIdLookup = createObjectIdLookup(editorBeatmap.HitObjectGimmicks ?? new BeatmapHitObjectGimmicks());
             var lookup = createLookup(editorBeatmap.HitObjectGimmicks ?? new BeatmapHitObjectGimmicks());
@@ -167,6 +173,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                 enableHpGimmick: getBoolState(s => s.EnableHPGimmick),
                 isFakeNote: getBoolState(s => s.IsFakeNote),
                 fakePunishMode: SelectionFakePunishMode,
+                fakeAutoHitOnApproachClose: getBoolState(s => s.FakeAutoHitOnApproachClose),
+                fakeAutoHitPlayHitsound: getBoolState(s => s.FakeAutoHitPlayHitsound),
                 enableNoMiss: getBoolState(s => s.EnableNoMiss),
                 enableCountLimits: getBoolState(s => s.EnableCountLimits),
                 enableGreatOffsetPenalty: getBoolState(s => s.EnableGreatOffsetPenalty),
@@ -351,6 +359,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                             IsFakeNote = settings.IsFakeNote,
                             FakePunishMode = settings.FakePunishMode,
                             FakePlayHitsound = settings.FakePlayHitsound,
+                            FakeAutoHitOnApproachClose = settings.FakeAutoHitOnApproachClose,
+                            FakeAutoHitPlayHitsound = settings.FakeAutoHitPlayHitsound,
                             FakeRevealEnabled = settings.FakeRevealEnabled,
                             FakeRevealRed = settings.FakeRevealRed,
                             FakeRevealGreen = settings.FakeRevealGreen,
@@ -487,6 +497,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                           || s.IsFakeNote
                           || s.FakePunishMode != FakePunishMode.None
                           || s.FakePlayHitsound
+                          || s.FakeAutoHitOnApproachClose
+                          || s.FakeAutoHitPlayHitsound
                           || !s.FakeRevealEnabled
                           || Math.Abs(s.FakeRevealRed - 1f) > 0.0001f
                           || Math.Abs(s.FakeRevealGreen - 0.3019608f) > 0.0001f

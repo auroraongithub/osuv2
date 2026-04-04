@@ -8,12 +8,20 @@ namespace osu.Game.Rulesets.Osu.Objects
 {
     public class SliderHeadCircle : HitCircle
     {
+        public Slider? Slider { get; set; }
+
         /// <summary>
         /// If <see langword="false"/>, treat this <see cref="SliderHeadCircle"/> as a normal <see cref="HitCircle"/> for judgement purposes.
         /// If <see langword="true"/>, this <see cref="SliderHeadCircle"/> will be judged as a <see cref="SliderTick"/> instead.
         /// </summary>
         public bool ClassicSliderBehaviour;
 
-        public override Judgement CreateJudgement() => ClassicSliderBehaviour ? new SliderTickJudgement() : base.CreateJudgement();
+        public override Judgement CreateJudgement()
+        {
+            if (Slider is FakeSlider)
+                return new FakeCircleJudgement();
+
+            return ClassicSliderBehaviour ? new SliderTickJudgement() : base.CreateJudgement();
+        }
     }
 }

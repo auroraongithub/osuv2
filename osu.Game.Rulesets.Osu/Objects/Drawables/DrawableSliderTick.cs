@@ -22,6 +22,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         protected DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
 
+        public override bool DisplayResult => ((SliderTick)HitObject).Slider is FakeSlider ? false : base.DisplayResult;
+
         private SkinnableDrawable scaleContainer;
 
         public DrawableSliderTick()
