@@ -8,7 +8,7 @@
     <AssemblyTitle>deltalazer</AssemblyTitle>
     <Title>deltalazer</Title>
     <Product>deltalazer</Product>
-    <ApplicationIcon>lazer.ico</ApplicationIcon>
+    <ApplicationIcon>delta.ico</ApplicationIcon>
     <Version>0.0.0</Version>
     <FileVersion>0.0.0</FileVersion>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
   <ItemGroup Label="Resources">
-    <EmbeddedResource Include="lazer.ico" />
+    <EmbeddedResource Include="delta.ico" />
   </ItemGroup>
   <ItemGroup Label="Windows Icons">
     <Content Include="*.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
