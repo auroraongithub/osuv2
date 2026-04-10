@@ -294,7 +294,7 @@ namespace osu.Game
             try
             {
                 // Point this directly to where your new repo builds the DLL
-                string localDllPath = @"..\delta-resources\delta.Game.Resources.Overrides\bin\Debug\net8.0\delta.Game.Resources.Overrides.dll";
+                string localDllPath = @"..\..\..\..\..\delta-resources\delta.Game.Resources.Overrides\bin\Debug\net8.0\delta.Game.Resources.Overrides.dll";
 
                 var overrideAssembly = Assembly.LoadFrom(localDllPath);
                 Resources.AddStore(new DllResourceStore(overrideAssembly));
