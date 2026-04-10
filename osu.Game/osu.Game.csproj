@@ -54,4 +54,8 @@
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
   </ItemGroup>
+  <!-- Below is an override for deltalazer to inject it's own resources.-->
+  <ItemGroup>
+   <!-- <PackageReference Include="Delta.Game.Resources.Overrides" Version="0.0.1" /> -->
+  </ItemGroup>
 </Project>
