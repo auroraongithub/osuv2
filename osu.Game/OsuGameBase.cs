@@ -275,7 +275,43 @@ namespace osu.Game
                 VersionHash = $"{Version}-{RuntimeInfo.OS}".ComputeMD5Hash();
             }
 
+
+#if DEBUG
+            /* TODO: Get the resources out so this works
+            try
+            {
+                // Deltaresources Overrides
+                var overrideAssembly = typeof(delta.Game.Resources.Overrides.DeltaResources).Assembly;
+                Resources.AddStore(new DllResourceStore(overrideAssembly));
+            }
+            catch (Exception e)
+            {
+                // Log the error so we know why it failed
+                Logger.Log($"[DELTALAZER] Warning: NuGet Override failed: {e.Message}");
+            }
+            */
+
+            try
+            {
+                // Point this directly to where your new repo builds the DLL
+                string localDllPath = @"..\delta-resources\delta.Game.Resources.Overrides\bin\Debug\net8.0\delta.Game.Resources.Overrides.dll";
+
+                var overrideAssembly = Assembly.LoadFrom(localDllPath);
+                Resources.AddStore(new DllResourceStore(overrideAssembly));
+            }
+            catch (System.Exception e)
+            {
+                // If the path is wrong or the file is missing, it will warn you in the logs instead of crashing
+                Logger.Log($"[DELTALAZER] Failed to load local resource override: {e.Message}", LoggingTarget.Runtime, LogLevel.Important);
+            }
+#endif
+
+            // Fallback to OsuResources if a resource is found to be missing
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
+
+            Logger.Log("Deltalazer is currently very experimental, and may contain bugs!", LoggingTarget.Runtime, LogLevel.Important);
+
+
 
             dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread));
 

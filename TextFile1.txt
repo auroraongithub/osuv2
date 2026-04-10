@@ -1,0 +1,3 @@
+This folder contains resource overrides and is a dependency for DeltaLazer.
+
+Removing this folder has a very high chance of bricking your deltalazer install!

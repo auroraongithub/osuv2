@@ -9,6 +9,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
+using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -19,6 +20,8 @@ using osu.Game.Overlays.Settings;
 using osu.Game.Resources.Localisation.Web;
 using osuTK;
 using osu.Game.Localisation;
+using osu.Framework.Graphics.Shapes;
+
 
 namespace osu.Game.Overlays.Login
 {
@@ -36,7 +39,7 @@ namespace osu.Game.Overlays.Login
         public override bool AcceptsFocus => true;
 
         [BackgroundDependencyLoader(permitNulls: true)]
-        private void load(OsuConfigManager config, AccountCreationOverlay accountCreation)
+        private void load(OsuConfigManager config, AccountCreationOverlay accountCreation, GameHost host /*, OsuColour colours */)
         {
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
@@ -45,6 +48,7 @@ namespace osu.Game.Overlays.Login
 
             ErrorTextFlowContainer errorText;
             LinkFlowContainer forgottenPasswordLink;
+            LinkFlowContainer AccountHeaderFlow;
 
             Children = new Drawable[]
             {
@@ -57,10 +61,13 @@ namespace osu.Game.Overlays.Login
                     Spacing = new Vector2(0f, SettingsSection.ITEM_SPACING),
                     Children = new Drawable[]
                     {
-                        new OsuSpriteText
+                        AccountHeaderFlow = new LinkFlowContainer(t =>
                         {
-                            Text = LoginPanelStrings.Account.ToUpper(),
-                            Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                            t.Font = OsuFont.GetFont(weight: FontWeight.Bold);
+                        })
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
                         },
                         username = new OsuTextBox
                         {
@@ -76,6 +83,38 @@ namespace osu.Game.Overlays.Login
                             RelativeSizeAxes = Axes.X,
                             TabbableContentContainer = this,
                         },
+
+                        /* Remove this comment alongside the osu!colors import on the loader if you wish to put a notice on the text box!
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Masking = true,
+                            CornerRadius = 5,
+                            Margin = new MarginPadding { Top = 5 },
+                            Children = new Drawable[]
+                            {
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = colours.CarmineDark
+                                },
+                                new OsuTextFlowContainer(t =>
+                                {
+                                    t.Font = OsuFont.Default.With(size: 14, weight: FontWeight.SemiBold);
+                                    t.Colour = Colour4.Black;
+                                })
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Padding = new MarginPadding(10),
+                                    Text = ""
+
+                                }
+                            }
+                        },
+                        */
+
                         errorText = new ErrorTextFlowContainer
                         {
                             RelativeSizeAxes = Axes.X,
@@ -113,7 +152,7 @@ namespace osu.Game.Overlays.Login
                             Child = new SettingsButton
                             {
                                 Text = UsersStrings.LoginButton,
-                                Action = performLogin
+                                Action = performLogin,
                             },
                         }
                     }
@@ -128,6 +167,10 @@ namespace osu.Game.Overlays.Login
                     }
                 }
             };
+
+
+            AccountHeaderFlow.AddText($"{LoginPanelStrings.Account.ToUpper()} - ");
+            AccountHeaderFlow.AddLink($"Delta Server", () => host.OpenUrlExternally("https://deltalazer.vercel.app/"), "Go to Delta Lazer's homepage");
 
             forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, $"{api.Endpoints.WebsiteUrl}/home/password-reset");
 

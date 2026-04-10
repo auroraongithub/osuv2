@@ -73,35 +73,43 @@ namespace osu.Game.Screens.Menu
 
             const float font_size = 14;
 
+            static void formatLight(SpriteText t) => t.Font = OsuFont.GetFont(size: font_size, weight: FontWeight.Light);
             static void formatSemiBold(SpriteText t) => t.Font = OsuFont.GetFont(size: font_size, weight: FontWeight.SemiBold);
+            static void formatBold(SpriteText t) => t.Font = OsuFont.GetFont(size: font_size, weight: FontWeight.Bold);
 
             currentUser.BindTo(api.LocalUser);
             currentUser.BindValueChanged(e =>
             {
                 supportFlow.Children.ForEach(d => d.FadeOut().Expire());
-
-                if (e.NewValue.IsSupporter)
+                
+                if (e.NewValue.IsSupporter) // TODO: Grab "Supporter" status from server and use Github's star API (somehow)
                 {
-                    supportFlow.AddText("Eternal thanks to you for supporting osu!", formatSemiBold);
+                    supportFlow.AddText("waow..,,, thanks for beeing... a ", formatSemiBold);
+                    supportFlow.AddText("staaarrrrr,,,!", formatBold);
+                    // Placeholder (for obvious reasons)
+                    // itd be really funny if users could roll a 20 to get this text
+                    // instead of whatever standard text we makethough
 
-                    backgroundBox.FadeColour(colours.Pink, 250);
+                    backgroundBox.FadeColour(colours.Orange3, 250);
                 }
                 else
                 {
-                    supportFlow.AddText("Consider becoming an ", formatSemiBold);
-                    supportFlow.AddLink("osu!supporter", "https://osu.ppy.sh/home/support", formatSemiBold);
-                    supportFlow.AddText(" to help support osu!'s development", formatSemiBold);
+                    supportFlow.AddText("Please consider giving deltalazer a star on", formatSemiBold);
+                    supportFlow.AddLink(" our Github page!", "https://github.com/deltalazer/delta", formatSemiBold);
+                    // supportFlow.AddText(" (it gives you supporter perks for free!~)", formatLight);
+                    // Also a part of above TODO
 
-                    backgroundBox.FadeColour(colours.Pink4, 250);
+
+                    backgroundBox.FadeColour(colours.Orange4, 250);
                 }
 
-                supportFlow.AddIcon(FontAwesome.Solid.Heart, t =>
+                supportFlow.AddIcon(FontAwesome.Solid.Star, t =>
                 {
                     heart = t;
 
                     t.Padding = new MarginPadding { Left = 5, Top = 1 };
                     t.Font = t.Font.With(size: font_size);
-                    t.Colour = colours.Pink;
+                    t.Colour = colours.Yellow;
 
                     Schedule(() =>
                     {
