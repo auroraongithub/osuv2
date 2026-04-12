@@ -13,7 +13,6 @@ using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Overlays.Settings;
@@ -39,7 +38,7 @@ namespace osu.Game.Overlays.Login
         public override bool AcceptsFocus => true;
 
         [BackgroundDependencyLoader(permitNulls: true)]
-        private void load(OsuConfigManager config, AccountCreationOverlay accountCreation, GameHost host /*, OsuColour colours */)
+        private void load(OsuConfigManager config, AccountCreationOverlay accountCreation, GameHost host, OsuColour colours)
         {
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
@@ -48,7 +47,7 @@ namespace osu.Game.Overlays.Login
 
             ErrorTextFlowContainer errorText;
             LinkFlowContainer forgottenPasswordLink;
-            LinkFlowContainer AccountHeaderFlow;
+            LinkFlowContainer accountHeaderFlow;
 
             Children = new Drawable[]
             {
@@ -61,7 +60,7 @@ namespace osu.Game.Overlays.Login
                     Spacing = new Vector2(0f, SettingsSection.ITEM_SPACING),
                     Children = new Drawable[]
                     {
-                        AccountHeaderFlow = new LinkFlowContainer(t =>
+                        accountHeaderFlow = new LinkFlowContainer(t =>
                         {
                             t.Font = OsuFont.GetFont(weight: FontWeight.Bold);
                         })
@@ -83,8 +82,6 @@ namespace osu.Game.Overlays.Login
                             RelativeSizeAxes = Axes.X,
                             TabbableContentContainer = this,
                         },
-
-                        /* Remove this comment alongside the osu!colors import on the loader if you wish to put a notice on the text box!
                         new Container
                         {
                             RelativeSizeAxes = Axes.X,
@@ -102,18 +99,16 @@ namespace osu.Game.Overlays.Login
                                 new OsuTextFlowContainer(t =>
                                 {
                                     t.Font = OsuFont.Default.With(size: 14, weight: FontWeight.SemiBold);
-                                    t.Colour = Colour4.Black;
+                                    t.Colour = Colour4.White;
                                 })
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,
                                     Padding = new MarginPadding(10),
-                                    Text = ""
-
+                                    Text = "Logins are currently disabled, as this client still connects to servers upstream. \nDeltaLazer contains features that make it incompatible with the game's current infrastructure, with Bancho blocking score uploads through modified clients \nSorry! :P"
                                 }
                             }
                         },
-                        */
 
                         errorText = new ErrorTextFlowContainer
                         {
@@ -152,7 +147,7 @@ namespace osu.Game.Overlays.Login
                             Child = new SettingsButton
                             {
                                 Text = UsersStrings.LoginButton,
-                                Action = performLogin,
+                                Action = null, // Standard Action: `performLogin`
                             },
                         }
                     }
@@ -160,19 +155,23 @@ namespace osu.Game.Overlays.Login
                 new SettingsButton
                 {
                     Text = LoginPanelStrings.Register,
+                    Action = null,
+                    /* Defailt Action:
                     Action = () =>
                     {
                         RequestHide?.Invoke();
                         accountCreation.Show();
                     }
+                    */
                 }
             };
 
 
-            AccountHeaderFlow.AddText($"{LoginPanelStrings.Account.ToUpper()} - ");
-            AccountHeaderFlow.AddLink($"Delta Server", () => host.OpenUrlExternally("https://deltalazer.vercel.app/"), "Go to Delta Lazer's homepage");
+            accountHeaderFlow.AddText($"{LoginPanelStrings.Account.ToUpper()} - ");
+            accountHeaderFlow.AddLink($"Delta Server", () => host.OpenUrlExternally("https://deltalazer.vercel.app/"), "Go to Delta Lazer's homepage");
 
-            forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, $"{api.Endpoints.WebsiteUrl}/home/password-reset");
+            // forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, $"{api.Endpoints.WebsiteUrl}/home/password-reset");
+            // Remove comment if you wish to re-activate this!
 
             password.OnCommit += (_, _) => performLogin();
 
