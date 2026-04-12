@@ -22,6 +22,7 @@
     <PackageReference Include="AutoMapper" Version="13.0.1">
       <NoWarn>NU1903</NoWarn>
     </PackageReference>
+    <PackageReference Include="delta.Game.Resources.Overrides" Version="2026.4.10-A" />
     <PackageReference Include="DiffPlex" Version="1.9.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <!-- Held back due to .NET 9 requirement. See https://github.com/Humanizr/Humanizer?tab=readme-ov-file#supported-frameworks-->
@@ -53,9 +54,5 @@
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
-  </ItemGroup>
-  <!-- Below is an override for deltalazer to inject it's own resources.-->
-  <ItemGroup>
-   <!-- <PackageReference Include="Delta.Game.Resources.Overrides" Version="0.0.1" /> -->
   </ItemGroup>
 </Project>
