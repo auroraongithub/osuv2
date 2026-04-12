@@ -22,17 +22,10 @@ using osu.Game.Rulesets;
 using osuTK;
 using osuTK.Graphics;
 
-// Needed to mute "welcome to osu!" effect. Treat this as a temporary-permanent fix, as ideally, we'd have our own music, but uhhh yk
-using osu.Game.Audio.Effects;
-using osu.Framework.Bindables;
-using osu.Framework.Audio.Track;
-using osu.Framework.Audio.Mixing;
-
 namespace osu.Game.Screens.Menu
 {
     public partial class IntroTriangles : IntroScreen
     {
-
         protected override string BeatmapHash => "a1556d0801b3a6b175dda32ef546f0ec812b400499f575c44fccbe9c67f9b1e5";
 
         protected override string BeatmapFile => "triangles.osz";
@@ -43,9 +36,6 @@ namespace osu.Game.Screens.Menu
         private Sample welcome;
 
         private TrianglesIntroSequence intro;
-
-        private AudioFilter introFilter;
-        private Bindable<Track> localTrackBindable = new Bindable<Track>();
 
         public IntroTriangles([CanBeNull] Func<MainMenu> createNextScreen = null)
             : base(createNextScreen)
@@ -69,7 +59,7 @@ namespace osu.Game.Screens.Menu
 
                 var decouplingClock = new DecouplingFramedClock(UsingThemedIntro ? Track : null);
 
-                LoadComponentAsync(intro = new TrianglesIntroSequence(logo, () => FadeInBackground(), Track)
+                LoadComponentAsync(intro = new TrianglesIntroSequence(logo, () => FadeInBackground())
                 {
                     RelativeSizeAxes = Axes.Both,
                     Clock = new InterpolatingFramedClock(decouplingClock),
@@ -122,21 +112,12 @@ namespace osu.Game.Screens.Menu
 
             private GlitchingTriangles triangles;
 
-            // Track mute variables
-            private readonly ITrack introTrack;
-            private AudioMixer introMixer;
-            private AudioFilter introFilter;
-
-            [Resolved]
-            private AudioManager audio { get; set; } // Thhis injects osu's audio manager
-
             public Action LoadMenu;
 
-            public TrianglesIntroSequence(OsuLogo logo, Action showBackgroundAction, ITrack introTrack)
+            public TrianglesIntroSequence(OsuLogo logo, Action showBackgroundAction)
             {
                 this.logo = logo;
                 this.showBackgroundAction = showBackgroundAction;
-                this.introTrack = introTrack;
             }
 
             [Resolved]
@@ -145,15 +126,8 @@ namespace osu.Game.Screens.Menu
             [BackgroundDependencyLoader]
             private void load()
             {
-                introMixer = audio.CreateAudioMixer();
-
-                if (introTrack is IAudioChannel channel)
-                    introMixer.Add(channel);
-
                 InternalChildren = new Drawable[]
                 {
-                    introFilter = new AudioFilter(introMixer),
-
                     triangles = new GlitchingTriangles
                     {
                         Alpha = 0,
@@ -220,14 +194,6 @@ namespace osu.Game.Screens.Menu
 
                 using (BeginAbsoluteSequence(0))
                 {
-                    // Mutes original track audio
-                    using (introFilter.BeginDelayedSequence(text_1))
-                        introFilter.CutoffTo(0);
-
-                    using (introFilter.BeginDelayedSequence(rulesets_1))
-                        introFilter.CutoffTo(AudioFilter.MAX_LOWPASS_CUTOFF);
-                    // From text_1 to rulesets.1
-
                     using (BeginDelayedSequence(text_1))
                         welcomeText.FadeIn().OnComplete(t => t.Text = "wel");
 
@@ -293,17 +259,6 @@ namespace osu.Game.Screens.Menu
                         });
                     }
                 }
-            }
-
-            protected override void Dispose(bool isDisposing) // Disposes of normal game audio
-            {
-                base.Dispose(isDisposing);
-
-                // Returns overrided FX track to the global mixer so the audio engine transfers the mute
-                if (introTrack is IAudioChannel channel)
-                    introMixer?.Remove(channel);
-
-                introMixer?.Dispose();
             }
 
             private partial class GameWideFlash : Box
