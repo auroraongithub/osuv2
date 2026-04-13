@@ -275,7 +275,25 @@ namespace osu.Game
                 VersionHash = $"{Version}-{RuntimeInfo.OS}".ComputeMD5Hash();
             }
 
+
+            try
+            {
+                // This loads DeltaLazer resource overrides from NuGet.
+                var overrideAssembly = typeof(delta.Game.Resources.Overrides.DeltaResources).Assembly;
+                Resources.AddStore(new DllResourceStore(overrideAssembly));
+            }
+            catch (Exception e)
+            {
+                // In case said overrides fail, this
+                Logger.Log($"Warning: Failed to append assets to game. Please open a bug report as this is unintended behavior!", LoggingTarget.Runtime, LogLevel.Important);
+                Logger.Log($"[DeltaLazer] Internal Error - Failed to append assets on build - {e.Message}", LoggingTarget.Runtime, LogLevel.Verbose);
+            }
+
+            // Fallback to OsuResources if a resource is found to be missing
+            // This pretty much applies to most resources in-game
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
+
+            Logger.Log("Deltalazer is currently very experimental, and may contain bugs!", LoggingTarget.Runtime, LogLevel.Important);
 
             dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread));
 

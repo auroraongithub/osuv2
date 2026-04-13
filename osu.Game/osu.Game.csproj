@@ -22,6 +22,7 @@
     <PackageReference Include="AutoMapper" Version="13.0.1">
       <NoWarn>NU1903</NoWarn>
     </PackageReference>
+    <PackageReference Include="delta.Game.Resources.Overrides" Version="2026.4.10-A" />
     <PackageReference Include="DiffPlex" Version="1.9.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <!-- Held back due to .NET 9 requirement. See https://github.com/Humanizr/Humanizer?tab=readme-ov-file#supported-frameworks-->
